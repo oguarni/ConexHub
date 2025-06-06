@@ -1,0 +1,236 @@
+const { Supplier, Product, Review, Quote, Order } = require('../models');
+const { Op } = require('sequelize');
+
+class SupplierController {
+  async getSuppliers(req, res, next) {
+    try {
+      const { verified, category, search, page = 1, limit = 20 } = req.query;
+      const offset = (page - 1) * limit;
+
+      const where = {};
+      
+      if (verified === 'true') {
+        where.verified = true;
+      }
+
+      const include = [];
+      
+      if (category) {
+        include.push({
+          model: Product,
+          where: { category },
+          required: true
+        });
+      }
+
+      if (search) {
+        where[Op.or] = [
+          { companyName: { [Op.iLike]: `%${search}%` } },
+          { tradingName: { [Op.iLike]: `%${search}%` } }
+        ];
+      }
+
+      const { rows: suppliers, count } = await Supplier.findAndCountAll({
+        where,
+        include,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['rating', 'DESC'], ['totalOrders', 'DESC']],
+        distinct: true
+      });
+
+      res.json({
+        suppliers,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          pages: Math.ceil(count / limit)
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getSupplierProfile(req, res, next) {
+    try {
+      const { id } = req.params;
+      
+      const supplier = await Supplier.findByPk(id, {
+        include: [
+          {
+            model: Product,
+            where: { isActive: true },
+            required: false,
+            limit: 10
+          }
+        ]
+      });
+
+      if (!supplier) {
+        return res.status(404).json({ error: 'Supplier not found' });
+      }
+
+      // Get supplier stats
+      const stats = await this.getSupplierStats(id);
+
+      res.json({
+        supplier,
+        stats
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getSupplierStats(supplierId) {
+    const [orderStats, reviewStats, productCount] = await Promise.all([
+      Order.findOne({
+        where: { supplierId },
+        attributes: [
+          [sequelize.fn('COUNT', sequelize.col('id')), 'totalOrders'],
+          [sequelize.fn('SUM', sequelize.col('totalAmount')), 'totalRevenue']
+        ],
+        raw: true
+      }),
+      Review.findOne({
+        where: { supplierId },
+        attributes: [
+          [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating'],
+          [sequelize.fn('COUNT', sequelize.col('id')), 'totalReviews']
+        ],
+        raw: true
+      }),
+      Product.count({
+        where: { supplierId, isActive: true }
+      })
+    ]);
+
+    return {
+      totalOrders: orderStats?.totalOrders || 0,
+      totalRevenue: orderStats?.totalRevenue || 0,
+      avgRating: parseFloat(reviewStats?.avgRating || 0).toFixed(2),
+      totalReviews: reviewStats?.totalReviews || 0,
+      activeProducts: productCount
+    };
+  }
+
+  async updateSupplierProfile(req, res, next) {
+    try {
+      const supplier = await Supplier.findOne({
+        where: { userId: req.user.id }
+      });
+
+      if (!supplier) {
+        return res.status(404).json({ error: 'Supplier profile not found' });
+      }
+
+      const { tradingName, description, logo } = req.body;
+
+      await supplier.update({
+        tradingName,
+        description,
+        logo
+      });
+
+      res.json(supplier);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getSupplierProducts(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { page = 1, limit = 20 } = req.query;
+      const offset = (page - 1) * limit;
+
+      const { rows: products, count } = await Product.findAndCountAll({
+        where: {
+          supplierId: id,
+          isActive: true
+        },
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['featured', 'DESC'], ['createdAt', 'DESC']]
+      });
+
+      res.json({
+        products,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          pages: Math.ceil(count / limit)
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getSupplierReviews(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { page = 1, limit = 20 } = req.query;
+      const offset = (page - 1) * limit;
+
+      const { rows: reviews, count } = await Review.findAndCountAll({
+        where: { supplierId: id },
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'companyName']
+        }],
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['createdAt', 'DESC']]
+      });
+
+      res.json({
+        reviews,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          pages: Math.ceil(count / limit)
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateSubscription(req, res, next) {
+    try {
+      const { plan } = req.body;
+      
+      const supplier = await Supplier.findOne({
+        where: { userId: req.user.id }
+      });
+
+      if (!supplier) {
+        return res.status(404).json({ error: 'Supplier profile not found' });
+      }
+
+      const planDurations = {
+        basic: 30,
+        pro: 30
+      };
+
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + planDurations[plan]);
+
+      await supplier.update({
+        subscriptionPlan: plan,
+        subscriptionExpiresAt: expiresAt
+      });
+
+      res.json({
+        message: 'Subscription updated successfully',
+        supplier
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+module.exports = new SupplierController();
