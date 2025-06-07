@@ -1,19 +1,19 @@
 // services/authService.js
 class SecureAuthService {
   constructor() {
-    this.TOKEN_KEY = 'auth_token';
+    this.TOKEN_KEY = 'token';
     this.USER_KEY = 'user_data';
   }
 
-  // Usar sessionStorage em vez de localStorage para dados sensíveis
+  // Use localStorage for persistent auth data
   setAuthData(token, user) {
     try {
-      // Token em sessionStorage (mais seguro)
-      sessionStorage.setItem(this.TOKEN_KEY, token);
-      
-      // Dados do usuário sem informações sensíveis
+      // Sanitize user data before storing
       const sanitizedUser = this.sanitizeUserData(user);
-      sessionStorage.setItem(this.USER_KEY, JSON.stringify(sanitizedUser));
+      
+      // Store in localStorage for persistence across browser sessions
+      localStorage.setItem(this.TOKEN_KEY, token);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(sanitizedUser));
       
       return true;
     } catch (error) {
@@ -24,8 +24,8 @@ class SecureAuthService {
 
   getAuthData() {
     try {
-      const token = sessionStorage.getItem(this.TOKEN_KEY);
-      const userData = sessionStorage.getItem(this.USER_KEY);
+      const token = localStorage.getItem(this.TOKEN_KEY);
+      const userData = localStorage.getItem(this.USER_KEY);
       
       return {
         token,
@@ -39,14 +39,17 @@ class SecureAuthService {
   }
 
   clearAuthData() {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    // Also clear any legacy keys
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem(this.USER_KEY);
-    localStorage.removeItem('token'); // Limpar dados antigos
-    localStorage.removeItem('user');
   }
 
   sanitizeUserData(user) {
-    // Remove dados sensíveis antes de armazenar
+    // Remove sensitive data before storing
     const { password, ...sanitizedUser } = user;
     return sanitizedUser;
   }

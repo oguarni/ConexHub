@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { apiService } from '../services/api';
 
 // Create context first
 const AppContext = createContext(null);
@@ -49,27 +50,15 @@ export const AppProvider = ({ children }) => {
     setError('');
     
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUiState(prev => ({ ...prev, showAuth: false }));
-        return true;
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Login failed');
-        return false;
-      }
+      const data = await apiService.login(email, password);
+      setUser(data.user);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUiState(prev => ({ ...prev, showAuth: false }));
+      return true;
     } catch (err) {
       console.error('Login error:', err);
-      setError('Network error');
+      setError(err.message || 'Login failed');
       return false;
     } finally {
       setLoading(false);
@@ -100,15 +89,12 @@ export const AppProvider = ({ children }) => {
     setUiState(prev => ({ ...prev, isMenuOpen: !prev.isMenuOpen }));
   }, []);
 
-  // Product functions
+  // Product functions - UPDATED to use apiService
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/products`);
-      if (response.ok) {
-        const data = await response.json();
-        setProducts(data.products || []);
-      }
+      const data = await apiService.getProducts();
+      setProducts(data.products || data || []);
     } catch (err) {
       console.error('Error loading products:', err);
       setError('Failed to load products');

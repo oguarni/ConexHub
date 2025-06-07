@@ -1,93 +1,280 @@
-import React from 'react';
-import { X, Building, Users, ShoppingCart } from 'lucide-react';
-import { formatCNPJ } from '../../utils/validation';
-import ErrorHandler from '../common/ErrorHandler';
+// Fixed auth hook following SOLID principles
+import { useState, useEffect, useCallback } from 'react';
+import { validateCNPJ } from '../utils/validation';
 
-const AuthModal = ({ 
-  showAuth, 
-  setShowAuth, 
-  isLogin, 
-  setIsLogin, 
-  authForm, 
-  setAuthForm, 
-  handleAuth, 
-  loading,
-  error
-}) => {
-  if (!showAuth) return null;
+export const useAuth = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState({});
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleAuth();
-  };
+  // Initialize user from localStorage on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (err) {
+        console.error('Error parsing user data:', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
-  const handleFieldChange = (field, value) => {
-    if (field === 'cnpj') {
-      value = formatCNPJ(value);
-    } else if (field === 'phone') {
-      value = value.replace(/\D/g, '')
-        .replace(/^(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{5})(\d)/, '$1-$2')
-        .substring(0, 15);
+  // Form validation
+  const validateRegisterForm = useCallback((formData) => {
+    const errors = {};
+
+    if (!formData.name?.trim()) errors.name = 'Nome é obrigatório';
+    
+    if (!formData.email?.trim()) {
+      errors.email = 'Email é obrigatório';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Email inválido';
     }
     
-    setAuthForm({...authForm, [field]: value});
+    if (!formData.password || formData.password.length < 6) {
+      errors.password = 'Senha deve ter pelo menos 6 caracteres';
+    }
+    
+    if (!formData.cnpj?.trim()) {
+      errors.cnpj = 'CNPJ é obrigatório';
+    } else if (!validateCNPJ(formData.cnpj)) {
+      errors.cnpj = 'CNPJ inválido';
+    }
+    
+    if (!formData.companyName?.trim()) {
+      errors.companyName = 'Razão social é obrigatória';
+    }
+    
+    if (!formData.role || !['buyer', 'supplier'].includes(formData.role)) {
+      errors.role = 'Tipo de usuário é obrigatório';
+    }
+    
+    if (!formData.address?.trim()) errors.address = 'Endereço é obrigatório';
+    if (!formData.phone?.trim()) errors.phone = 'Telefone é obrigatório';
+
+    return errors;
+  }, []);
+
+  const login = useCallback(async (email, password) => {
+    try {
+      setLoading(true);
+      setError('');
+      setValidationErrors({});
+
+      if (!email?.trim() || !password?.trim()) {
+        setError('Email e senha são obrigatórios');
+        return false;
+      }
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        return true;
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Erro na autenticação');
+        return false;
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Erro de conexão com o servidor');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const register = useCallback(async (userData) => {
+    try {
+      setLoading(true);
+      setError('');
+      setValidationErrors({});
+
+      // Client-side validation
+      const errors = validateRegisterForm(userData);
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        setError('Por favor, corrija os campos destacados');
+        return false;
+      }
+
+      // Format CNPJ before sending
+      const formattedData = {
+        ...userData,
+        cnpj: userData.cnpj.replace(/\D/g, ''), // Remove formatting
+      };
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formattedData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        return true;
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Erro no cadastro');
+        
+        // Map backend validation errors
+        if (errorData.details) {
+          setValidationErrors(errorData.details);
+        }
+        
+        return false;
+      }
+    } catch (error) {
+      console.error('Register error:', error);
+      setError('Erro de conexão com o servidor');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [validateRegisterForm]);
+
+  const logout = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }, []);
+
+  return {
+    user,
+    loading,
+    error,
+    validationErrors,
+    login,
+    register,
+    logout,
+    validateCNPJ
+  };
+};
+
+// AuthModal component
+import React, { useState } from 'react';
+import { X, Building, ShoppingCart, Users } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+
+const AuthModal = ({ isOpen, onClose, onSuccess }) => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [authForm, setAuthForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    cnpj: '',
+    companyName: '',
+    role: 'buyer',
+    address: '',
+    phone: '',
+    sector: ''
+  });
+
+  const { login, register, loading, error, validationErrors } = useAuth();
+
+  if (!isOpen) return null;
+
+  const handleFieldChange = (field, value) => {
+    setAuthForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const InputField = ({ 
-    field, 
-    type = 'text', 
-    placeholder, 
-    required = false,
-    maxLength,
-    as = 'input',
-    rows 
-  }) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    let success = false;
+    if (isLogin) {
+      success = await login(authForm.email, authForm.password);
+    } else {
+      success = await register(authForm);
+    }
+    
+    if (success) {
+      onSuccess?.();
+      onClose();
+      // Reset form
+      setAuthForm({
+        name: '',
+        email: '',
+        password: '',
+        cnpj: '',
+        companyName: '',
+        role: 'buyer',
+        address: '',
+        phone: '',
+        sector: ''
+      });
+    }
+  };
+
+  const InputField = ({ field, type = 'text', placeholder, required, maxLength, as = 'input', rows }) => {
     const Component = as;
     return (
-      <Component
-        type={type}
-        placeholder={`${placeholder}${required ? ' *' : ''}`}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-        value={authForm[field] || ''}
-        onChange={(e) => handleFieldChange(field, e.target.value)}
-        maxLength={maxLength}
-        rows={rows}
-        required={required}
-        aria-label={placeholder}
-      />
+      <div>
+        <Component
+          type={type}
+          value={authForm[field]}
+          onChange={(e) => handleFieldChange(field, e.target.value)}
+          placeholder={placeholder}
+          required={required}
+          maxLength={maxLength}
+          rows={rows}
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            validationErrors[field] ? 'border-red-500' : 'border-gray-300'
+          }`}
+        />
+        {validationErrors[field] && (
+          <p className="text-red-500 text-sm mt-1">{validationErrors[field]}</p>
+        )}
+      </div>
     );
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 modal-backdrop">
-      <div className="bg-white rounded-lg w-full max-w-lg p-6 relative max-h-screen overflow-y-auto fade-in">
-        <button 
-          onClick={() => setShowAuth(false)} 
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          aria-label="Fechar modal"
-        >
-          <X size={24} />
-        </button>
-        
-        <div className="text-center mb-6">
-          <Building className="mx-auto mb-2 text-blue-600" size={48} />
-          <h2 className="text-2xl font-bold">
-            {isLogin ? 'Acesso B2B' : 'Cadastro Empresarial'}
-          </h2>
-          <p className="text-gray-600 text-sm mt-2">
-            {isLogin ? 'Entre com suas credenciais' : 'Registre sua empresa no marketplace'}
-          </p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <div className="flex items-center space-x-2">
+            <Building className="text-blue-600" size={24} />
+            <h2 className="text-xl font-bold">
+              {isLogin ? 'Login Empresarial' : 'Cadastro de Empresa'}
+            </h2>
+          </div>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label="Fechar"
+          >
+            <X size={24} />
+          </button>
         </div>
-
-        {error && (
-          <ErrorHandler 
-            error={error} 
-            className="mb-4"
-          />
-        )}
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+          
           {!isLogin && (
             <>
               <InputField 
@@ -95,42 +282,30 @@ const AuthModal = ({
                 placeholder="Nome do responsável" 
                 required 
               />
-
+              
               <InputField 
                 field="companyName" 
-                placeholder="Razão Social da Empresa" 
+                placeholder="Razão social da empresa" 
                 required 
               />
-
+              
               <InputField 
                 field="cnpj" 
-                placeholder="CNPJ" 
+                placeholder="CNPJ (apenas números)" 
                 maxLength={18}
                 required 
               />
 
-              <select
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={authForm.sector || ''}
-                onChange={(e) => handleFieldChange('sector', e.target.value)}
-                required
-                aria-label="Setor industrial"
-              >
-                <option value="">Selecione o setor industrial *</option>
-                <option value="metalurgia">Metalurgia</option>
-                <option value="automotivo">Automotivo</option>
-                <option value="petrochemical">Petroquímico</option>
-                <option value="alimenticio">Alimentício</option>
-                <option value="textil">Têxtil</option>
-                <option value="construcao">Construção Civil</option>
-                <option value="eletroeletronico">Eletroeletrônico</option>
-                <option value="farmaceutico">Farmacêutico</option>
-                <option value="papel">Papel e Celulose</option>
-                <option value="outros">Outros</option>
-              </select>
+              <InputField 
+                field="sector" 
+                placeholder="Setor de atuação" 
+                required 
+              />
 
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Tipo de empresa *</p>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de conta
+                </label>
                 <div className="grid grid-cols-2 gap-3">
                   <label className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                     authForm.role === 'buyer' 
@@ -225,7 +400,7 @@ const AuthModal = ({
           </button>
         </form>
         
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center pb-6">
           <p className="text-sm text-gray-600">
             {isLogin ? 'Não tem conta?' : 'Já tem conta?'}
             <button 
@@ -239,12 +414,11 @@ const AuthModal = ({
         </div>
         
         {isLogin && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg mx-6 mb-6">
             <p className="text-xs text-gray-600 text-center">
-              <strong>Conta demo:</strong><br />
+              <strong>Contas demo:</strong><br />
               Admin: admin@b2bmarketplace.com / 123456<br />
-              Comprador: buyer@empresa.com / 123456<br />
-              Fornecedor: supplier@empresa.com / 123456
+              Comprador: joao@empresa.com / 123456
             </p>
           </div>
         )}
