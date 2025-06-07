@@ -6,7 +6,6 @@ const Header = () => {
   const { 
     user, 
     uiState, 
-    login, 
     logout, 
     showModal, 
     toggleMenu,
