@@ -1,0 +1,22 @@
+# Use Node.js 18 Alpine
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install --silent
+
+# Copy source code
+COPY . .
+
+# Create missing directories
+RUN mkdir -p src/components/common src/components/layout
+
+EXPOSE 3000
+
+# Development command with polling for Docker
+CMD ["npm", "start"]

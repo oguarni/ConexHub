@@ -1,12 +1,15 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-const AppContext = createContext();
+// Create context first
+const AppContext = createContext(null);
 
+// Main provider component
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   // UI State
   const [uiState, setUiState] = useState({
@@ -24,11 +27,29 @@ export const AppProvider = ({ children }) => {
     isLogin: true
   });
 
+  // Load user from storage on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+      } catch (err) {
+        console.error('Error loading user data:', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+
   // Auth functions
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     setLoading(true);
+    setError('');
+    
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -38,69 +59,138 @@ export const AppProvider = ({ children }) => {
         const data = await response.json();
         setUser(data.user);
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         setUiState(prev => ({ ...prev, showAuth: false }));
         return true;
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Login failed');
+        return false;
       }
-      return false;
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Network error');
       return false;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('token');
-  };
+    localStorage.removeItem('user');
+    setUiState(prev => ({ ...prev, showAuth: false }));
+  }, []);
 
   // UI functions
-  const updateUI = (updates) => {
+  const updateUI = useCallback((updates) => {
     setUiState(prev => ({ ...prev, ...updates }));
-  };
+  }, []);
 
-  const showModal = (modalName) => {
+  const showModal = useCallback((modalName) => {
     setUiState(prev => ({ ...prev, [modalName]: true }));
-  };
+  }, []);
 
-  const hideModal = (modalName) => {
+  const hideModal = useCallback((modalName) => {
     setUiState(prev => ({ ...prev, [modalName]: false }));
-  };
+  }, []);
 
-  const toggleMenu = () => {
+  const toggleMenu = useCallback(() => {
     setUiState(prev => ({ ...prev, isMenuOpen: !prev.isMenuOpen }));
-  };
+  }, []);
 
-  // Mock data functions
-  const handleRequestQuote = (product) => {
+  // Product functions
+  const loadProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/products');
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data.products || []);
+      }
+    } catch (err) {
+      console.error('Error loading products:', err);
+      setError('Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Quote functions
+  const handleRequestQuote = useCallback((product) => {
     if (!user) {
       showModal('showAuth');
       return;
     }
     showModal('showQuoteModal');
-  };
+  }, [user, showModal]);
+
+  const addNotification = useCallback((notification) => {
+    const id = Date.now() + Math.random();
+    const newNotification = { id, timestamp: Date.now(), ...notification };
+    
+    setUiState(prev => ({
+      ...prev,
+      notifications: [...prev.notifications, newNotification]
+    }));
+
+    // Auto-remove after 5 seconds
+    if (notification.autoHide !== false) {
+      setTimeout(() => {
+        setUiState(prev => ({
+          ...prev,
+          notifications: prev.notifications.filter(n => n.id !== id)
+        }));
+      }, 5000);
+    }
+
+    return id;
+  }, []);
+
+  const removeNotification = useCallback((id) => {
+    setUiState(prev => ({
+      ...prev,
+      notifications: prev.notifications.filter(n => n.id !== id)
+    }));
+  }, []);
+
+  // Load initial data
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const contextValue = {
     // State
+    user,
+    products,
+    quotes,
+    loading,
+    error,
     uiState,
-    auth: { user, loading, login, logout },
-    quotes: { quotes, handleRequestQuote },
-    products: { products, loading },
     
-    // Functions
+    // Auth
+    login,
+    logout,
+    
+    // UI
     updateUI,
     showModal,
     hideModal,
     toggleMenu,
-    handleRequestQuote,
+    addNotification,
+    removeNotification,
     
-    // Legacy support
-    user,
-    login,
-    logout,
+    // Products
+    loadProducts,
     setProducts,
-    setQuotes
+    
+    // Quotes
+    handleRequestQuote,
+    setQuotes,
+    
+    // Utils
+    clearError: () => setError('')
   };
 
   return (
@@ -110,6 +200,7 @@ export const AppProvider = ({ children }) => {
   );
 };
 
+// Hook to use context
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {
@@ -118,4 +209,5 @@ export const useAppContext = () => {
   return context;
 };
 
+// Default export
 export default AppProvider;

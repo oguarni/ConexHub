@@ -1,33 +1,43 @@
 import React from 'react';
-import { FileText, User, Menu, X, Package, Settings, Building } from 'lucide-react';
-import { useAppContext } from '../../contexts';
-import { apiService } from '../../services/api';
+import { FileText, User, Menu, X, Building } from 'lucide-react';
+import { useAppContext } from '../../contexts/AppProvider';
 
 const Header = () => {
   const { 
+    user, 
     uiState, 
-    auth, 
-    quotes,
+    login, 
+    logout, 
     showModal, 
-    hideModal, 
-    toggleMenu, 
-    closeMenu, 
+    toggleMenu,
     addNotification 
   } = useAppContext();
 
+  const handleLogin = async () => {
+    if (user) {
+      logout();
+      addNotification({
+        type: 'info',
+        message: 'Logout realizado com sucesso'
+      });
+    } else {
+      showModal('showAuth');
+    }
+  };
+
   const seedData = async () => {
     try {
-      await apiService.seedDatabase();
-      addNotification({
-        type: 'success',
-        title: 'Dados populados!',
-        message: 'Banco de dados atualizado com produtos B2B'
-      });
+      const response = await fetch('/api/seed', { method: 'POST' });
+      if (response.ok) {
+        addNotification({
+          type: 'success',
+          message: 'Dados populados com sucesso!'
+        });
+      }
     } catch (error) {
       addNotification({
         type: 'error',
-        title: 'Erro ao popular dados',
-        message: 'Falha na operação'
+        message: 'Erro ao popular dados'
       });
     }
   };
@@ -40,15 +50,14 @@ const Header = () => {
           <div className="flex items-center space-x-3">
             <button 
               onClick={toggleMenu}
-              className="md:hidden focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 rounded p-1 transition-colors hover:bg-blue-700"
+              className="md:hidden"
               aria-label={uiState.isMenuOpen ? "Fechar menu" : "Abrir menu"}
-              aria-expanded={uiState.isMenuOpen}
             >
               {uiState.isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
             
             <div className="flex items-center space-x-2">
-              <Building size={28} aria-hidden="true" />
+              <Building size={28} />
               <div>
                 <h1 className="text-xl font-bold">B2B Marketplace</h1>
                 <p className="text-xs text-blue-200 hidden lg:block">Soluções Industriais</p>
@@ -61,18 +70,17 @@ const Header = () => {
             {process.env.NODE_ENV === 'development' && (
               <button 
                 onClick={seedData}
-                className="hover:text-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 rounded px-2 py-1 transition-colors text-sm"
+                className="hover:text-blue-200 text-sm"
               >
                 Popular DB
               </button>
             )}
             
-            {auth.user?.role === 'admin' && (
+            {user?.role === 'admin' && (
               <button 
                 onClick={() => showModal('showAdmin')}
-                className="hover:text-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 rounded px-2 py-1 transition-colors flex items-center space-x-1"
+                className="hover:text-blue-200 flex items-center space-x-1"
               >
-                <Settings size={16} />
                 <span>Admin</span>
               </button>
             )}
@@ -82,36 +90,32 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <button 
               onClick={() => showModal('showQuotes')}
-              className="relative bg-blue-700 px-3 py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center space-x-2"
+              className="relative bg-blue-700 px-3 py-2 rounded-lg hover:bg-blue-800 flex items-center space-x-2"
             >
               <FileText size={18} />
               <span className="hidden sm:inline text-sm">Cotações</span>
-              {quotes.getTotalQuotes() > 0 && (
-                <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-medium">
-                  {quotes.getTotalQuotes()}
-                </span>
-              )}
             </button>
 
-            {auth.user ? (
+            {user ? (
               <div className="flex items-center space-x-3">
                 <div className="hidden sm:block text-right">
-                  <div className="text-sm font-medium">{auth.user.name}</div>
+                  <div className="text-sm font-medium">{user.name}</div>
                   <div className="text-xs text-blue-200">
-                    {auth.getUserDisplayInfo()?.roleLabel}
+                    {user.role === 'admin' ? 'Administrador' : 
+                     user.role === 'buyer' ? 'Comprador' : 'Fornecedor'}
                   </div>
                 </div>
                 <button 
-                  onClick={auth.logout}
-                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                  onClick={handleLogin}
+                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100"
                 >
                   Sair
                 </button>
               </div>
             ) : (
               <button 
-                onClick={() => showModal('showAuth')}
-                className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                onClick={handleLogin}
+                className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 flex items-center space-x-2"
               >
                 <User size={18} />
                 <span className="hidden sm:inline">Login</span>
