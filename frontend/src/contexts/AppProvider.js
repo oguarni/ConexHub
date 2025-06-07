@@ -49,7 +49,7 @@ export const AppProvider = ({ children }) => {
     setError('');
     
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -104,7 +104,7 @@ export const AppProvider = ({ children }) => {
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/products');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/products`);
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);

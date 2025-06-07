@@ -15,6 +15,11 @@ const analyticsController = require('../controllers/analyticsController');
 const adminController = require('../controllers/adminController');
 const seedController = require('../controllers/seedController');
 
+// Test route
+router.get('/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
+
 // Auth routes
 router.post('/auth/register', [
   body('name').notEmpty().trim(),
@@ -27,7 +32,7 @@ router.post('/auth/register', [
 router.post('/auth/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty()
-], authController.login);
+], authController.login.bind(authController));
 
 router.get('/auth/profile', authenticate, authController.getProfile);
 router.put('/auth/profile', authenticate, authController.updateProfile);

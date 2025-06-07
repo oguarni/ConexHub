@@ -9,6 +9,7 @@ const ProductCard = memo(({ product, onRequestQuote, user }) => {
   }), [user?.role, user?.id, product.supplierId]);
 
   const handleQuoteClick = useCallback(() => {
+    console.log('Quote button clicked');
     onRequestQuote(product);
   }, [onRequestQuote, product.id]);
 

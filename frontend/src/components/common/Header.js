@@ -14,6 +14,7 @@ const Header = () => {
 
   const handleLogin = async () => {
     if (user) {
+      console.log('Login button clicked'); // For debugging
       logout();
       addNotification({
         type: 'info',

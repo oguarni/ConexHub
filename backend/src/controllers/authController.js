@@ -1,7 +1,6 @@
 const { User, Supplier } = require('../models');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
 
 class AuthController {
   async register(req, res, next) {
@@ -81,7 +80,7 @@ class AuthController {
         return res.status(403).json({ error: 'Account deactivated' });
       }
 
-      // Generate token
+      // FIXED: Use this.generateToken instead of authController.generateToken
       const token = this.generateToken(user);
 
       // Return user without password
@@ -167,17 +166,12 @@ class AuthController {
 
   generateToken(user) {
     return jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role
-      },
-      process.env.JWT_SECRET || 'your-secret-key',
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-      }
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
   }
 }
 
-module.exports = new AuthController();
+const authController = new AuthController();
+module.exports = authController;  // Export the instance, not the class
