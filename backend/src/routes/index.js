@@ -15,6 +15,9 @@ const analyticsController = require('../controllers/analyticsController');
 const adminController = require('../controllers/adminController');
 const seedController = require('../controllers/seedController');
 
+// PIX routes
+const pixRoutes = require('./pix');
+
 // Test route
 router.get('/test', (req, res) => {
   res.json({ message: 'API is working!' });
@@ -120,6 +123,9 @@ router.get('/admin/users', authenticate, isAdmin, adminController.getUsers);
 router.put('/admin/users/:id', authenticate, isAdmin, adminController.updateUser);
 router.post('/admin/suppliers/verify/:id', authenticate, isAdmin, adminController.verifySupplier);
 router.get('/admin/reports', authenticate, isAdmin, adminController.getReports);
+
+// PIX payment routes
+router.use('/pix', pixRoutes);
 
 // Seed route for development (simple version)
 router.post('/seed', async (req, res) => {
