@@ -11,7 +11,8 @@ import {
   MapPin,
   Clock,
   CheckCircle,
-  Star
+  Star,
+  Package
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
