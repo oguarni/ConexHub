@@ -1,5 +1,7 @@
-import React from 'react';
-import { X, FileText, Clock, CheckCircle, Building } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, FileText, Clock, CheckCircle, Building, CreditCard } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
+import PixPaymentModal from '../payments/PixPaymentModal';
 
 const QuotesSidebar = ({ 
   showQuotes, 
@@ -10,6 +12,10 @@ const QuotesSidebar = ({
   setShowQuoteComparison,
   setShowAuth 
 }) => {
+  const { t } = useLanguage();
+  const [showPixPayment, setShowPixPayment] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState(null);
+  
   if (!showQuotes) return null;
 
   const getStatusIcon = (status) => {
@@ -28,16 +34,21 @@ const QuotesSidebar = ({
   const getStatusText = (status) => {
     switch (status) {
       case 'pending':
-        return 'Aguardando resposta';
+        return t('pending');
       case 'responded':
-        return 'Cotação recebida';
+        return t('quoted');
       case 'accepted':
-        return 'Cotação aceita';
+        return t('accepted');
       case 'rejected':
-        return 'Cotação rejeitada';
+        return t('rejected');
       default:
         return status;
     }
+  };
+
+  const handlePayWithPix = (quote) => {
+    setSelectedQuote(quote);
+    setShowPixPayment(true);
   };
 
   const respondedQuotes = quotes.filter(q => q.status === 'responded');
@@ -119,6 +130,18 @@ const QuotesSidebar = ({
                   <div className="text-xs text-gray-500 mt-2">
                     Solicitado em: {new Date(quote.createdAt).toLocaleDateString()}
                   </div>
+
+                  {quote.status === 'accepted' && (
+                    <div className="mt-3 pt-2 border-t border-gray-200">
+                      <button
+                        onClick={() => handlePayWithPix(quote)}
+                        className="w-full bg-green-600 text-white py-2 px-3 rounded-md hover:bg-green-700 flex items-center justify-center space-x-2 text-sm"
+                      >
+                        <CreditCard size={16} />
+                        <span>{t('payWithPix')}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -140,6 +163,20 @@ const QuotesSidebar = ({
           </div>
         )}
       </div>
+
+      {/* PIX Payment Modal */}
+      <PixPaymentModal
+        isOpen={showPixPayment}
+        onClose={() => {
+          setShowPixPayment(false);
+          setSelectedQuote(null);
+        }}
+        quote={selectedQuote}
+        onPaymentCreated={(payment) => {
+          console.log('PIX payment created:', payment);
+          // You could update the quote status here or refresh the quotes
+        }}
+      />
     </div>
   );
 };

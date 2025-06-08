@@ -15,19 +15,27 @@ const analyticsController = require('../controllers/analyticsController');
 const adminController = require('../controllers/adminController');
 const seedController = require('../controllers/seedController');
 
+// PIX routes
+const pixRoutes = require('./pix');
+
+// Test route
+router.get('/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
+
 // Auth routes
 router.post('/auth/register', [
   body('name').notEmpty().trim(),
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
-  body('cpf').notEmpty().trim(),
+  body('cpf').optional().trim(),
   body('role').optional().isIn(['buyer', 'supplier'])
 ], authController.register);
 
 router.post('/auth/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty()
-], authController.login);
+], authController.login.bind(authController));
 
 router.get('/auth/profile', authenticate, authController.getProfile);
 router.put('/auth/profile', authenticate, authController.updateProfile);
@@ -71,19 +79,16 @@ router.post('/suppliers/subscription', authenticate, isSupplier, [
 
 // Quote routes (B2B specific)
 router.post('/quotes/request', authenticate, [
-  body('items').isArray().notEmpty(),
-  body('items.*.productId').notEmpty(),
-  body('items.*.quantity').isInt({ min: 1 })
+  body('productId').notEmpty(),
+  body('quantity').isInt({ min: 1 })
 ], quoteController.requestQuote);
-router.get('/quotes/supplier', authenticate, isSupplier, quoteController.getSupplierQuotes);
-router.post('/quotes/submit', authenticate, isSupplier, [
-  body('orderId').notEmpty(),
-  body('items').isArray().notEmpty(),
-  body('items.*.productId').notEmpty(),
-  body('items.*.price').isFloat({ min: 0 })
+router.get('/quotes/supplier', authenticate, quoteController.getSupplierQuotes);
+router.get('/quotes/buyer', authenticate, quoteController.getBuyerQuotes);
+router.put('/quotes/:quoteId/respond', authenticate, [
+  body('unitPrice').isFloat({ min: 0 })
 ], quoteController.submitQuote);
-router.get('/quotes/order/:orderId', authenticate, quoteController.getBuyerQuotes);
 router.post('/quotes/:quoteId/accept', authenticate, quoteController.acceptQuote);
+router.post('/quotes/:quoteId/reject', authenticate, quoteController.rejectQuote);
 
 // Order routes
 router.post('/orders', authenticate, orderController.createOrder);
@@ -118,6 +123,9 @@ router.get('/admin/users', authenticate, isAdmin, adminController.getUsers);
 router.put('/admin/users/:id', authenticate, isAdmin, adminController.updateUser);
 router.post('/admin/suppliers/verify/:id', authenticate, isAdmin, adminController.verifySupplier);
 router.get('/admin/reports', authenticate, isAdmin, adminController.getReports);
+
+// PIX payment routes
+router.use('/pix', pixRoutes);
 
 // Seed route for development (simple version)
 router.post('/seed', async (req, res) => {

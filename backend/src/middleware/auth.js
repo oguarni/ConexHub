@@ -7,7 +7,7 @@ const authenticate = async (req, res, next) => {
     if (!token) throw new Error();
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findByPk(decoded.id, {
+    const user = await User.findByPk(decoded.userId, {
       include: [{ model: Supplier, required: false }]
     });
 

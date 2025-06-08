@@ -247,8 +247,10 @@ class ApiService {
 
   // Products methods com retry
   async getProducts(filters = {}) {
+    console.log('API: Getting products with filters:', filters);
     return this.withRetry(async () => {
       const response = await this.api.get('/products', { params: filters });
+      console.log('API: Products response:', response.data);
       return response.data;
     });
   }
@@ -346,6 +348,19 @@ class ApiService {
   }
 
   // Quote methods
+  async requestQuote(productId, quoteData) {
+    try {
+      const response = await this.api.post('/quotes/request', {
+        productId,
+        quantity: quoteData.quantity,
+        notes: `${quoteData.message || ''}\n\nUrgência: ${quoteData.urgency}\nEndereço: ${quoteData.deliveryAddress || ''}\nEspecificações: ${quoteData.specifications || ''}`.trim()
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async createQuote(quoteData) {
     try {
       const response = await this.api.post('/quotes', quoteData);

@@ -1,4 +1,7 @@
-module.exports = (sequelize, DataTypes) => {
+const { DataTypes } = require('sequelize');
+const bcrypt = require('bcryptjs');
+
+module.exports = (sequelize) => {
   const User = sequelize.define('User', {
     id: {
       type: DataTypes.UUID,
@@ -7,80 +10,81 @@ module.exports = (sequelize, DataTypes) => {
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
       validate: {
-        isEmail: true,
-      },
+        isEmail: true
+      }
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
     },
     cpf: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true
     },
     phone: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true
     },
     address: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: true
+    },
+    role: {
+      type: DataTypes.ENUM('admin', 'buyer', 'supplier'),
+      defaultValue: 'buyer'
     },
     companyName: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true
     },
     cnpj: {
       type: DataTypes.STRING,
-      allowNull: true,
-    },
-    role: {
-      type: DataTypes.ENUM('buyer', 'supplier', 'admin'),
-      defaultValue: 'buyer',
+      allowNull: true
     },
     isActive: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    emailVerified: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      defaultValue: true
     }
   }, {
-    timestamps: true,
-    tableName: 'Users',
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {
-          const bcrypt = require('bcryptjs');
-          user.password = await bcrypt.hash(user.password, 10);
+          user.password = await bcrypt.hash(user.password, 12);
         }
       },
       beforeUpdate: async (user) => {
         if (user.changed('password')) {
-          const bcrypt = require('bcryptjs');
-          user.password = await bcrypt.hash(user.password, 10);
+          user.password = await bcrypt.hash(user.password, 12);
         }
       }
     }
   });
 
+  // Instance method to validate password
   User.prototype.validatePassword = async function(password) {
-    const bcrypt = require('bcryptjs');
     return await bcrypt.compare(password, this.password);
   };
 
+  // Associations
   User.associate = (models) => {
-    User.hasOne(models.Supplier, { foreignKey: 'userId' });
     User.hasMany(models.Order, { foreignKey: 'userId' });
     User.hasMany(models.Review, { foreignKey: 'userId' });
+    User.hasOne(models.Supplier, { foreignKey: 'userId' });
+    User.hasMany(models.Quote, { 
+      foreignKey: 'buyerId', 
+      as: 'BuyerQuotes'
+    });
+    User.hasMany(models.Quote, { 
+      foreignKey: 'supplierId', 
+      as: 'SupplierQuotes'
+    });
   };
 
   return User;

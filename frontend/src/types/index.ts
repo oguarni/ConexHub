@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 // ✅ Tipos principais da aplicação
 export interface User {
   readonly id: string;
@@ -329,7 +331,7 @@ export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
-// ✅ Tipos de evento
+// ✅ Tipos de evento - Fixed React import
 export type FormEvent = React.FormEvent<HTMLFormElement>;
 export type ChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 export type ClickEvent = React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>;

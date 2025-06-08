@@ -1,253 +1,236 @@
-import React from 'react';
-import { X, Building, Users, ShoppingCart } from 'lucide-react';
-import { formatCNPJ } from '../../utils/validation';
-import ErrorHandler from '../common/ErrorHandler';
+import React, { useState } from 'react';
+import { X, User, Mail, Lock, Building } from 'lucide-react';
+import { useAppContext } from '../../contexts/AppProvider';
 
-const AuthModal = ({ 
-  showAuth, 
-  setShowAuth, 
-  isLogin, 
-  setIsLogin, 
-  authForm, 
-  setAuthForm, 
-  handleAuth, 
-  loading,
-  error
-}) => {
-  if (!showAuth) return null;
+const AuthModal = () => {
+  const { 
+    uiState, 
+    hideModal, 
+    login, 
+    register,
+    loading, 
+    error,
+    addNotification 
+  } = useAppContext();
 
-  const handleSubmit = (e) => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    companyName: '',
+    cnpj: '',
+    role: 'buyer'
+  });
+
+  const [isLogin, setIsLogin] = useState(true);
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleAuth();
-  };
-
-  const handleFieldChange = (field, value) => {
-    if (field === 'cnpj') {
-      value = formatCNPJ(value);
-    } else if (field === 'phone') {
-      value = value.replace(/\D/g, '')
-        .replace(/^(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{5})(\d)/, '$1-$2')
-        .substring(0, 15);
-    }
     
-    setAuthForm({...authForm, [field]: value});
+    if (isLogin) {
+      // Login
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        hideModal('showAuth');
+        addNotification({
+          type: 'success',
+          message: 'Login realizado com sucesso!'
+        });
+      }
+    } else {
+      // Register
+      const success = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        companyName: formData.companyName,
+        cnpj: formData.cnpj,
+        role: formData.role
+      });
+      
+      if (success) {
+        hideModal('showAuth');
+        addNotification({
+          type: 'success',
+          message: 'Conta criada com sucesso!'
+        });
+      }
+    }
   };
 
-  const InputField = ({ 
-    field, 
-    type = 'text', 
-    placeholder, 
-    required = false,
-    maxLength,
-    as = 'input',
-    rows 
-  }) => {
-    const Component = as;
-    return (
-      <Component
-        type={type}
-        placeholder={`${placeholder}${required ? ' *' : ''}`}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-        value={authForm[field] || ''}
-        onChange={(e) => handleFieldChange(field, e.target.value)}
-        maxLength={maxLength}
-        rows={rows}
-        required={required}
-        aria-label={placeholder}
-      />
-    );
+  const closeModal = () => {
+    hideModal('showAuth');
+    setFormData({
+      email: '',
+      password: '',
+      name: '',
+      companyName: '',
+      cnpj: '',
+      role: 'buyer'
+    });
   };
+
+  if (!uiState.showAuth) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 modal-backdrop">
-      <div className="bg-white rounded-lg w-full max-w-lg p-6 relative max-h-screen overflow-y-auto fade-in">
-        <button 
-          onClick={() => setShowAuth(false)} 
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          aria-label="Fechar modal"
-        >
-          <X size={24} />
-        </button>
-        
-        <div className="text-center mb-6">
-          <Building className="mx-auto mb-2 text-blue-600" size={48} />
-          <h2 className="text-2xl font-bold">
-            {isLogin ? 'Acesso B2B' : 'Cadastro Empresarial'}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {isLogin ? 'Fazer Login' : 'Criar Conta'}
           </h2>
-          <p className="text-gray-600 text-sm mt-2">
-            {isLogin ? 'Entre com suas credenciais' : 'Registre sua empresa no marketplace'}
-          </p>
-        </div>
-
-        {error && (
-          <ErrorHandler 
-            error={error} 
-            className="mb-4"
-          />
-        )}
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <>
-              <InputField 
-                field="name" 
-                placeholder="Nome do responsável" 
-                required 
-              />
-
-              <InputField 
-                field="companyName" 
-                placeholder="Razão Social da Empresa" 
-                required 
-              />
-
-              <InputField 
-                field="cnpj" 
-                placeholder="CNPJ" 
-                maxLength={18}
-                required 
-              />
-
-              <select
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={authForm.sector || ''}
-                onChange={(e) => handleFieldChange('sector', e.target.value)}
-                required
-                aria-label="Setor industrial"
-              >
-                <option value="">Selecione o setor industrial *</option>
-                <option value="metalurgia">Metalurgia</option>
-                <option value="automotivo">Automotivo</option>
-                <option value="petrochemical">Petroquímico</option>
-                <option value="alimenticio">Alimentício</option>
-                <option value="textil">Têxtil</option>
-                <option value="construcao">Construção Civil</option>
-                <option value="eletroeletronico">Eletroeletrônico</option>
-                <option value="farmaceutico">Farmacêutico</option>
-                <option value="papel">Papel e Celulose</option>
-                <option value="outros">Outros</option>
-              </select>
-
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Tipo de empresa *</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <label className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                    authForm.role === 'buyer' 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="role"
-                      value="buyer"
-                      checked={authForm.role === 'buyer'}
-                      onChange={(e) => handleFieldChange('role', e.target.value)}
-                      className="sr-only"
-                    />
-                    <div className="text-center">
-                      <ShoppingCart className="mx-auto mb-2 text-blue-600" size={32} />
-                      <div className="font-medium">Comprador</div>
-                      <div className="text-xs text-gray-600">Busca produtos</div>
-                    </div>
-                  </label>
-
-                  <label className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                    authForm.role === 'supplier' 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="role"
-                      value="supplier"
-                      checked={authForm.role === 'supplier'}
-                      onChange={(e) => handleFieldChange('role', e.target.value)}
-                      className="sr-only"
-                    />
-                    <div className="text-center">
-                      <Users className="mx-auto mb-2 text-green-600" size={32} />
-                      <div className="font-medium">Fornecedor</div>
-                      <div className="text-xs text-gray-600">Vende produtos</div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-            </>
-          )}
-          
-          <InputField 
-            field="email" 
-            type="email"
-            placeholder="Email empresarial" 
-            required 
-          />
-          
-          <InputField 
-            field="password" 
-            type="password"
-            placeholder={isLogin ? "Senha" : "Senha (mín. 6 caracteres)"} 
-            required 
-          />
-          
-          {!isLogin && (
-            <>
-              <InputField 
-                field="phone" 
-                placeholder="Telefone empresarial" 
-                maxLength={15}
-                required 
-              />
-
-              <InputField 
-                field="address" 
-                placeholder="Endereço completo da empresa" 
-                as="textarea"
-                rows={3}
-                required 
-              />
-            </>
-          )}
-          
-          <button 
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
-            disabled={loading}
+          <button
+            onClick={closeModal}
+            className="text-gray-400 hover:text-gray-600"
           >
-            {loading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin inline-block w-5 h-5 border-b-2 border-white mr-2"></div>
-                Processando...
-              </div>
-            ) : (
-              isLogin ? 'Entrar' : 'Cadastrar Empresa'
-            )}
+            <X size={24} />
           </button>
-        </form>
-        
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            {isLogin ? 'Não tem conta?' : 'Já tem conta?'}
-            <button 
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-600 ml-1 hover:underline font-medium"
-            >
-              {isLogin ? 'Cadastre sua empresa' : 'Faça login'}
-            </button>
-          </p>
         </div>
-        
-        {isLogin && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 text-center">
-              <strong>Conta demo:</strong><br />
-              Admin: admin@b2bmarketplace.com / 123456<br />
-              Comprador: buyer@empresa.com / 123456<br />
-              Fornecedor: supplier@empresa.com / 123456
-            </p>
+
+        {/* Form */}
+        <div className="p-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nome Completo
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Seu nome completo"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Empresa
+                  </label>
+                  <div className="relative">
+                    <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={formData.companyName}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Nome da empresa"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tipo de Conta
+                  </label>
+                  <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="buyer">Comprador</option>
+                    <option value="supplier">Fornecedor</option>
+                  </select>
+                </div>
+              </>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="seu@email.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Senha
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Carregando...
+                </div>
+              ) : (
+                isLogin ? 'Entrar' : 'Criar Conta'
+              )}
+            </button>
+          </form>
+
+          {/* Switch between login/register */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-blue-600 hover:text-blue-700 text-sm"
+            >
+              {isLogin ? 'Não tem conta? Criar uma' : 'Já tem conta? Fazer login'}
+            </button>
           </div>
-        )}
+
+          {/* Test accounts info */}
+          {isLogin && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800 font-medium mb-2">Contas de Teste:</p>
+              <div className="text-xs text-blue-700 space-y-1">
+                <p><strong>Comprador:</strong> joao@empresa.com / buyer123</p>
+                <p><strong>Fornecedor:</strong> carlos@fornecedor.com / supplier123</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

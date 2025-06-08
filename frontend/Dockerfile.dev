@@ -1,0 +1,33 @@
+# Use Node.js 16 Alpine - more stable for React
+FROM node:16-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Fix permissions - create node user with proper ownership
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# Copy package files
+COPY package*.json ./
+
+# Remove lock file and install fresh
+RUN rm -f package-lock.json && npm install
+
+# Copy source code
+COPY . .
+
+# Create missing directories if needed
+RUN mkdir -p src/components/common src/components/layout
+
+# Fix cache permissions
+RUN mkdir -p node_modules/.cache && chown -R nextjs:nodejs node_modules/.cache
+RUN chown -R nextjs:nodejs /app
+
+# Switch to non-root user
+USER nextjs
+
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "start"]

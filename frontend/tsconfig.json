@@ -21,16 +21,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": "src",
-    "paths": {
-      "@/*": ["*"],
-      "@/components/*": ["components/*"],
-      "@/hooks/*": ["hooks/*"],
-      "@/utils/*": ["utils/*"],
-      "@/types/*": ["types/*"],
-      "@/services/*": ["services/*"],
-      "@/contexts/*": ["contexts/*"]
-    },
-    "typeRoots": ["node_modules/@types", "src/types"],
+    "typeRoots": [
+      "node_modules/@types",
+      "src/types"
+    ],
     "declaration": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

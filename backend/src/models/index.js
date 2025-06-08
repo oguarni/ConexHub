@@ -18,6 +18,7 @@ const models = {
   OrderItem: require('./OrderItem')(sequelize, Sequelize.DataTypes),
   Quote: require('./Quote')(sequelize, Sequelize.DataTypes),
   Review: require('./Review')(sequelize, Sequelize.DataTypes),
+  PixPayment: require('./PixPayment')(sequelize, Sequelize.DataTypes),
 };
 
 // Define associations
