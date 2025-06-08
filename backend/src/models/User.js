@@ -77,6 +77,14 @@ module.exports = (sequelize) => {
     User.hasMany(models.Order, { foreignKey: 'userId' });
     User.hasMany(models.Review, { foreignKey: 'userId' });
     User.hasOne(models.Supplier, { foreignKey: 'userId' });
+    User.hasMany(models.Quote, { 
+      foreignKey: 'buyerId', 
+      as: 'BuyerQuotes'
+    });
+    User.hasMany(models.Quote, { 
+      foreignKey: 'supplierId', 
+      as: 'SupplierQuotes'
+    });
   };
 
   return User;
