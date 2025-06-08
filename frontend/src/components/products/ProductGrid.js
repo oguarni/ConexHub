@@ -3,7 +3,7 @@ import { FixedSizeGrid as Grid } from 'react-window';
 import { Package } from 'lucide-react';
 import ProductCard from './ProductCard';
 
-// const ITEM_HEIGHT = 400;
+const ITEM_HEIGHT = 400;
 // const ITEM_WIDTH = 300;
 const ITEM_PADDING = 12;
 

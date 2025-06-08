@@ -21,13 +21,13 @@ const AdminPanel = ({
   const [pendingSuppliers, setPendingSuppliers] = useState([]);
   const [suppliersLoading, setSuppliersLoading] = useState(false);
 
-  if (!showAdmin || user?.role !== 'admin') return null;
-
   useEffect(() => {
     if (activeTab === 'suppliers') {
       loadPendingSuppliers();
     }
   }, [activeTab]);
+
+  if (!showAdmin || user?.role !== 'admin') return null;
 
   const loadPendingSuppliers = async () => {
     try {

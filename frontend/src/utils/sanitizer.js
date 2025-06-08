@@ -1,4 +1,5 @@
 // utils/sanitizer.js - Proteção contra XSS
+import React from 'react';
 import DOMPurify from 'dompurify';
 
 export class SecuritySanitizer {
