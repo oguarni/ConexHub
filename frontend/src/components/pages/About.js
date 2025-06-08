@@ -73,21 +73,21 @@ const About = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white">
+      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 text-white">
         <div className="container mx-auto px-4 py-20">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl font-bold mb-6">
               {t('aboutTitle')}
             </h1>
-            <p className="text-xl mb-8 text-blue-100">
+            <p className="text-xl mb-8 text-green-100">
               {t('aboutDescription')} - {t('aboutSubtitle') || 'Conectando indústrias com eficiência, segurança e inovação desde 2020.'}
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               {stats.map((stat, index) => (
                 <div key={index} className="bg-white/10 backdrop-blur-sm rounded-lg p-6 min-w-[200px]">
-                  <stat.icon size={32} className="mx-auto mb-3 text-blue-300" />
+                  <stat.icon size={32} className="mx-auto mb-3 text-green-300" />
                   <div className="text-3xl font-bold mb-1">{stat.value}</div>
-                  <div className="text-sm text-blue-200">{stat.label}</div>
+                  <div className="text-sm text-green-200">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -101,8 +101,8 @@ const About = () => {
           <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
             <div className="bg-white rounded-xl shadow-lg p-8">
               <div className="flex items-center mb-6">
-                <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                  <Building size={32} className="text-blue-600" />
+                <div className="bg-green-100 p-3 rounded-lg mr-4">
+                  <Building size={32} className="text-green-600" />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900">{t('mission')}</h2>
               </div>
@@ -141,7 +141,7 @@ const About = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="text-center group">
-                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 w-20 h-20 rounded-xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <div className="bg-gradient-to-br from-green-500 to-emerald-600 w-20 h-20 rounded-xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <feature.icon size={32} className="text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
@@ -185,23 +185,23 @@ const About = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 bg-blue-900 text-white">
+      <section className="py-20 bg-green-900 text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">{t('contact')}</h2>
-              <p className="text-xl text-blue-200">
+              <p className="text-xl text-green-200">
                 {t('contactDescription') || 'Entre em contato conosco para começar sua jornada B2B'}
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="bg-blue-800 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <div className="bg-green-800 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
                   <MapPin size={24} />
                 </div>
                 <h3 className="text-xl font-bold mb-2">{t('location')}</h3>
-                <p className="text-blue-200">
+                <p className="text-green-200">
                   Av. Paulista, 1000<br />
                   São Paulo - SP<br />
                   CEP: 01310-100
@@ -209,11 +209,11 @@ const About = () => {
               </div>
 
               <div className="text-center">
-                <div className="bg-blue-800 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <div className="bg-green-800 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
                   <Phone size={24} />
                 </div>
                 <h3 className="text-xl font-bold mb-2">{t('phone') || 'Telefone'}</h3>
-                <p className="text-blue-200">
+                <p className="text-green-200">
                   +55 (11) 3000-0000<br />
                   +55 (11) 9 8000-0000<br />
                   {t('support247') || 'Atendimento 24/7'}
@@ -221,11 +221,11 @@ const About = () => {
               </div>
 
               <div className="text-center">
-                <div className="bg-blue-800 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <div className="bg-green-800 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
                   <Mail size={24} />
                 </div>
                 <h3 className="text-xl font-bold mb-2">{t('email') || 'Email'}</h3>
-                <p className="text-blue-200">
+                <p className="text-green-200">
                   contato@b2bmarketplace.com<br />
                   suporte@b2bmarketplace.com<br />
                   vendas@b2bmarketplace.com
@@ -234,7 +234,7 @@ const About = () => {
             </div>
 
             {/* Business Hours */}
-            <div className="mt-16 bg-blue-800/50 rounded-xl p-8">
+            <div className="mt-16 bg-green-800/50 rounded-xl p-8">
               <div className="flex items-center justify-center mb-6">
                 <Clock size={24} className="mr-3" />
                 <h3 className="text-2xl font-bold">{t('businessHours') || 'Horário de Atendimento'}</h3>
@@ -242,13 +242,13 @@ const About = () => {
               <div className="grid md:grid-cols-2 gap-6 text-center">
                 <div>
                   <p className="font-semibold mb-2">{t('technicalSupport') || 'Suporte Técnico'}</p>
-                  <p className="text-blue-200">{t('mondayToFriday') || 'Segunda a Sexta'}: 8h às 18h</p>
-                  <p className="text-blue-200">{t('saturday') || 'Sábado'}: 9h às 14h</p>
+                  <p className="text-green-200">{t('mondayToFriday') || 'Segunda a Sexta'}: 8h às 18h</p>
+                  <p className="text-green-200">{t('saturday') || 'Sábado'}: 9h às 14h</p>
                 </div>
                 <div>
                   <p className="font-semibold mb-2">{t('salesCommercial') || 'Vendas & Comercial'}</p>
-                  <p className="text-blue-200">{t('mondayToFriday') || 'Segunda a Sexta'}: 8h às 19h</p>
-                  <p className="text-blue-200">{t('saturday') || 'Sábado'}: 9h às 16h</p>
+                  <p className="text-green-200">{t('mondayToFriday') || 'Segunda a Sexta'}: 8h às 19h</p>
+                  <p className="text-green-200">{t('saturday') || 'Sábado'}: 9h às 16h</p>
                 </div>
               </div>
             </div>

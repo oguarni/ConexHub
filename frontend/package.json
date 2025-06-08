@@ -1,14 +1,16 @@
 {
-  "name": "b2b-marketplace-frontend",
-  "version": "0.2.0",
+  "name": "conexhub-frontend",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "lucide-react": "^0.294.0",
     "axios": "^1.6.0",
-    "web-vitals": "^3.5.0",
+    "web-vitals": "^3.5.0"
+  },
+  "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0"
   },
@@ -36,7 +38,10 @@
       "last 1 safari version"
     ]
   },
-  "overrides": {
-    "typescript": "^4.9.5"
+  "resolutions": {
+    "html-webpack-plugin": "5.5.0",
+    "webpack": "5.88.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0"
   }
 }

@@ -46,7 +46,7 @@ const Header = ({ currentPage, setCurrentPage }) => {
   };
 
   return (
-    <header className="bg-blue-600 text-white sticky top-0 z-40 shadow-md">
+    <header className="bg-green-600 text-white sticky top-0 z-40 shadow-md">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo e Menu Mobile */}
@@ -62,8 +62,8 @@ const Header = ({ currentPage, setCurrentPage }) => {
             <div className="flex items-center space-x-2">
               <Building size={28} />
               <div>
-                <h1 className="text-xl font-bold">B2B Marketplace</h1>
-                <p className="text-xs text-blue-200 hidden lg:block">Soluções Industriais</p>
+                <h1 className="text-xl font-bold">ConexHub</h1>
+                <p className="text-xs text-green-200 hidden lg:block">{t('industrialSolutions') || 'Soluções Industriais'}</p>
               </div>
             </div>
           </div>
@@ -128,7 +128,7 @@ const Header = ({ currentPage, setCurrentPage }) => {
           <div className="flex items-center space-x-4">
             <button 
               onClick={() => showModal('showQuotes')}
-              className="relative bg-blue-700 px-3 py-2 rounded-lg hover:bg-blue-800 flex items-center space-x-2"
+              className="relative bg-green-700 px-3 py-2 rounded-lg hover:bg-green-800 flex items-center space-x-2"
             >
               <FileText size={18} />
               <span className="hidden sm:inline text-sm">{t('quotes')}</span>
@@ -155,7 +155,7 @@ const Header = ({ currentPage, setCurrentPage }) => {
                 </div>
                 <button 
                   onClick={handleLogin}
-                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100"
+                  className="bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100"
                 >
                   {t('logout')}
                 </button>
@@ -163,7 +163,7 @@ const Header = ({ currentPage, setCurrentPage }) => {
             ) : (
               <button 
                 onClick={handleLogin}
-                className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 flex items-center space-x-2"
+                className="bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 flex items-center space-x-2"
               >
                 <User size={18} />
                 <span className="hidden sm:inline">{t('login')}</span>

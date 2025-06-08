@@ -1,9 +1,10 @@
-# B2B Industrial Marketplace - Complete Specifications
+# ConexHub - B2B Industrial Marketplace - Complete Specifications
 
 ## 📋 Project Overview
 **Location**: Dois Vizinhos, Paraná, Brazil  
 **Target Market**: Brazilian B2B Industrial Commerce  
-**Project Type**: Full-Stack Web Application for Industrial B2B Marketplace  
+**Project Type**: ConexHub - Full-Stack Web Application for Industrial B2B Marketplace  
+**Brand Identity**: Professional green-themed B2B platform connecting industries  
 **Academic Context**: University Project with Production-Ready Requirements  
 
 ## 🎯 Business Objectives
@@ -171,12 +172,13 @@
 
 ## 🎨 Design Requirements
 
-### **Visual Identity**
-- Professional B2B aesthetic
-- Blue and green color scheme (trust and growth)
-- Clean, modern interface
+### **Visual Identity - ConexHub Branding**
+- Professional B2B aesthetic with ConexHub green branding
+- Primary color: Green (#16a34a) representing growth and trust
+- Clean, modern interface matching ConexHub's professional identity
 - Mobile-responsive design
 - Accessibility compliance (WCAG 2.1)
+- Consistent green-themed UI elements throughout platform
 
 ### **User Experience**
 - Intuitive navigation for non-technical users

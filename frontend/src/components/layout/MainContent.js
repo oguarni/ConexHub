@@ -20,21 +20,21 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
         
         <div className="mb-3">
           <h3 className="font-semibold text-gray-800 mb-1">{product.name}</h3>
-          <p className="text-xs text-blue-600 mb-2">
+          <p className="text-xs text-green-600 mb-2">
             {product.Supplier?.companyName || product.supplier || t('supplier')}
           </p>
           <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
         </div>
         
         <div className="mb-3">
-          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
             {product.category}
           </span>
         </div>
         
         <div className="flex items-baseline justify-between mb-3">
           <div>
-            <span className="text-xl font-bold text-blue-600">
+            <span className="text-xl font-bold text-green-600">
               R$ {parseFloat(product.price || 0).toFixed(2)}
             </span>
             <span className="text-sm text-gray-500 ml-1">/{product.unit || 'un'}</span>
@@ -49,7 +49,7 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
         </div>
         
         {isOwner ? (
-          <div className="w-full bg-blue-100 text-blue-700 py-2.5 rounded-lg text-center text-sm font-medium">
+          <div className="w-full bg-green-100 text-green-700 py-2.5 rounded-lg text-center text-sm font-medium">
             {t('yourProduct') || 'Seu Produto'}
           </div>
         ) : canRequest ? (
@@ -62,7 +62,7 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
         ) : (
           <button
             onClick={() => onRequestQuote(product)}
-            className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors"
+            className="w-full bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 transition-colors"
           >
             {t('loginToQuote') || 'Login para Cotar'}
           </button>
@@ -93,7 +93,7 @@ const SearchAndFilters = ({ searchTerm, setSearchTerm, selectedCategory, setSele
             <input
               type="text"
               placeholder={t('searchProducts')}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -106,7 +106,7 @@ const SearchAndFilters = ({ searchTerm, setSearchTerm, selectedCategory, setSele
                 onClick={() => setSelectedCategory(category.key)}
                 className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                   selectedCategory === category.key
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-green-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -248,7 +248,7 @@ const MainContent = () => {
       
       {loading ? (
         <div className="flex justify-center items-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-16">

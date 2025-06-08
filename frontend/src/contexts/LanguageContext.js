@@ -80,8 +80,9 @@ const translations = {
     admin: 'Administrador',
     
     // About Page
-    aboutTitle: 'Sobre o B2B Marketplace',
+    aboutTitle: 'Sobre o ConexHub',
     aboutDescription: 'Plataforma líder em comércio eletrônico B2B para indústrias locais',
+    industrialSolutions: 'Soluções Industriais',
     aboutSubtitle: 'Conectando indústrias com eficiência, segurança e inovação desde 2020.',
     mission: 'Nossa Missão',
     vision: 'Nossa Visão',
@@ -222,8 +223,9 @@ const translations = {
     admin: 'Administrator',
     
     // About Page
-    aboutTitle: 'About B2B Marketplace',
+    aboutTitle: 'About ConexHub',
     aboutDescription: 'Leading B2B e-commerce platform for local industries',
+    industrialSolutions: 'Industrial Solutions',
     aboutSubtitle: 'Connecting industries with efficiency, security and innovation since 2020.',
     mission: 'Our Mission',
     vision: 'Our Vision',

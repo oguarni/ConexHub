@@ -1,8 +1,8 @@
-# Perplexity Research Prompt: B2B Marketplace Optimization for Dois Vizinhos, Brazil
+# Perplexity Research Prompt: ConexHub B2B Marketplace Optimization for Dois Vizinhos, Brazil
 
 ## 🎯 Research Request
 
-I'm developing a B2B industrial marketplace for the Brazilian market, specifically targeting Dois Vizinhos, Paraná, Brazil. I need comprehensive research on the best technologies, design patterns, and market strategies for this specific geographic and economic context.
+I'm developing **ConexHub**, a B2B industrial marketplace for the Brazilian market, specifically targeting Dois Vizinhos, Paraná, Brazil. ConexHub uses a professional green branding theme and focuses on connecting industries with efficiency and security. I need comprehensive research on the best technologies, design patterns, and market strategies for this specific geographic and economic context.
 
 ## 📍 Geographic Context
 - **Location**: Dois Vizinhos, Paraná, Brazil
