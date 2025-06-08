@@ -126,6 +126,7 @@ const MainContent = () => {
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteForm, setQuoteForm] = useState({
     quantity: 1,
     urgency: 'normal',
@@ -187,7 +188,7 @@ const MainContent = () => {
   const handleSubmitQuote = async () => {
     if (!selectedProduct) return;
 
-    setLoading(true);
+    setQuoteLoading(true);
     try {
       await apiService.requestQuote(selectedProduct.id, quoteForm);
       
@@ -205,7 +206,7 @@ const MainContent = () => {
         message: error.userMessage || 'Erro ao solicitar cotação. Tente novamente.'
       });
     } finally {
-      setLoading(false);
+      setQuoteLoading(false);
     }
   };
 
@@ -271,7 +272,7 @@ const MainContent = () => {
         quoteForm={quoteForm}
         setQuoteForm={setQuoteForm}
         onSubmitQuote={handleSubmitQuote}
-        loading={loading}
+        loading={quoteLoading}
       />
     </div>
   );
