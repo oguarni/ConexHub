@@ -46,11 +46,11 @@ const QuoteModal = ({
                 <div className="flex items-center space-x-4 text-sm text-gray-600">
                   <span className="flex items-center">
                     <Building size={14} className="mr-1" />
-                    {product.supplier || 'Fornecedor'}
+                    {product.Supplier?.companyName || 'Fornecedor'}
                   </span>
                   <span className="flex items-center">
                     <Package size={14} className="mr-1" />
-                    Min: {product.minQuantity || 1} {product.unit}
+                    Min: {product.minOrder || 1} {product.unit}
                   </span>
                 </div>
                 <div className="mt-2">
@@ -71,14 +71,14 @@ const QuoteModal = ({
                 </label>
                 <input
                   type="number"
-                  min={product.minQuantity || 1}
+                  min={product.minOrder || 1}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   value={quoteForm.quantity || 1}
                   onChange={(e) => setQuoteForm({...quoteForm, quantity: parseInt(e.target.value) || 1})}
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Mínimo: {product.minQuantity || 1} {product.unit}
+                  Mínimo: {product.minOrder || 1} {product.unit}
                 </p>
               </div>
 

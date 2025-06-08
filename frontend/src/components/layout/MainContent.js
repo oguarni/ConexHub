@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Package } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppProvider';
+import { apiService } from '../../services/api';
+import QuoteModal from '../products/QuoteModal';
 
 // Simple Product Card
 const ProductCard = ({ product, onRequestQuote, user }) => {
@@ -16,7 +18,9 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
         
         <div className="mb-3">
           <h3 className="font-semibold text-gray-800 mb-1">{product.name}</h3>
-          <p className="text-xs text-blue-600 mb-2">{product.supplier || 'Fornecedor Industrial'}</p>
+          <p className="text-xs text-blue-600 mb-2">
+            {product.Supplier?.companyName || product.supplier || 'Fornecedor Industrial'}
+          </p>
           <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
         </div>
         
@@ -38,7 +42,7 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
         <div className="mb-4">
           <div className="flex items-center text-sm text-gray-600">
             <Package size={14} className="mr-1" />
-            <span>Mín: {product.minQuantity || 1} {product.unit || 'un'}</span>
+            <span>Mín: {product.minOrder || product.minQuantity || 1} {product.unit || 'un'}</span>
           </div>
         </div>
         
@@ -68,7 +72,7 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
 
 // Search and Filters
 const SearchAndFilters = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCategory }) => {
-  const categories = ['Todas', 'Maquinário', 'Matéria-Prima', 'Componentes', 'Ferramentas', 'Equipamentos'];
+  const categories = ['Todas', 'Machinery', 'Raw Materials', 'Components', 'Ferramentas', 'Equipamentos'];
 
   return (
     <div className="bg-white shadow-sm sticky top-14 z-30">
@@ -120,23 +124,37 @@ const MainContent = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [quoteForm, setQuoteForm] = useState({
+    quantity: 1,
+    urgency: 'normal',
+    deliveryAddress: '',
+    specifications: '',
+    message: ''
+  });
 
   // Load products on mount
   useEffect(() => {
+    console.log('MainContent: Loading products on mount');
     loadProducts();
   }, [loadProducts]);
 
   // Filter products
-  const filteredProducts = products.filter(product => {
+  console.log('MainContent: products from context:', products);
+  const filteredProducts = (products || []).filter(product => {
+    if (!product || !product.name) return false;
+    
     const matchesSearch = !searchTerm || 
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesCategory = selectedCategory === 'Todas' || 
       product.category === selectedCategory;
     
     return matchesSearch && matchesCategory;
   });
+  console.log('MainContent: filtered products:', filteredProducts);
 
   const handleQuoteRequest = (product) => {
     if (!user) {
@@ -144,13 +162,56 @@ const MainContent = () => {
         type: 'info',
         message: 'Faça login para solicitar cotações'
       });
-    } else {
+      return;
+    }
+    
+    if (user.role === 'supplier') {
+      addNotification({
+        type: 'warning',
+        message: 'Fornecedores não podem solicitar cotações'
+      });
+      return;
+    }
+
+    setSelectedProduct(product);
+    setQuoteForm({
+      quantity: product.minOrder || 1,
+      urgency: 'normal',
+      deliveryAddress: user.address || '',
+      specifications: '',
+      message: ''
+    });
+    setShowQuoteModal(true);
+  };
+
+  const handleSubmitQuote = async () => {
+    if (!selectedProduct) return;
+
+    setLoading(true);
+    try {
+      await apiService.requestQuote(selectedProduct.id, quoteForm);
+      
       addNotification({
         type: 'success',
-        message: `Cotação solicitada para ${product.name}`
+        message: `Cotação solicitada para ${selectedProduct.name}! O fornecedor será notificado.`
       });
+      
+      setShowQuoteModal(false);
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error('Error submitting quote:', error);
+      addNotification({
+        type: 'error',
+        message: error.userMessage || 'Erro ao solicitar cotação. Tente novamente.'
+      });
+    } finally {
+      setLoading(false);
     }
-    handleRequestQuote(product);
+  };
+
+  const handleCloseQuoteModal = () => {
+    setShowQuoteModal(false);
+    setSelectedProduct(null);
   };
 
   if (error) {
@@ -201,6 +262,17 @@ const MainContent = () => {
           ))}
         </div>
       )}
+      
+      <QuoteModal
+        show={showQuoteModal}
+        onClose={handleCloseQuoteModal}
+        product={selectedProduct}
+        user={user}
+        quoteForm={quoteForm}
+        setQuoteForm={setQuoteForm}
+        onSubmitQuote={handleSubmitQuote}
+        loading={loading}
+      />
     </div>
   );
 };

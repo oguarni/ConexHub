@@ -65,6 +65,26 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
+  const register = useCallback(async (userData) => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const data = await apiService.register(userData);
+      setUser(data.user);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUiState(prev => ({ ...prev, showAuth: false }));
+      return true;
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.message || 'Registration failed');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('token');
@@ -92,12 +112,17 @@ export const AppProvider = ({ children }) => {
   // Product functions - UPDATED to use apiService
   const loadProducts = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
+      console.log('Loading products...');
       const data = await apiService.getProducts();
-      setProducts(data.products || data || []);
+      console.log('Products data received:', data);
+      const productList = data.products || data || [];
+      console.log('Setting products:', productList);
+      setProducts(productList);
     } catch (err) {
       console.error('Error loading products:', err);
-      setError('Failed to load products');
+      setError('Failed to load products. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -111,6 +136,36 @@ export const AppProvider = ({ children }) => {
     }
     showModal('showQuoteModal');
   }, [user, showModal]);
+
+  const loadQuotes = useCallback(async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const endpoint = user.role === 'supplier' ? '/quotes/supplier' : '/quotes/buyer';
+      const data = await apiService.api.get(endpoint);
+      const quotesList = data.data.quotes || [];
+      
+      // Transform quotes for display
+      const transformedQuotes = quotesList.map(quote => ({
+        id: quote.id,
+        productName: quote.Product?.name || 'Produto',
+        supplierName: quote.Supplier?.companyName || quote.Buyer?.companyName || 'Empresa',
+        quantity: quote.quantity,
+        unit: quote.Product?.unit || 'un',
+        status: quote.status,
+        totalPrice: quote.totalAmount,
+        createdAt: quote.createdAt
+      }));
+      
+      setQuotes(transformedQuotes);
+    } catch (err) {
+      console.error('Error loading quotes:', err);
+      setError('Failed to load quotes');
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   const addNotification = useCallback((notification) => {
     const id = Date.now() + Math.random();
@@ -157,6 +212,7 @@ export const AppProvider = ({ children }) => {
     
     // Auth
     login,
+    register,
     logout,
     
     // UI
@@ -173,6 +229,7 @@ export const AppProvider = ({ children }) => {
     
     // Quotes
     handleRequestQuote,
+    loadQuotes,
     setQuotes,
     
     // Utils

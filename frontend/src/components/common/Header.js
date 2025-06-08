@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, User, Menu, X, Building } from 'lucide-react';
+import { FileText, User, Menu, X, Building, Package } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppProvider';
 
 const Header = () => {
@@ -95,6 +95,16 @@ const Header = () => {
               <FileText size={18} />
               <span className="hidden sm:inline text-sm">Cotações</span>
             </button>
+            
+            {user && (
+              <button 
+                onClick={() => showModal('showOrders')}
+                className="relative bg-green-700 px-3 py-2 rounded-lg hover:bg-green-800 flex items-center space-x-2"
+              >
+                <Package size={18} />
+                <span className="hidden sm:inline text-sm">Pedidos</span>
+              </button>
+            )}
 
             {user ? (
               <div className="flex items-center space-x-3">
