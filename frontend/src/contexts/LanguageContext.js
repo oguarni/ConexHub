@@ -64,10 +64,20 @@ const translations = {
     
     // Messages
     loginSuccess: 'Login realizado com sucesso!',
+    logoutSuccess: 'Logout realizado com sucesso!',
     quoteRequestSuccess: 'Cotação solicitada com sucesso!',
+    quoteRequestError: 'Erro ao solicitar cotação. Tente novamente.',
     loginRequired: 'Faça login para solicitar cotações',
+    suppliersCannotRequest: 'Fornecedores não podem solicitar cotações',
     noProductsFound: 'Nenhum produto encontrado',
+    noProductsRegistered: 'Nenhum produto cadastrado ainda. Use o botão "Popular DB" para adicionar dados de exemplo.',
+    adjustFilters: 'Tente ajustar os filtros ou termos de pesquisa.',
     loadingProducts: 'Carregando produtos...',
+    seedSuccess: 'Dados populados com sucesso!',
+    seedError: 'Erro ao popular dados',
+    yourProduct: 'Seu Produto',
+    loginToQuote: 'Login para Cotar',
+    admin: 'Administrador',
     
     // About Page
     aboutTitle: 'Sobre o B2B Marketplace',
@@ -155,10 +165,20 @@ const translations = {
     
     // Messages
     loginSuccess: 'Login successful!',
+    logoutSuccess: 'Logout successful!',
     quoteRequestSuccess: 'Quote requested successfully!',
+    quoteRequestError: 'Error requesting quote. Please try again.',
     loginRequired: 'Please login to request quotes',
+    suppliersCannotRequest: 'Suppliers cannot request quotes',
     noProductsFound: 'No products found',
+    noProductsRegistered: 'No products registered yet. Use the "Seed DB" button to add sample data.',
+    adjustFilters: 'Try adjusting the filters or search terms.',
     loadingProducts: 'Loading products...',
+    seedSuccess: 'Data populated successfully!',
+    seedError: 'Error populating data',
+    yourProduct: 'Your Product',
+    loginToQuote: 'Login to Quote',
+    admin: 'Administrator',
     
     // About Page
     aboutTitle: 'About B2B Marketplace',

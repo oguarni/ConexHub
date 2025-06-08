@@ -1,8 +1,9 @@
 import React from 'react';
-import { FileText, User, Menu, X, Building, Package } from 'lucide-react';
+import { FileText, User, Menu, X, Building, Package, Globe } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppProvider';
+import { useLanguage } from '../../contexts/LanguageContext';
 
-const Header = () => {
+const Header = ({ currentPage, setCurrentPage }) => {
   const { 
     user, 
     uiState, 
@@ -11,6 +12,8 @@ const Header = () => {
     toggleMenu,
     addNotification 
   } = useAppContext();
+  
+  const { t, language, changeLanguage, availableLanguages } = useLanguage();
 
   const handleLogin = async () => {
     if (user) {
@@ -18,7 +21,7 @@ const Header = () => {
       logout();
       addNotification({
         type: 'info',
-        message: 'Logout realizado com sucesso'
+        message: t('logoutSuccess') || 'Logout realizado com sucesso'
       });
     } else {
       showModal('showAuth');
@@ -31,13 +34,13 @@ const Header = () => {
       if (response.ok) {
         addNotification({
           type: 'success',
-          message: 'Dados populados com sucesso!'
+          message: t('seedSuccess') || 'Dados populados com sucesso!'
         });
       }
     } catch (error) {
       addNotification({
         type: 'error',
-        message: 'Erro ao popular dados'
+        message: t('seedError') || 'Erro ao popular dados'
       });
     }
   };
@@ -67,12 +70,47 @@ const Header = () => {
           
           {/* Menu Desktop */}
           <nav className="hidden md:flex items-center space-x-6">
+            <button 
+              onClick={() => setCurrentPage && setCurrentPage('products')}
+              className={`hover:text-blue-200 text-sm ${currentPage === 'products' ? 'border-b-2 border-white' : ''}`}
+            >
+              {t('products')}
+            </button>
+            
+            <button 
+              onClick={() => setCurrentPage && setCurrentPage('about')}
+              className={`hover:text-blue-200 text-sm ${currentPage === 'about' ? 'border-b-2 border-white' : ''}`}
+            >
+              {t('about')}
+            </button>
+            
+            {/* Language Switcher */}
+            <div className="relative group">
+              <button className="hover:text-blue-200 flex items-center space-x-1">
+                <Globe size={16} />
+                <span className="text-xs">{availableLanguages.find(lang => lang.code === language)?.flag}</span>
+              </button>
+              <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                {availableLanguages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className={`block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${
+                      language === lang.code ? 'bg-blue-50 text-blue-600' : ''
+                    }`}
+                  >
+                    {lang.flag} {lang.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             {process.env.NODE_ENV === 'development' && (
               <button 
                 onClick={seedData}
-                className="hover:text-blue-200 text-sm"
+                className="hover:text-blue-200 text-xs"
               >
-                Popular DB
+                Seed DB
               </button>
             )}
             
@@ -93,7 +131,7 @@ const Header = () => {
               className="relative bg-blue-700 px-3 py-2 rounded-lg hover:bg-blue-800 flex items-center space-x-2"
             >
               <FileText size={18} />
-              <span className="hidden sm:inline text-sm">Cotações</span>
+              <span className="hidden sm:inline text-sm">{t('quotes')}</span>
             </button>
             
             {user && (
@@ -102,7 +140,7 @@ const Header = () => {
                 className="relative bg-green-700 px-3 py-2 rounded-lg hover:bg-green-800 flex items-center space-x-2"
               >
                 <Package size={18} />
-                <span className="hidden sm:inline text-sm">Pedidos</span>
+                <span className="hidden sm:inline text-sm">{t('orders')}</span>
               </button>
             )}
 
@@ -111,15 +149,15 @@ const Header = () => {
                 <div className="hidden sm:block text-right">
                   <div className="text-sm font-medium">{user.name}</div>
                   <div className="text-xs text-blue-200">
-                    {user.role === 'admin' ? 'Administrador' : 
-                     user.role === 'buyer' ? 'Comprador' : 'Fornecedor'}
+                    {user.role === 'admin' ? t('admin') || 'Administrador' : 
+                     user.role === 'buyer' ? t('buyer') : t('supplier')}
                   </div>
                 </div>
                 <button 
                   onClick={handleLogin}
                   className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100"
                 >
-                  Sair
+                  {t('logout')}
                 </button>
               </div>
             ) : (
@@ -128,7 +166,7 @@ const Header = () => {
                 className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 flex items-center space-x-2"
               >
                 <User size={18} />
-                <span className="hidden sm:inline">Login</span>
+                <span className="hidden sm:inline">{t('login')}</span>
               </button>
             )}
           </div>

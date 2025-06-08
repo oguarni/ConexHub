@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Package } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppProvider';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { apiService } from '../../services/api';
 import QuoteModal from '../products/QuoteModal';
 
 // Simple Product Card
 const ProductCard = ({ product, onRequestQuote, user }) => {
+  const { t } = useLanguage();
   const canRequest = user && (user.role === 'buyer' || user.role === 'admin');
   const isOwner = user && user.role === 'supplier' && product.supplierId === user.id;
 
@@ -19,7 +21,7 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
         <div className="mb-3">
           <h3 className="font-semibold text-gray-800 mb-1">{product.name}</h3>
           <p className="text-xs text-blue-600 mb-2">
-            {product.Supplier?.companyName || product.supplier || 'Fornecedor Industrial'}
+            {product.Supplier?.companyName || product.supplier || t('supplier')}
           </p>
           <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
         </div>
@@ -48,21 +50,21 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
         
         {isOwner ? (
           <div className="w-full bg-blue-100 text-blue-700 py-2.5 rounded-lg text-center text-sm font-medium">
-            Seu Produto
+            {t('yourProduct') || 'Seu Produto'}
           </div>
         ) : canRequest ? (
           <button
             onClick={() => onRequestQuote(product)}
             className="w-full bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 transition-colors"
           >
-            Solicitar Cotação
+            {t('requestQuote')}
           </button>
         ) : (
           <button
             onClick={() => onRequestQuote(product)}
             className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Login para Cotar
+            {t('loginToQuote') || 'Login para Cotar'}
           </button>
         )}
       </div>
@@ -72,7 +74,15 @@ const ProductCard = ({ product, onRequestQuote, user }) => {
 
 // Search and Filters
 const SearchAndFilters = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCategory }) => {
-  const categories = ['Todas', 'Machinery', 'Raw Materials', 'Components', 'Ferramentas', 'Equipamentos'];
+  const { t } = useLanguage();
+  const categories = [
+    { key: 'all', label: t('all') },
+    { key: 'Machinery', label: t('machinery') },
+    { key: 'Raw Materials', label: t('rawMaterials') },
+    { key: 'Components', label: t('components') },
+    { key: 'Tools', label: t('tools') },
+    { key: 'Equipment', label: t('equipment') }
+  ];
 
   return (
     <div className="bg-white shadow-sm sticky top-14 z-30">
@@ -82,7 +92,7 @@ const SearchAndFilters = ({ searchTerm, setSearchTerm, selectedCategory, setSele
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Buscar produtos..."
+              placeholder={t('searchProducts')}
               className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -92,15 +102,15 @@ const SearchAndFilters = ({ searchTerm, setSearchTerm, selectedCategory, setSele
           <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
             {categories.map(category => (
               <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
+                key={category.key}
+                onClick={() => setSelectedCategory(category.key)}
                 className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
-                  selectedCategory === category
+                  selectedCategory === category.key
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {category}
+                {category.label}
               </button>
             ))}
           </div>
@@ -121,9 +131,11 @@ const MainContent = () => {
     loadProducts,
     addNotification 
   } = useAppContext();
+  
+  const { t } = useLanguage();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Todas');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
@@ -150,7 +162,7 @@ const MainContent = () => {
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesCategory = selectedCategory === 'Todas' || 
+    const matchesCategory = selectedCategory === 'all' || 
       product.category === selectedCategory;
     
     return matchesSearch && matchesCategory;
@@ -161,7 +173,7 @@ const MainContent = () => {
     if (!user) {
       addNotification({
         type: 'info',
-        message: 'Faça login para solicitar cotações'
+        message: t('loginRequired')
       });
       return;
     }
@@ -169,7 +181,7 @@ const MainContent = () => {
     if (user.role === 'supplier') {
       addNotification({
         type: 'warning',
-        message: 'Fornecedores não podem solicitar cotações'
+        message: t('suppliersCannotRequest') || 'Fornecedores não podem solicitar cotações'
       });
       return;
     }
@@ -194,7 +206,7 @@ const MainContent = () => {
       
       addNotification({
         type: 'success',
-        message: `Cotação solicitada para ${selectedProduct.name}! O fornecedor será notificado.`
+        message: t('quoteRequestSuccess')
       });
       
       setShowQuoteModal(false);
@@ -203,7 +215,7 @@ const MainContent = () => {
       console.error('Error submitting quote:', error);
       addNotification({
         type: 'error',
-        message: error.userMessage || 'Erro ao solicitar cotação. Tente novamente.'
+        message: error.userMessage || t('quoteRequestError') || 'Erro ao solicitar cotação. Tente novamente.'
       });
     } finally {
       setQuoteLoading(false);
@@ -242,12 +254,12 @@ const MainContent = () => {
         <div className="text-center py-16">
           <Package className="mx-auto mb-4 text-gray-400" size={80} />
           <h3 className="text-xl font-medium text-gray-900 mb-2">
-            Nenhum produto encontrado
+            {t('noProductsFound')}
           </h3>
           <p className="text-gray-500">
             {products.length === 0 
-              ? 'Nenhum produto cadastrado ainda. Use o botão "Popular DB" para adicionar dados de exemplo.'
-              : 'Tente ajustar os filtros ou termos de pesquisa.'
+              ? t('noProductsRegistered') || 'Nenhum produto cadastrado ainda. Use o botão "Popular DB" para adicionar dados de exemplo.'
+              : t('adjustFilters') || 'Tente ajustar os filtros ou termos de pesquisa.'
             }
           </p>
         </div>
