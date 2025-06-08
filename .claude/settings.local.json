@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose up:*)",
+      "Bash(npm install)",
+      "Bash(npx sequelize-cli:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:password@localhost:5434/b2b_marketplace\" npx sequelize-cli db:migrate)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:password@localhost:5434/b2b_marketplace\" npm run seed)",
+      "Bash(curl:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(docker network:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker restart:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(rm:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(npm start)",
+      "Bash(node:*)",
+      "Bash(npm --version)",
+      "Bash(git rm:*)",
+      "Bash(npm install:*)",
+      "Bash(ls:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)"
+    ],
+    "deny": []
+  }
+}
