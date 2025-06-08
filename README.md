@@ -160,7 +160,7 @@ ConexHub/
 ### 1. Clone o Repositório
 
 ```bash
-git clone https://github.com/seu-usuario/conexhub.git
+git clone [https://github.com/seu-usuario/conexhub.git](https://github.com/oguarni/conexhub)
 cd conexhub
 ```
 
