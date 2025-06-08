@@ -82,8 +82,49 @@ const translations = {
     // About Page
     aboutTitle: 'Sobre o B2B Marketplace',
     aboutDescription: 'Plataforma líder em comércio eletrônico B2B para indústrias locais',
+    aboutSubtitle: 'Conectando indústrias com eficiência, segurança e inovação desde 2020.',
     mission: 'Nossa Missão',
     vision: 'Nossa Visão',
+    missionText: 'Democratizar o acesso ao comércio B2B, conectando pequenas e médias empresas a fornecedores qualificados, proporcionando transparência, eficiência e crescimento sustentável para todos os participantes do ecossistema industrial brasileiro.',
+    visionText: 'Ser a principal plataforma de comércio B2B da América Latina, reconhecida pela excelência em conectar empresas, promover inovação e impulsionar o crescimento econômico regional através da tecnologia.',
+    
+    // Stats
+    registeredCompanies: 'Empresas Cadastradas',
+    availableProducts: 'Produtos Disponíveis', 
+    transactionsCompleted: 'Transações Realizadas',
+    customerSatisfaction: 'Satisfação do Cliente',
+    
+    // Features
+    whyChooseUs: 'Por que escolher nossa plataforma?',
+    whyChooseDescription: 'Oferecemos uma experiência completa e segura para empresas que buscam excelência em seus processos de compra e venda B2B.',
+    guaranteedSecurity: 'Segurança Garantida',
+    securityDescription: 'Todas as transações são protegidas por criptografia de ponta e verificação rigorosa de fornecedores.',
+    integratedLogistics: 'Logística Integrada',
+    logisticsDescription: 'Parceria com principais transportadoras para garantir entregas rápidas e seguras em todo o Brasil.',
+    certifiedQuality: 'Qualidade Certificada',
+    qualityDescription: 'Todos os fornecedores passam por processo de verificação e certificação de qualidade.',
+    specializedSupport: 'Suporte Especializado',
+    supportDescription: 'Equipe de especialistas em B2B disponível para auxiliar em todas as etapas do processo.',
+    
+    // Team
+    ourTeam: 'Nossa Equipe',
+    teamDescription: 'Profissionais experientes dedicados ao seu sucesso',
+    ceoFounder: 'CEO & Fundador',
+    commercialDirector: 'Diretor Comercial',
+    carlosDescription: '20+ anos de experiência em comércio B2B',
+    anaDescription: 'Especialista em tecnologia e inovação',
+    joaoDescription: 'Expert em desenvolvimento de negócios B2B',
+    
+    // Contact
+    contactDescription: 'Entre em contato conosco para começar sua jornada B2B',
+    phone: 'Telefone',
+    email: 'Email',
+    support247: 'Atendimento 24/7',
+    businessHours: 'Horário de Atendimento',
+    technicalSupport: 'Suporte Técnico',
+    salesCommercial: 'Vendas & Comercial',
+    mondayToFriday: 'Segunda a Sexta',
+    saturday: 'Sábado',
     
     // Footer
     contact: 'Contato',
@@ -183,8 +224,49 @@ const translations = {
     // About Page
     aboutTitle: 'About B2B Marketplace',
     aboutDescription: 'Leading B2B e-commerce platform for local industries',
+    aboutSubtitle: 'Connecting industries with efficiency, security and innovation since 2020.',
     mission: 'Our Mission',
     vision: 'Our Vision',
+    missionText: 'To democratize access to B2B commerce, connecting small and medium enterprises to qualified suppliers, providing transparency, efficiency and sustainable growth for all participants in the Brazilian industrial ecosystem.',
+    visionText: 'To be the main B2B commerce platform in Latin America, recognized for excellence in connecting companies, promoting innovation and driving regional economic growth through technology.',
+    
+    // Stats
+    registeredCompanies: 'Registered Companies',
+    availableProducts: 'Available Products',
+    transactionsCompleted: 'Transactions Completed',
+    customerSatisfaction: 'Customer Satisfaction',
+    
+    // Features
+    whyChooseUs: 'Why choose our platform?',
+    whyChooseDescription: 'We offer a complete and secure experience for companies seeking excellence in their B2B buying and selling processes.',
+    guaranteedSecurity: 'Guaranteed Security',
+    securityDescription: 'All transactions are protected by end-to-end encryption and rigorous supplier verification.',
+    integratedLogistics: 'Integrated Logistics',
+    logisticsDescription: 'Partnership with major carriers to ensure fast and secure deliveries throughout Brazil.',
+    certifiedQuality: 'Certified Quality',
+    qualityDescription: 'All suppliers go through a quality verification and certification process.',
+    specializedSupport: 'Specialized Support',
+    supportDescription: 'Team of B2B specialists available to assist in all stages of the process.',
+    
+    // Team
+    ourTeam: 'Our Team',
+    teamDescription: 'Experienced professionals dedicated to your success',
+    ceoFounder: 'CEO & Founder',
+    commercialDirector: 'Commercial Director',
+    carlosDescription: '20+ years of experience in B2B commerce',
+    anaDescription: 'Technology and innovation specialist',
+    joaoDescription: 'Expert in B2B business development',
+    
+    // Contact
+    contactDescription: 'Contact us to start your B2B journey',
+    phone: 'Phone',
+    email: 'Email',
+    support247: '24/7 Support',
+    businessHours: 'Business Hours',
+    technicalSupport: 'Technical Support',
+    salesCommercial: 'Sales & Commercial',
+    mondayToFriday: 'Monday to Friday',
+    saturday: 'Saturday',
     
     // Footer
     contact: 'Contact',

@@ -20,53 +20,53 @@ const About = () => {
   const { t } = useLanguage();
 
   const stats = [
-    { label: 'Empresas Cadastradas', value: '1,200+', icon: Building },
-    { label: 'Produtos Disponíveis', value: '50,000+', icon: Package },
-    { label: 'Transações Realizadas', value: 'R$ 150M+', icon: Globe },
-    { label: 'Satisfação do Cliente', value: '98%', icon: Star }
+    { label: t('registeredCompanies') || 'Empresas Cadastradas', value: '1,200+', icon: Building },
+    { label: t('availableProducts') || 'Produtos Disponíveis', value: '50,000+', icon: Package },
+    { label: t('transactionsCompleted') || 'Transações Realizadas', value: 'R$ 150M+', icon: Globe },
+    { label: t('customerSatisfaction') || 'Satisfação do Cliente', value: '98%', icon: Star }
   ];
 
   const features = [
     {
       icon: Shield,
-      title: 'Segurança Garantida',
-      description: 'Todas as transações são protegidas por criptografia de ponta e verificação rigorosa de fornecedores.'
+      title: t('guaranteedSecurity') || 'Segurança Garantida',
+      description: t('securityDescription') || 'Todas as transações são protegidas por criptografia de ponta e verificação rigorosa de fornecedores.'
     },
     {
       icon: Truck,
-      title: 'Logística Integrada',
-      description: 'Parceria com principais transportadoras para garantir entregas rápidas e seguras em todo o Brasil.'
+      title: t('integratedLogistics') || 'Logística Integrada',
+      description: t('logisticsDescription') || 'Parceria com principais transportadoras para garantir entregas rápidas e seguras em todo o Brasil.'
     },
     {
       icon: Award,
-      title: 'Qualidade Certificada',
-      description: 'Todos os fornecedores passam por processo de verificação e certificação de qualidade.'
+      title: t('certifiedQuality') || 'Qualidade Certificada',
+      description: t('qualityDescription') || 'Todos os fornecedores passam por processo de verificação e certificação de qualidade.'
     },
     {
       icon: Users,
-      title: 'Suporte Especializado',
-      description: 'Equipe de especialistas em B2B disponível para auxiliar em todas as etapas do processo.'
+      title: t('specializedSupport') || 'Suporte Especializado',
+      description: t('supportDescription') || 'Equipe de especialistas em B2B disponível para auxiliar em todas as etapas do processo.'
     }
   ];
 
   const team = [
     {
       name: 'Dr. Carlos Silva',
-      role: 'CEO & Fundador',
+      role: t('ceoFounder') || 'CEO & Fundador',
       image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face',
-      description: '20+ anos de experiência em comércio B2B'
+      description: t('carlosDescription') || '20+ anos de experiência em comércio B2B'
     },
     {
       name: 'Ana Costa',
       role: 'CTO',
       image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face',
-      description: 'Especialista em tecnologia e inovação'
+      description: t('anaDescription') || 'Especialista em tecnologia e inovação'
     },
     {
       name: 'João Santos',
-      role: 'Diretor Comercial',
+      role: t('commercialDirector') || 'Diretor Comercial',
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
-      description: 'Expert em desenvolvimento de negócios B2B'
+      description: t('joaoDescription') || 'Expert em desenvolvimento de negócios B2B'
     }
   ];
 
@@ -80,8 +80,7 @@ const About = () => {
               {t('aboutTitle')}
             </h1>
             <p className="text-xl mb-8 text-blue-100">
-              {t('aboutDescription')} - Conectando indústrias com eficiência, 
-              segurança e inovação desde 2020.
+              {t('aboutDescription')} - {t('aboutSubtitle') || 'Conectando indústrias com eficiência, segurança e inovação desde 2020.'}
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               {stats.map((stat, index) => (
@@ -108,9 +107,7 @@ const About = () => {
                 <h2 className="text-3xl font-bold text-gray-900">{t('mission')}</h2>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Democratizar o acesso ao comércio B2B, conectando pequenas e médias empresas 
-                a fornecedores qualificados, proporcionando transparência, eficiência e 
-                crescimento sustentável para todos os participantes do ecossistema industrial brasileiro.
+                {t('missionText') || 'Democratizar o acesso ao comércio B2B, conectando pequenas e médias empresas a fornecedores qualificados, proporcionando transparência, eficiência e crescimento sustentável para todos os participantes do ecossistema industrial brasileiro.'}
               </p>
             </div>
 
@@ -122,9 +119,7 @@ const About = () => {
                 <h2 className="text-3xl font-bold text-gray-900">{t('vision')}</h2>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Ser a principal plataforma de comércio B2B da América Latina, 
-                reconhecida pela excelência em conectar empresas, promover inovação 
-                e impulsionar o crescimento econômico regional através da tecnologia.
+                {t('visionText') || 'Ser a principal plataforma de comércio B2B da América Latina, reconhecida pela excelência em conectar empresas, promover inovação e impulsionar o crescimento econômico regional através da tecnologia.'}
               </p>
             </div>
           </div>
@@ -136,11 +131,10 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Por que escolher nossa plataforma?
+              {t('whyChooseUs') || 'Por que escolher nossa plataforma?'}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Oferecemos uma experiência completa e segura para empresas que buscam 
-              excelência em seus processos de compra e venda B2B.
+              {t('whyChooseDescription') || 'Oferecemos uma experiência completa e segura para empresas que buscam excelência em seus processos de compra e venda B2B.'}
             </p>
           </div>
 
@@ -162,9 +156,9 @@ const About = () => {
       <section className="py-20 bg-gray-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Nossa Equipe</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">{t('ourTeam') || 'Nossa Equipe'}</h2>
             <p className="text-xl text-gray-600">
-              Profissionais experientes dedicados ao seu sucesso
+              {t('teamDescription') || 'Profissionais experientes dedicados ao seu sucesso'}
             </p>
           </div>
 
@@ -197,7 +191,7 @@ const About = () => {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">{t('contact')}</h2>
               <p className="text-xl text-blue-200">
-                Entre em contato conosco para começar sua jornada B2B
+                {t('contactDescription') || 'Entre em contato conosco para começar sua jornada B2B'}
               </p>
             </div>
 
@@ -218,11 +212,11 @@ const About = () => {
                 <div className="bg-blue-800 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
                   <Phone size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Telefone</h3>
+                <h3 className="text-xl font-bold mb-2">{t('phone') || 'Telefone'}</h3>
                 <p className="text-blue-200">
                   +55 (11) 3000-0000<br />
                   +55 (11) 9 8000-0000<br />
-                  Atendimento 24/7
+                  {t('support247') || 'Atendimento 24/7'}
                 </p>
               </div>
 
@@ -230,7 +224,7 @@ const About = () => {
                 <div className="bg-blue-800 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
                   <Mail size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Email</h3>
+                <h3 className="text-xl font-bold mb-2">{t('email') || 'Email'}</h3>
                 <p className="text-blue-200">
                   contato@b2bmarketplace.com<br />
                   suporte@b2bmarketplace.com<br />
@@ -243,18 +237,18 @@ const About = () => {
             <div className="mt-16 bg-blue-800/50 rounded-xl p-8">
               <div className="flex items-center justify-center mb-6">
                 <Clock size={24} className="mr-3" />
-                <h3 className="text-2xl font-bold">Horário de Atendimento</h3>
+                <h3 className="text-2xl font-bold">{t('businessHours') || 'Horário de Atendimento'}</h3>
               </div>
               <div className="grid md:grid-cols-2 gap-6 text-center">
                 <div>
-                  <p className="font-semibold mb-2">Suporte Técnico</p>
-                  <p className="text-blue-200">Segunda a Sexta: 8h às 18h</p>
-                  <p className="text-blue-200">Sábado: 9h às 14h</p>
+                  <p className="font-semibold mb-2">{t('technicalSupport') || 'Suporte Técnico'}</p>
+                  <p className="text-blue-200">{t('mondayToFriday') || 'Segunda a Sexta'}: 8h às 18h</p>
+                  <p className="text-blue-200">{t('saturday') || 'Sábado'}: 9h às 14h</p>
                 </div>
                 <div>
-                  <p className="font-semibold mb-2">Vendas & Comercial</p>
-                  <p className="text-blue-200">Segunda a Sexta: 8h às 19h</p>
-                  <p className="text-blue-200">Sábado: 9h às 16h</p>
+                  <p className="font-semibold mb-2">{t('salesCommercial') || 'Vendas & Comercial'}</p>
+                  <p className="text-blue-200">{t('mondayToFriday') || 'Segunda a Sexta'}: 8h às 19h</p>
+                  <p className="text-blue-200">{t('saturday') || 'Sábado'}: 9h às 16h</p>
                 </div>
               </div>
             </div>
