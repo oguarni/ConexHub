@@ -154,7 +154,9 @@ const MainContent = () => {
   }, [loadProducts]);
 
   // Filter products
-  console.log('MainContent: products from context:', products);
+  console.log('MainContent: Products available:', products?.length || 0);
+  console.log('MainContent: Selected category:', selectedCategory, 'Search term:', searchTerm);
+  
   const filteredProducts = (products || []).filter(product => {
     if (!product || !product.name) return false;
     
@@ -167,7 +169,8 @@ const MainContent = () => {
     
     return matchesSearch && matchesCategory;
   });
-  console.log('MainContent: filtered products:', filteredProducts);
+  
+  console.log('MainContent: Filtered products:', filteredProducts.length, 'found');
 
   const handleQuoteRequest = (product) => {
     if (!user) {

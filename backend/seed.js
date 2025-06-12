@@ -8,40 +8,107 @@ const seedData = async () => {
     const categories = await Category.bulkCreate([
       {
         name: 'Equipamentos Industriais',
+        slug: 'equipamentos-industriais',
         description: 'Máquinas e equipamentos para indústria'
       },
       {
         name: 'Ferramentas',
+        slug: 'ferramentas',
         description: 'Ferramentas manuais e elétricas'
       },
       {
         name: 'Materiais de Construção',
+        slug: 'materiais-construcao',
         description: 'Materiais para construção civil'
       },
       {
         name: 'Componentes Eletrônicos',
+        slug: 'componentes-eletronicos',
         description: 'Componentes e equipamentos eletrônicos'
       }
     ]);
 
-    // Criar fornecedores
-    const suppliers = await Supplier.bulkCreate([
-      {
-        name: 'TechSupply Ltda',
-        description: 'Fornecedor especializado em equipamentos tecnológicos',
-        contact_info: 'contato@techsupply.com.br'
-      },
-      {
-        name: 'Industrial Solutions',
-        description: 'Soluções completas para indústria',
-        contact_info: 'vendas@industrialsolutions.com.br'
-      },
-      {
-        name: 'Construfer Materiais',
-        description: 'Materiais de construção de alta qualidade',
-        contact_info: 'comercial@construfer.com.br'
-      }
-    ]);
+    // Criar usuários de teste primeiro
+    const bcrypt = require('bcrypt');
+    
+    // Hash das senhas específicas para cada usuário
+    const buyerPassword = await bcrypt.hash('buyer123', 10);
+    const supplierPassword = await bcrypt.hash('supplier123', 10);
+    const adminPassword = await bcrypt.hash('admin123', 10);
+    
+    // Usuário Comprador
+    const buyerUser = await User.create({
+      name: 'João Silva',
+      email: 'joao@empresa.com',
+      password: buyerPassword,
+      cpf: '12345678901',
+      cnpj: '12345678000123',
+      role: 'buyer'
+    });
+
+    // Usuário Fornecedor  
+    const supplierUser = await User.create({
+      name: 'Carlos Santos',
+      email: 'carlos@fornecedor.com',
+      password: supplierPassword,
+      cpf: '98765432100',
+      cnpj: '98765432000199',
+      role: 'supplier'
+    });
+
+    // Usuário Administrador
+    const adminUser = await User.create({
+      name: 'Administrador',
+      email: 'admin@b2bmarketplace.com',
+      password: adminPassword,
+      cpf: '11111111111',
+      cnpj: '11111111000111',
+      role: 'admin'
+    });
+
+    // Criar fornecedores relacionados aos usuários
+    const suppliers = [];
+
+    // Supplier para Carlos
+    const carlosSupplier = await Supplier.create({
+      userId: supplierUser.id,
+      companyName: 'Carlos Santos - Fornecedor',
+      cnpj: '98765432000199'
+    });
+    suppliers.push(carlosSupplier);
+
+    // Fornecedores adicionais para produtos
+    const techUser = await User.create({
+      name: 'TechSupply Ltda',
+      email: 'contato@techsupply.com.br',
+      password: supplierPassword,
+      cpf: '12312312312',
+      cnpj: '12312312000112',
+      role: 'supplier'
+    });
+
+    const techSupplier = await Supplier.create({
+      userId: techUser.id,
+      companyName: 'TechSupply Ltda',
+      cnpj: '12312312000112'
+    });
+    suppliers.push(techSupplier);
+
+    const industrialUser = await User.create({
+      name: 'Industrial Solutions',
+      email: 'vendas@industrialsolutions.com.br',
+      password: supplierPassword,
+      cpf: '45645645645',
+      cnpj: '45645645000145',
+      role: 'supplier'
+    });
+
+    const industrialSupplier = await Supplier.create({
+      userId: industrialUser.id,
+      companyName: 'Industrial Solutions',
+      cnpj: '45645645000145'
+    });
+    suppliers.push(industrialSupplier);
 
     // Criar produtos
     await Product.bulkCreate([
@@ -51,7 +118,7 @@ const seedData = async () => {
         price: 450.00,
         stock_quantity: 15,
         category_id: categories[1].id,
-        supplier_id: suppliers[0].id
+        supplier_id: suppliers[1].id
       },
       {
         name: 'Compressor de Ar 50L',
@@ -59,7 +126,7 @@ const seedData = async () => {
         price: 1200.00,
         stock_quantity: 8,
         category_id: categories[0].id,
-        supplier_id: suppliers[1].id
+        supplier_id: suppliers[2].id
       },
       {
         name: 'Cimento Portland 50kg',
@@ -67,7 +134,7 @@ const seedData = async () => {
         price: 35.00,
         stock_quantity: 200,
         category_id: categories[2].id,
-        supplier_id: suppliers[2].id
+        supplier_id: suppliers[0].id
       },
       {
         name: 'Multímetro Digital',
@@ -75,7 +142,7 @@ const seedData = async () => {
         price: 89.90,
         stock_quantity: 25,
         category_id: categories[3].id,
-        supplier_id: suppliers[0].id
+        supplier_id: suppliers[1].id
       },
       {
         name: 'Serra Circular 7.1/4"',
@@ -83,7 +150,7 @@ const seedData = async () => {
         price: 320.00,
         stock_quantity: 12,
         category_id: categories[1].id,
-        supplier_id: suppliers[1].id
+        supplier_id: suppliers[2].id
       },
       {
         name: 'Vergalhão de Aço 8mm',
@@ -91,7 +158,7 @@ const seedData = async () => {
         price: 28.50,
         stock_quantity: 150,
         category_id: categories[2].id,
-        supplier_id: suppliers[2].id
+        supplier_id: suppliers[0].id
       },
       {
         name: 'Transformador 220V/110V',
@@ -99,7 +166,7 @@ const seedData = async () => {
         price: 125.00,
         stock_quantity: 20,
         category_id: categories[3].id,
-        supplier_id: suppliers[0].id
+        supplier_id: suppliers[1].id
       },
       {
         name: 'Chave de Fenda Philips Set',
@@ -107,40 +174,21 @@ const seedData = async () => {
         price: 45.00,
         stock_quantity: 30,
         category_id: categories[1].id,
-        supplier_id: suppliers[1].id
+        supplier_id: suppliers[2].id
       }
     ]);
-
-    // Criar usuário de teste
-    const bcrypt = require('bcrypt');
-    const hashedPassword = await bcrypt.hash('123456', 10);
-    
-    await User.create({
-      name: 'Administrador',
-      email: 'admin@b2bmarketplace.com',
-      password: hashedPassword,
-      cpf: '12345678901',
-      role: 'admin'
-    });
-
-    await User.create({
-      name: 'João Silva',
-      email: 'joao@empresa.com',
-      password: hashedPassword,
-      cpf: '98765432100',
-      role: 'buyer'
-    });
 
     console.log('✅ Seed concluído com sucesso!');
     console.log('📊 Dados criados:');
     console.log(`   • ${categories.length} categorias`);
     console.log(`   • ${suppliers.length} fornecedores`);
     console.log(`   • 8 produtos`);
-    console.log(`   • 2 usuários`);
+    console.log(`   • 6 usuários`);
     console.log('');
     console.log('🔑 Credenciais de teste:');
-    console.log('   Admin: admin@b2bmarketplace.com / 123456');
-    console.log('   User:  joao@empresa.com / 123456');
+    console.log('   Comprador: joao@empresa.com / buyer123');
+    console.log('   Fornecedor: carlos@fornecedor.com / supplier123');
+    console.log('   Admin: admin@b2bmarketplace.com / admin123');
 
   } catch (error) {
     console.error('❌ Erro ao fazer seed:', error);

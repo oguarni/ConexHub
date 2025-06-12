@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defesa de Projeto: ConexHub - E-commerce B2B</title>
+    
+    <!-- Tailwind CSS para um design moderno e responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter, para uma tipografia limpa e profissional -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons para iconografia elegante -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #f5f5f5;
+            background-color: #090a0f;
+            background-image: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            overflow: hidden;
+        }
+        
+        main {
+            height: 100vh;
+            width: 100vw;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+        }
+
+        .slide {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            border-bottom: 1px solid #27272a;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        .gradient-text {
+            background-image: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .ai-gradient-text {
+            background-image: linear-gradient(to right, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .card {
+            background-color: rgba(24, 24, 27, 0.5);
+            border: 1px solid #3f3f46;
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-content { animation: fadeIn 0.8s ease-out forwards; }
+
+        .sidenav {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+        }
+
+        .sidenav a {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #3f3f46;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sidenav a.active {
+             background-color: #3b82f6;
+             transform: scale(1.3);
+        }
+        
+        .sidenav a.active[href="#demo-ia"] { background-color: #10b981; }
+
+        .sidenav a .tooltip {
+            visibility: hidden;
+            width: 150px;
+            background-color: #18181b;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            top: -5px;
+            right: 150%;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidenav a:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); display: flex;
+            justify-content: center; align-items: center; z-index: 1000;
+            backdrop-filter: blur(5px); animation: fadeIn 0.3s ease;
+        }
+        .modal-content {
+            background-color: #18181b; border: 1px solid #3f3f46;
+            border-radius: 1rem; padding: 2.5rem; width: 90%;
+            max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative;
+        }
+        .modal-content h3 { font-size: 1.75rem; font-weight: 700; color: #10b981; margin-bottom: 1rem; }
+        .modal-content h4 { font-size: 1.25rem; font-weight: 600; color: #f5f5f5; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .modal-content p { color: #d4d4d8; line-height: 1.6; }
+        .modal-content ul { list-style: none; padding: 0; margin-top: 0.5rem; }
+        .modal-content li { color: #d4d4d8; margin-bottom: 0.75rem; padding-left: 1.5rem; position: relative; }
+        .modal-content li::before { content: '✓'; color: #10b981; position: absolute; left: 0; }
+        .modal-close-btn {
+            position: absolute; top: 1rem; right: 1rem; background: transparent;
+            border: none; color: #a1a1aa; cursor: pointer; padding: 0.5rem;
+        }
+        .modal-close-btn:hover { color: #f5f5f5; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidenav">
+        <a href="#inicio" class="active"><span class="tooltip">Início</span></a>
+        <a href="#objetivo"><span class="tooltip">Objetivo</span></a>
+        <a href="#arquitetura"><span class="tooltip">Arquitetura</span></a>
+        <a href="#requisitos-funcionais"><span class="tooltip">Requisitos Funcionais</span></a>
+        <a href="#requisitos-nao-funcionais"><span class="tooltip">Requisitos Não-Funcionais</span></a>
+        <a href="#demonstracao"><span class="tooltip">Demonstração Prática</span></a>
+        <a href="#demo-ia"><span class="tooltip">Originalidade (IA)</span></a>
+        <a href="#conclusao"><span class="tooltip">Conclusão</span></a>
+    </nav>
+    
+    <main id="presentation-container">
+        <section id="inicio" class="slide">
+            <div class="text-center slide-content">
+                <h1 class="text-6xl md:text-8xl font-black uppercase gradient-text">ConexHub</h1>
+                <p class="mt-4 text-2xl md:text-3xl text-zinc-300">Desenvolvimento de um E-commerce B2B para Indústrias</p>
+                <div class="mt-12 text-zinc-300">
+                    <p class="text-xl"><strong>Disciplina:</strong> Comércio Eletrônico</p>
+                    <p class="text-xl"><strong>Estudante:</strong> Gabriel Felipe Guarnieri</p>
+                    <p class="text-xl"><strong>Professora:</strong> Maria Adelina Silva Brito</p>
+                    <p class="text-lg mt-6">Universidade Tecnológica Federal do Paraná (UTFPR)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="objetivo" class="slide">
+            <div class="max-w-5xl w-full slide-content">
+                <div class="text-center">
+                    <i data-lucide="target" class="w-16 h-16 mx-auto mb-6 gradient-text"></i>
+                    <h2 class="text-4xl font-bold mb-6">Objetivo do Projeto</h2>
+                </div>
+                <p class="text-xl text-zinc-300 leading-relaxed text-center">
+                    Desenvolver um MVP (Minimum Viable Product) de uma plataforma de e-commerce que demonstre a aplicação de conceitos de engenharia de software na construção de um sistema de vendas online, integrando frontend, backend e banco de dados, com foco em segurança e usabilidade.
+                </p>
+                <div class="mt-8 card w-full">
+                    <h3 class="font-bold text-xl mb-4 text-white text-center">Tema Escolhido: E-commerce B2B para Indústrias</h3>
+                    <p class="text-zinc-300 text-center">A escolha se deu pela complexidade e relevância do mercado B2B, permitindo explorar funcionalidades avançadas como sistemas de cotação, múltiplos perfis de usuário e validações específicas, indo além do escopo de um e-commerce B2C tradicional.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="arquitetura" class="slide">
+            <div class="max-w-7xl w-full slide-content">
+                <div class="text-center">
+                    <i data-lucide="layers" class="w-16 h-16 mx-auto mb-6 gradient-text"></i>
+                    <h2 class="text-4xl font-bold text-center mb-12">Arquitetura e Tecnologias</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="card"><h3 class="font-bold text-xl mb-3 text-blue-400">Frontend</h3><p class="text-zinc-300">Interface reativa construída com <strong>React.js</strong> para uma experiência de usuário dinâmica e componentizada. Estilização moderna e responsiva com <strong>Tailwind CSS</strong>.</p></div>
+                    <div class="card"><h3 class="font-bold text-xl mb-3 text-purple-400">Backend</h3><p class="text-zinc-300">API RESTful robusta desenvolvida em <strong>Node.js</strong> com <strong>Express.js</strong>. Interação com o banco de dados gerenciada pelo ORM <strong>Sequelize</strong> para abstração e segurança.</p></div>
+                    <div class="card"><h3 class="font-bold text-xl mb-3 text-green-400">Banco de Dados e Infra</h3><p class="text-zinc-300">Utilização do <strong>PostgreSQL</strong>, um banco de dados relacional poderoso. O ambiente de desenvolvimento e produção é containerizado com <strong>Docker</strong> e <strong>Docker Compose</strong> para garantir consistência e facilitar o deploy.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="requisitos-funcionais" class="slide">
+            <div class="max-w-6xl w-full slide-content">
+                <div class="text-center">
+                     <i data-lucide="check-square" class="w-16 h-16 mx-auto mb-6 gradient-text"></i>
+                    <h2 class="text-4xl font-bold text-center mb-12">Atendimento aos Requisitos Funcionais</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card"><h3 class="font-bold text-lg mb-2">✓ Cadastro/Login</h3><p class="text-zinc-400">Registro de usuários e empresas com autenticação via JWT.</p></div>
+                    <div class="card"><h3 class="font-bold text-lg mb-2">✓ Catálogo</h3><p class="text-zinc-400">Listagem de produtos, imagens, preços e filtros por categoria.</p></div>
+                    <div class="card"><h3 class="font-bold text-lg mb-2">✓ Carrinho (Adaptado)</h3><p class="text-zinc-400">Substituído por um "Pedido de Cotação", mais adequado ao modelo B2B.</p></div>
+                    <div class="card"><h3 class="font-bold text-lg mb-2">✓ Checkout</h3><p class="text-zinc-400">Formulário de pagamento simulado via PIX, gerando um pedido formal.</p></div>
+                    <div class="card"><h3 class="font-bold text-lg mb-2">✓ Admin</h3><p class="text-zinc-400">Painel para CRUD completo de produtos, acessível a usuários com perfil "admin".</p></div>
+                    <div class="card bg-green-900/50 border-green-700"><h3 class="font-bold text-lg mb-2 text-green-300">★ Feature Extra</h3><p class="text-zinc-300">Sistema de comparação de cotações, permitindo ao comprador analisar múltiplas propostas.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="requisitos-nao-funcionais" class="slide">
+            <div class="max-w-5xl w-full slide-content">
+                <div class="text-center">
+                    <i data-lucide="shield-check" class="w-16 h-16 mx-auto mb-6 gradient-text"></i>
+                    <h2 class="text-4xl font-bold text-center mb-12">Atendimento aos Requisitos Não-Funcionais</h2>
+                </div>
+                <div class="space-y-8">
+                    <div class="card flex items-start gap-6"><i data-lucide="lock" class="w-12 h-12 text-purple-400 shrink-0"></i><div><h3 class="text-2xl font-bold">Segurança</h3><ul class="list-disc list-inside mt-2 text-zinc-300 space-y-1"><li>Senhas dos usuários são criptografadas no banco de dados com <strong>Bcrypt.js</strong>.</li><li>Rotas protegidas e controle de acesso baseado em perfis (roles) utilizando <strong>JSON Web Tokens (JWT)</strong>.</li><li>Uso do ORM Sequelize para mitigar riscos de ataques de <strong>SQL Injection</strong>.</li></ul></div></div>
+                    <div class="card flex items-start gap-6"><i data-lucide="smartphone" class="w-12 h-12 text-blue-400 shrink-0"></i><div><h3 class="text-2xl font-bold">Usabilidade e Performance</h3><ul class="list-disc list-inside mt-2 text-zinc-300 space-y-1"><li>Interface totalmente <strong>responsiva (Mobile First)</strong> desenvolvida com Tailwind CSS.</li><li><strong>Feedback visual</strong> constante para o usuário através de toasts, modais e estados de carregamento.</li><li>Componentes lazy-loaded no React para otimizar o tempo de carregamento inicial (TBT).</li></ul></div></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="demonstracao" class="slide">
+            <div class="max-w-5xl text-center slide-content">
+                <i data-lucide="play-circle" class="w-16 h-16 mx-auto mb-6 gradient-text"></i>
+                <h2 class="text-4xl font-bold mb-6">Demonstração Prática</h2>
+                <p class="text-xl text-zinc-300 leading-relaxed mb-8">
+                   A seguir, será demonstrado o fluxo principal da aplicação, cobrindo os seguintes pontos:
+                </p>
+                <div class="text-left card space-y-4 text-lg">
+                    <p class="flex items-center gap-3"><i data-lucide="user-plus" class="w-6 h-6 text-blue-400"></i><strong>Registro e Login:</strong> Criação de uma conta de comprador e autenticação.</p>
+                    <p class="flex items-center gap-3"><i data-lucide="search" class="w-6 h-6 text-purple-400"></i><strong>Navegação no Catálogo:</strong> Busca e filtragem de produtos industriais.</p>
+                    <p class="flex items-center gap-3"><i data-lucide="file-text" class="w-6 h-6 text-green-400"></i><strong>Solicitação de Cotação:</strong> Adição de itens e envio de um pedido de cotação.</p>
+                    <p class="flex items-center gap-3"><i data-lucide="git-compare" class="w-6 h-6 text-yellow-400"></i><strong>Comparação e Pedido:</strong> Análise de propostas (simuladas) e aprovação para gerar um pedido.</p>
+                    <p class="flex items-center gap-3"><i data-lucide="shield" class="w-6 h-6 text-red-400"></i><strong>Acesso Admin:</strong> Demonstração do painel de CRUD de produtos com um usuário administrador.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="demo-ia" class="slide">
+            <div class="max-w-5xl w-full slide-content">
+                <div class="text-center">
+                    <i data-lucide="sparkles" class="w-16 h-16 mx-auto mb-6 ai-gradient-text"></i>
+                    <h2 class="text-4xl font-bold text-center mb-8">Originalidade e Inovação: IA Generativa</h2>
+                    <p class="text-xl text-zinc-300 leading-relaxed mb-8">
+                        Para atender ao critério de originalidade, o projeto integra a API do Gemini para uma funcionalidade de valor agregado: a geração automática de descrições de produtos.
+                    </p>
+                </div>
+                <div class="card w-full">
+                    <div class="text-center"><h3 class="text-2xl font-bold text-white mb-2">✨ Demonstração do Gerador de Descrição</h3><p class="text-zinc-300 mb-6">Use um exemplo para ver a IA criar uma descrição de marketing profissional em segundos.</p></div>
+                    <div class="mb-4"><div id="preset-buttons" class="flex flex-wrap justify-center gap-2"><button class="preset-btn bg-zinc-700 hover:bg-zinc-600 text-sm py-1 px-3 rounded-full transition-colors">Kit EPI</button><button class="preset-btn bg-zinc-700 hover:bg-zinc-600 text-sm py-1 px-3 rounded-full transition-colors">Empilhadeira Elétrica</button><button class="preset-btn bg-zinc-700 hover:bg-zinc-600 text-sm py-1 px-3 rounded-full transition-colors">Componentes Eletrônicos</button></div></div>
+                    <div class="space-y-4"><input type="text" id="productName" class="w-full bg-zinc-800 border border-zinc-600 rounded-md px-3 py-2 text-white placeholder-zinc-400 focus:ring-2 focus:ring-emerald-500" placeholder="Nome do Produto"><input type="text" id="productFeatures" class="w-full bg-zinc-800 border border-zinc-600 rounded-md px-3 py-2 text-white placeholder-zinc-400 focus:ring-2 focus:ring-emerald-500" placeholder="Características principais (separadas por vírgula)"><button id="generateDescBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-md flex items-center justify-center gap-2 transition-colors"><div id="btn-spinner" class="spinner hidden mr-2"></div><i data-lucide="wand-2" id="btn-icon" class="w-5 h-5"></i><span id="btn-text">Gerar Descrição com IA</span></button></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusao" class="slide">
+            <div class="text-center slide-content">
+                <i data-lucide="award" class="w-16 h-16 mx-auto mb-6 gradient-text"></i>
+                <h2 class="text-4xl font-bold mb-6">Conclusão</h2>
+                 <p class="text-xl text-zinc-300 leading-relaxed max-w-4xl">
+                    O projeto ConexHub cumpre com sucesso todos os requisitos funcionais e não-funcionais especificados, entregando um MVP robusto e bem arquitetado. A escolha de um tema B2B permitiu a exploração de funcionalidades complexas e a integração de uma feature de IA demonstra originalidade e conhecimento de tecnologias atuais, resultando em um trabalho completo e de alta qualidade.
+                </p>
+                <div class="mt-12 text-zinc-300 border-t border-zinc-700 pt-8 max-w-2xl mx-auto">
+                     <p class="text-2xl font-bold">Obrigado!</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal-container"></div>
+
+    <script>
+        lucide.createIcons();
+
+        const slides = document.querySelectorAll('.slide');
+        const navLinks = document.querySelectorAll('.sidenav a');
+        let currentSlideIndex = 0;
+
+        function goToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                goToSlide(currentSlideIndex + 1);
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                goToSlide(currentSlideIndex - 1);
+            } else if (e.key === 'Escape') {
+                const modal = document.querySelector('.modal-overlay');
+                if (modal) modal.remove();
+            }
+        });
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    const activeLink = document.querySelector(`.sidenav a[href="#${id}"]`);
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    if(activeLink) {
+                       activeLink.classList.add('active');
+                       currentSlideIndex = Array.from(slides).findIndex(slide => slide.id === id);
+                    }
+                }
+            });
+        }, { threshold: 0.6 });
+
+        slides.forEach(slide => observer.observe(slide));
+
+        const generateBtn = document.getElementById('generateDescBtn');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const btnIcon = document.getElementById('btn-icon');
+        const btnText = document.getElementById('btn-text');
+
+        const productNameInput = document.getElementById('productName');
+        const productFeaturesInput = document.getElementById('productFeatures');
+        const presetButtons = document.getElementById('preset-buttons');
+        
+        const presets = {
+            'Kit EPI': { name: 'Kit de Segurança do Trabalho EPI Essencial', features: 'Capacete de segurança com suspensão, óculos de proteção com tratamento anti-risco, luvas de malha de aço para corte, protetor auricular tipo concha 22dB' },
+            'Empilhadeira Elétrica': { name: 'Empilhadeira Elétrica Contrabalançada 2.5T', features: 'Capacidade de 2.5 toneladas, torre triplex com elevação de 4.5m, bateria de lítio 48V, autonomia de 8 horas, sistema de freios regenerativos' },
+            'Componentes Eletrônicos': { name: 'Lote de Componentes Eletrônicos para Prototipagem', features: '1000 resistores 1/4W (valores diversos), 500 capacitores cerâmicos e eletrolíticos, 100 microcontroladores ATmega328P, 200 transistores BC548' }
+        };
+
+        presetButtons.addEventListener('click', (e) => {
+            if(e.target.classList.contains('preset-btn')) {
+                const presetData = presets[e.target.textContent];
+                if(presetData) {
+                    productNameInput.value = presetData.name;
+                    productFeaturesInput.value = presetData.features;
+                }
+            }
+        });
+
+        function parseAIResponse(text) {
+            let html = '';
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            let isList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('### ')) {
+                    if (isList) { html += '</ul>'; isList = false; }
+                    html += `<h3>${line.substring(4)}</h3>`;
+                } else if (line.startsWith('**')) {
+                    if (isList) { html += '</ul>'; isList = false; }
+                     html += `<h4>${line.replace(/\*\*/g, '')}</h4>`;
+                } else if (line.startsWith('* ')) {
+                    if (!isList) { html += '<ul>'; isList = true; }
+                    const content = line.substring(2).replace(/\*\*(.*?)\*\*/, '<strong>$1</strong>');
+                    html += `<li>${content}</li>`;
+                } else {
+                     if (isList) { html += '</ul>'; isList = false; }
+                     // Ignora linhas de conversação que não se encaixam no formato
+                     if (line.includes(':') || line.length < 20) return;
+                     html += `<p>${line}</p>`;
+                }
+            });
+
+            if (isList) { html += '</ul>'; }
+            return html;
+        }
+
+        function showResultModal(htmlContent) {
+            const modalContainer = document.getElementById('modal-container');
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            
+            modalOverlay.innerHTML = `
+                <div class="modal-content">
+                    <button class="modal-close-btn">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                    ${htmlContent}
+                </div>
+            `;
+            
+            modalContainer.appendChild(modalOverlay);
+            lucide.createIcons(); 
+
+            modalOverlay.querySelector('.modal-close-btn').addEventListener('click', () => {
+                modalContainer.innerHTML = '';
+            });
+            modalOverlay.addEventListener('click', (e) => {
+                if(e.target === modalOverlay){
+                     modalContainer.innerHTML = '';
+                }
+            });
+        }
+
+        generateBtn.addEventListener('click', async () => {
+            const productName = productNameInput.value;
+            const productFeatures = productFeaturesInput.value;
+            if (!productName || !productFeatures) return;
+
+            btnSpinner.classList.remove('hidden');
+            btnIcon.classList.add('hidden');
+            btnText.textContent = 'Gerando...';
+            generateBtn.disabled = true;
+
+            const prompt = `Você é um especialista em marketing B2B e copywriting. Sua tarefa é criar uma descrição de produto.
+            **Instruções Cruciais:**
+            1.  Foque nos benefícios para indústrias: eficiência, durabilidade, custo-benefício, segurança.
+            2.  Use o formato de saída estritamente como definido abaixo.
+            3.  NÃO inclua nenhuma frase introdutória, saudações ou texto conversacional. Sua resposta DEVE começar diretamente com "###".
+
+            **Produto:** ${productName}
+            **Características:** ${productFeatures}
+
+            **Formato de Saída Obrigatório:**
+            ### [Título Criativo do Produto]
+            [Parágrafo de introdução conciso e persuasivo]
+            **Principais Vantagens:**
+            * **Benefício Chave 1:** [Explicação do benefício]
+            * **Benefício Chave 2:** [Explicação do benefício]
+            * **Benefício Chave 3:** [Explicação do benefício]`;
+            
+            try {
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                const apiKey = "AIzaSyC9CHLD6VA-YAeKTepbhN_n-ycls-C339s"; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+                const result = await response.json();
+                
+                if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    const parsedHtml = parseAIResponse(result.candidates[0].content.parts[0].text);
+                    showResultModal(parsedHtml);
+                } else {
+                    throw new Error('Resposta da API inválida.');
+                }
+            } catch (error) {
+                showResultModal(`<h3 class="text-red-500">Erro</h3><p>${error.message}</p>`);
+            } finally {
+                btnSpinner.classList.add('hidden');
+                btnIcon.classList.remove('hidden');
+                btnText.textContent = 'Gerar Descrição com IA';
+                generateBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

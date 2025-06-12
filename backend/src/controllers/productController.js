@@ -134,9 +134,17 @@ const createProduct = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
+    let supplierId = req.user.Supplier?.id;
+    
+    // Se for admin e não tiver supplier, pegar o primeiro supplier disponível
+    if (req.user.role === 'admin' && !supplierId) {
+      const firstSupplier = await Supplier.findOne();
+      supplierId = firstSupplier?.id;
+    }
+
     const product = await Product.create({
       ...req.body,
-      supplierId: req.user.Supplier?.id
+      supplierId
     });
     res.status(201).json(product);
   } catch (error) {

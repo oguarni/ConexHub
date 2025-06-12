@@ -1,7 +1,12 @@
 import React, { memo, useMemo, useCallback } from 'react';
-import { FileText, Building, Package } from 'lucide-react';
+import { FileText, Building, Package, ShoppingCart } from 'lucide-react';
+import { useQuotation } from '../../contexts/QuotationContext';
+import { useAppContext } from '../../contexts/AppProvider';
 
 const ProductCard = memo(({ product, onRequestQuote, user }) => {
+  const { addToQuotation } = useQuotation();
+  const { addNotification, updateUI } = useAppContext();
+  
   const userPermissions = useMemo(() => ({
     canRequest: user && (user.role === 'buyer' || user.role === 'admin'),
     isSupplier: user && user.role === 'supplier',
@@ -12,6 +17,33 @@ const ProductCard = memo(({ product, onRequestQuote, user }) => {
     console.log('Quote button clicked');
     onRequestQuote(product);
   }, [onRequestQuote, product.id]);
+
+  const handleAddToQuotation = useCallback(() => {
+    console.log('📋 Add to Quotation clicked!', product.name, 'User:', user?.email);
+    
+    if (!user) {
+      addNotification({
+        type: 'error',
+        message: 'Faça login para adicionar produtos à cotação'
+      });
+      return;
+    }
+
+    if (product.stock <= 0) {
+      addNotification({
+        type: 'error',
+        message: 'Produto fora de estoque'
+      });
+      return;
+    }
+
+    console.log('📦 Adding to quotation:', product.name, 'Quantity:', product.minOrder || 1);
+    addToQuotation(product, product.minOrder || 1);
+    addNotification({
+      type: 'success',
+      message: `${product.name} adicionado à cotação!`
+    });
+  }, [addToQuotation, product, user, addNotification]);
 
   const formattedPrice = useMemo(() => 
     new Intl.NumberFormat('pt-BR', {
@@ -79,7 +111,7 @@ const ProductCard = memo(({ product, onRequestQuote, user }) => {
           <p className="text-xs text-blue-600 mb-2">
             <span className="inline-flex items-center">
               <Building size={12} className="mr-1" />
-              {product.supplier || 'Fornecedor Industrial'}
+              {product.Supplier?.companyName || product.supplier || 'Fornecedor Industrial'}
             </span>
           </p>
           <p className="text-sm text-gray-600 line-clamp-2" title={product.description}>
@@ -113,12 +145,28 @@ const ProductCard = memo(({ product, onRequestQuote, user }) => {
         <div className="mb-4">
           <div className="flex items-center text-sm text-gray-600">
             <Package size={14} className="mr-1 flex-shrink-0" />
-            <span>Mín: {product.minQuantity || 1} {product.unit}</span>
+            <span>Mín: {product.minOrder || 1} {product.unit}</span>
           </div>
         </div>
         
-        {/* Action Button */}
-        {renderActionButton()}
+        {/* Action Buttons */}
+        <div className="space-y-2">
+          {/* Add to Quotation Button */}
+          {user && user.role === 'buyer' && (
+            <button
+              onClick={handleAddToQuotation}
+              disabled={product.stock <= 0}
+              className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors flex items-center justify-center space-x-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={`Adicionar ${product.name} à cotação`}
+            >
+              <ShoppingCart size={18} />
+              <span>{product.stock <= 0 ? 'Sem Estoque' : 'Adicionar à Cotação'}</span>
+            </button>
+          )}
+          
+          {/* Quote Button */}
+          {renderActionButton()}
+        </div>
       </div>
     </article>
   );

@@ -1,11 +1,14 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { AppProvider, useAppContext } from './contexts/AppProvider';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { QuotationProvider } from './contexts/QuotationContext';
 import Header from './components/common/Header';
 import MainContent from './components/layout/MainContent';
 import AuthModal from './components/auth/AuthModal';
 import QuotesSidebar from './components/quotes/QuotesSidebar';
 import OrdersModal from './components/orders/OrdersModal';
+import QuotationModal from './components/quotation/QuotationModal';
+import CheckoutModal from './components/checkout/CheckoutModal';
 import About from './components/pages/About';
 import DebugProducts from './components/DebugProducts';
 import './App.css';
@@ -148,6 +151,8 @@ const AppContent = () => {
         user={user}
         addNotification={addNotification}
       />
+      <QuotationModal />
+      <CheckoutModal />
       <NotificationContainer />
     </div>
   );
@@ -179,9 +184,11 @@ function App() {
     <ErrorBoundary>
       <LanguageProvider>
         <AppProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <AppContent />
-          </Suspense>
+          <QuotationProvider>
+            <Suspense fallback={<LoadingFallback />}>
+              <AppContent />
+            </Suspense>
+          </QuotationProvider>
         </AppProvider>
       </LanguageProvider>
     </ErrorBoundary>

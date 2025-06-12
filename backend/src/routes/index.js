@@ -48,15 +48,33 @@ router.post('/auth/change-password', authenticate, [
 router.get('/products', productController.getAllProducts);
 router.get('/products/search', productController.searchProducts);
 router.get('/products/:id', productController.getProductById);
-router.post('/products', authenticate, isSupplierOrAdmin, [
+router.post('/products', authenticate, [
   body('name').notEmpty().trim(),
   body('category').notEmpty(),
   body('price').isFloat({ min: 0 }),
   body('unit').notEmpty(),
   body('minOrder').isInt({ min: 1 })
-], productController.createProduct);
-router.put('/products/:id', authenticate, isSupplierOrAdmin, productController.updateProduct);
-router.delete('/products/:id', authenticate, isSupplierOrAdmin, productController.deleteProduct);
+], (req, res, next) => {
+  // Permitir admin ou supplier criar produtos
+  if (req.user.role === 'admin' || req.user.role === 'supplier') {
+    return next();
+  }
+  return res.status(403).json({ error: 'Access denied' });
+}, productController.createProduct);
+router.put('/products/:id', authenticate, (req, res, next) => {
+  // Permitir admin ou supplier atualizar produtos
+  if (req.user.role === 'admin' || req.user.role === 'supplier') {
+    return next();
+  }
+  return res.status(403).json({ error: 'Access denied' });
+}, productController.updateProduct);
+router.delete('/products/:id', authenticate, (req, res, next) => {
+  // Permitir admin ou supplier deletar produtos
+  if (req.user.role === 'admin' || req.user.role === 'supplier') {
+    return next();
+  }
+  return res.status(403).json({ error: 'Access denied' });
+}, productController.deleteProduct);
 
 // Category routes
 router.get('/categories', categoryController.getAllCategories);

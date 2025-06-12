@@ -1,7 +1,8 @@
-import React from 'react';
-import { FileText, User, Menu, X, Building, Package, Globe } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, User, Menu, X, Building, Package, Globe, HelpCircle } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppProvider';
 import { useLanguage } from '../../contexts/LanguageContext';
+import QuotationButton from '../quotation/QuotationButton';
 
 const Header = ({ currentPage, setCurrentPage }) => {
   const { 
@@ -14,6 +15,7 @@ const Header = ({ currentPage, setCurrentPage }) => {
   } = useAppContext();
   
   const { t, language, changeLanguage, availableLanguages } = useLanguage();
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleLogin = async () => {
     if (user) {
@@ -126,13 +128,21 @@ const Header = ({ currentPage, setCurrentPage }) => {
 
           {/* Ações do usuário */}
           <div className="flex items-center space-x-4">
-            <button 
-              onClick={() => showModal('showQuotes')}
-              className="relative bg-green-700 px-3 py-2 rounded-lg hover:bg-green-800 flex items-center space-x-2"
-            >
-              <FileText size={18} />
-              <span className="hidden sm:inline text-sm">{t('quotes')}</span>
-            </button>
+            {/* Help Button */}
+            {!user && (
+              <button
+                onClick={() => setShowHelp(!showHelp)}
+                className="relative bg-green-700 px-2 py-2 rounded-lg hover:bg-green-800"
+                title="Ajuda para login demo"
+              >
+                <HelpCircle size={20} className="text-white" />
+              </button>
+            )}
+
+            {/* Quotation Button */}
+            <div className="bg-green-700 px-2 py-2 rounded-lg hover:bg-green-800">
+              <QuotationButton />
+            </div>
             
             {user && (
               <button 
@@ -172,6 +182,66 @@ const Header = ({ currentPage, setCurrentPage }) => {
           </div>
         </div>
       </div>
+
+      {/* Help Modal */}
+      {showHelp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Demo Login</h3>
+                <button
+                  onClick={() => setShowHelp(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  Use uma das credenciais abaixo para testar o sistema:
+                </p>
+                
+                <div className="space-y-3">
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <div className="font-medium text-blue-900">👤 Comprador</div>
+                    <div className="text-sm text-blue-700">buyer@demo.com</div>
+                    <div className="text-sm text-blue-700">Senha: demo123</div>
+                  </div>
+                  
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <div className="font-medium text-green-900">🏭 Fornecedor</div>
+                    <div className="text-sm text-green-700">supplier@demo.com</div>
+                    <div className="text-sm text-green-700">Senha: demo123</div>
+                  </div>
+                  
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <div className="font-medium text-purple-900">⚙️ Admin</div>
+                    <div className="text-sm text-purple-700">admin@demo.com</div>
+                    <div className="text-sm text-purple-700">Senha: demo123</div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                  <div className="text-xs text-gray-600">
+                    💡 Cada usuário tem funcionalidades diferentes. Teste todos para ver as diferentes perspectivas!
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setShowHelp(false)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Entendi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
