@@ -184,9 +184,31 @@ const generateInvoice = async (req, res) => {
   }
 };
 
+const getSupplierOrders = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      where: { supplierId: req.user.Supplier?.id },
+      include: [{
+        model: OrderItem,
+        include: [Product]
+      }, {
+        model: User,
+        attributes: ['name', 'email', 'companyName']
+      }],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({ orders });
+  } catch (error) {
+    console.error('Error fetching supplier orders:', error);
+    res.status(500).json({ error: 'Error fetching supplier orders' });
+  }
+};
+
 module.exports = {
   createOrder,
   getUserOrders,
+  getSupplierOrders,
   getOrderById,
   updateOrderStatus,
   generateInvoice

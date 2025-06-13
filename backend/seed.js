@@ -7,24 +7,29 @@ const seedData = async () => {
     // Criar categorias
     const categories = await Category.bulkCreate([
       {
-        name: 'Equipamentos Industriais',
-        slug: 'equipamentos-industriais',
-        description: 'Máquinas e equipamentos para indústria'
+        name: 'Equipment',
+        slug: 'equipment',
+        description: 'Industrial machinery and equipment'
       },
       {
-        name: 'Ferramentas',
-        slug: 'ferramentas',
-        description: 'Ferramentas manuais e elétricas'
+        name: 'Tools',
+        slug: 'tools',
+        description: 'Manual and electric tools'
       },
       {
-        name: 'Materiais de Construção',
-        slug: 'materiais-construcao',
-        description: 'Materiais para construção civil'
+        name: 'Raw Materials',
+        slug: 'raw-materials',
+        description: 'Construction and industrial materials'
       },
       {
-        name: 'Componentes Eletrônicos',
-        slug: 'componentes-eletronicos',
-        description: 'Componentes e equipamentos eletrônicos'
+        name: 'Components',
+        slug: 'components',
+        description: 'Electronic and mechanical components'
+      },
+      {
+        name: 'Machinery',
+        slug: 'machinery',
+        description: 'Heavy industrial machinery'
       }
     ]);
 
@@ -113,81 +118,137 @@ const seedData = async () => {
     // Criar produtos
     await Product.bulkCreate([
       {
-        name: 'Furadeira Industrial 1200W',
-        description: 'Furadeira industrial de alta potência com velocidade variável',
+        name: 'Industrial Drill 1200W',
+        description: 'High-power industrial drill with variable speed control',
         price: 450.00,
         stock_quantity: 15,
         category_id: categories[1].id,
         supplier_id: suppliers[1].id
       },
       {
-        name: 'Compressor de Ar 50L',
-        description: 'Compressor de ar comprimido 2HP com tanque de 50 litros',
+        name: 'Air Compressor 50L',
+        description: '2HP compressed air compressor with 50-liter tank',
         price: 1200.00,
         stock_quantity: 8,
         category_id: categories[0].id,
         supplier_id: suppliers[2].id
       },
       {
-        name: 'Cimento Portland 50kg',
-        description: 'Saco de cimento Portland CP-II-E-32 de 50kg',
+        name: 'Portland Cement 50kg',
+        description: 'Portland cement CP-II-E-32 bag of 50kg',
         price: 35.00,
         stock_quantity: 200,
         category_id: categories[2].id,
         supplier_id: suppliers[0].id
       },
       {
-        name: 'Multímetro Digital',
-        description: 'Multímetro digital com display LCD e múltiplas funções',
+        name: 'Digital Multimeter',
+        description: 'Digital multimeter with LCD display and multiple functions',
         price: 89.90,
         stock_quantity: 25,
         category_id: categories[3].id,
         supplier_id: suppliers[1].id
       },
       {
-        name: 'Serra Circular 7.1/4"',
-        description: 'Serra circular elétrica 1400W com disco de 7.1/4 polegadas',
+        name: 'Circular Saw 7.1/4"',
+        description: 'Electric circular saw 1400W with 7.1/4 inch disc',
         price: 320.00,
         stock_quantity: 12,
         category_id: categories[1].id,
         supplier_id: suppliers[2].id
       },
       {
-        name: 'Vergalhão de Aço 8mm',
-        description: 'Barra de vergalhão de aço CA-50 com 8mm de diâmetro - 12 metros',
+        name: 'Steel Rebar 8mm',
+        description: 'CA-50 steel rebar bar 8mm diameter - 12 meters',
         price: 28.50,
         stock_quantity: 150,
         category_id: categories[2].id,
         supplier_id: suppliers[0].id
       },
       {
-        name: 'Transformador 220V/110V',
-        description: 'Transformador bivolt 1000VA com proteção térmica',
+        name: 'Transformer 220V/110V',
+        description: 'Dual voltage transformer 1000VA with thermal protection',
         price: 125.00,
         stock_quantity: 20,
         category_id: categories[3].id,
         supplier_id: suppliers[1].id
       },
       {
-        name: 'Chave de Fenda Philips Set',
-        description: 'Kit com 6 chaves de fenda Philips tamanhos variados',
+        name: 'Phillips Screwdriver Set',
+        description: 'Kit with 6 Phillips screwdrivers in various sizes',
         price: 45.00,
         stock_quantity: 30,
         category_id: categories[1].id,
         supplier_id: suppliers[2].id
+      },
+      {
+        name: 'CNC Milling Machine',
+        description: 'Computer numerical control milling machine with 3-axis precision',
+        price: 85000.00,
+        stock_quantity: 2,
+        category_id: categories[4].id,
+        supplier_id: suppliers[2].id
+      },
+      {
+        name: 'Industrial Lathe',
+        description: 'High-precision mechanical lathe for industrial machining',
+        price: 45000.00,
+        stock_quantity: 3,
+        category_id: categories[4].id,
+        supplier_id: suppliers[2].id
+      },
+      {
+        name: 'Stainless Steel 304',
+        description: 'AISI 304 stainless steel sheets for industrial use',
+        price: 25.50,
+        stock_quantity: 1000,
+        category_id: categories[2].id,
+        supplier_id: suppliers[0].id
+      },
+      {
+        name: 'Aluminum 6061',
+        description: '6061-T6 aluminum bars for machining applications',
+        price: 18.75,
+        stock_quantity: 500,
+        category_id: categories[2].id,
+        supplier_id: suppliers[0].id
+      },
+      {
+        name: 'SKF Bearings',
+        description: 'Ball bearings for industrial applications',
+        price: 145.00,
+        stock_quantity: 200,
+        category_id: categories[3].id,
+        supplier_id: suppliers[1].id
+      },
+      {
+        name: 'M8 Bolts',
+        description: 'M8 hex bolts in galvanized steel',
+        price: 2.50,
+        stock_quantity: 5000,
+        category_id: categories[3].id,
+        supplier_id: suppliers[1].id
+      },
+      {
+        name: 'O-Ring Seals',
+        description: 'Nitrile rubber sealing rings',
+        price: 5.25,
+        stock_quantity: 1000,
+        category_id: categories[3].id,
+        supplier_id: suppliers[0].id
       }
     ]);
 
     console.log('✅ Seed concluído com sucesso!');
     console.log('📊 Dados criados:');
-    console.log(`   • ${categories.length} categorias`);
-    console.log(`   • ${suppliers.length} fornecedores`);
-    console.log(`   • 8 produtos`);
-    console.log(`   • 6 usuários`);
+    console.log(`   • ${categories.length} categories`);
+    console.log(`   • ${suppliers.length} suppliers`);
+    console.log(`   • 15 products`);
+    console.log(`   • 6 users`);
     console.log('');
-    console.log('🔑 Credenciais de teste:');
-    console.log('   Comprador: joao@empresa.com / buyer123');
-    console.log('   Fornecedor: carlos@fornecedor.com / supplier123');
+    console.log('🔑 Test credentials');
+    console.log('   Buyer: joao@empresa.com / buyer123');
+    console.log('   Supplier: carlos@fornecedor.com / supplier123');
     console.log('   Admin: admin@b2bmarketplace.com / admin123');
 
   } catch (error) {

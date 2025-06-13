@@ -15,7 +15,7 @@ export const ProductsProvider = ({ children }) => {
   
   const productForm = useForm({ 
     name: '', 
-    category: 'Maquinário', 
+    category: 'Machinery', 
     price: '', 
     unit: 'unidade', 
     description: '', 
@@ -26,7 +26,7 @@ export const ProductsProvider = ({ children }) => {
   // Load products with filters when UI state changes
   useEffect(() => {
     const filters = {};
-    if (uiState.selectedCategory !== 'Todas') filters.category = uiState.selectedCategory;
+    if (uiState.selectedCategory !== 'All') filters.category = uiState.selectedCategory;
     if (uiState.searchTerm) filters.search = uiState.searchTerm;
     products.loadProducts(filters);
   }, [uiState.selectedCategory, uiState.searchTerm]);

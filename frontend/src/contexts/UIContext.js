@@ -5,7 +5,7 @@ const UIContext = createContext();
 // Estado inicial da UI
 const initialUIState = {
   isMenuOpen: false,
-  selectedCategory: 'Todas',
+  selectedCategory: 'All',
   searchTerm: '',
   notifications: [],
   modals: {

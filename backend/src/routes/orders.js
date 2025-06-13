@@ -123,6 +123,34 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// Get supplier orders
+router.get('/supplier', authMiddleware, async (req, res) => {
+  try {
+    // For suppliers, find orders where they are the supplier
+    const orders = await Order.findAll({
+      where: { supplierId: req.user.supplierId },
+      include: [{
+        model: OrderItem,
+        as: 'items',
+        include: [{
+          model: Product,
+          as: 'product'
+        }]
+      }, {
+        model: User,
+        as: 'user',
+        attributes: ['name', 'email', 'companyName']
+      }],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({ orders });
+  } catch (error) {
+    console.error('Get supplier orders error:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 // Get order by ID
 router.get('/:id', authMiddleware, async (req, res) => {
   try {

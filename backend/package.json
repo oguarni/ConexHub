@@ -22,7 +22,8 @@
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
     "qrcode": "^1.5.3",
-    "sequelize": "^6.35.1"
+    "sequelize": "^6.35.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "jest": "^29.7.0",

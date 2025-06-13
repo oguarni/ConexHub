@@ -2,9 +2,10 @@ const { Sequelize } = require('sequelize');
 const path = require('path');
 
 const sequelize = new Sequelize(
-  process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/b2b_marketplace',
+  process.env.DATABASE_URL || 'sqlite:./test.db',
   {
-    dialect: 'postgres',
+    dialect: process.env.DATABASE_URL?.startsWith('sqlite') ? 'sqlite' : 'postgres',
+    storage: process.env.DATABASE_URL?.startsWith('sqlite') ? './test.db' : undefined,
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
   }
 );

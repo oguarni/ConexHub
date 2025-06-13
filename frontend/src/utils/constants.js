@@ -1,10 +1,10 @@
 export const categories = [
-  'Todas', 
-  'Maquinário', 
-  'Matéria-Prima', 
-  'Componentes', 
-  'Ferramentas', 
-  'Equipamentos'
+  'All', 
+  'Machinery', 
+  'Raw Materials', 
+  'Components', 
+  'Tools', 
+  'Equipment'
 ];
 
 export const industrialSectors = [
@@ -89,11 +89,11 @@ export const minimumOrderValues = {
 };
 
 export const leadTimes = {
-  maquinario: 30,
-  'materia-prima': 15,
-  componentes: 10,
-  ferramentas: 7,
-  equipamentos: 45
+  machinery: 30,
+  'raw-materials': 15,
+  components: 10,
+  tools: 7,
+  equipment: 45
 };
 
 export const calculateShipping = (cep) => {

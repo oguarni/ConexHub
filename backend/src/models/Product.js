@@ -55,12 +55,32 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: '📦',
     },
     images: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      defaultValue: [],
+      type: DataTypes.TEXT,
+      defaultValue: '[]',
+      get() {
+        try {
+          return JSON.parse(this.getDataValue('images') || '[]');
+        } catch {
+          return [];
+        }
+      },
+      set(value) {
+        this.setDataValue('images', JSON.stringify(value || []));
+      }
     },
     specifications: {
-      type: DataTypes.JSONB,
-      defaultValue: {},
+      type: DataTypes.TEXT,
+      defaultValue: '{}',
+      get() {
+        try {
+          return JSON.parse(this.getDataValue('specifications') || '{}');
+        } catch {
+          return {};
+        }
+      },
+      set(value) {
+        this.setDataValue('specifications', JSON.stringify(value || {}));
+      }
     },
     isActive: {
       type: DataTypes.BOOLEAN,

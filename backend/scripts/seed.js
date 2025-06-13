@@ -19,7 +19,9 @@ const seed = async () => {
     const categories = await Category.bulkCreate([
       { name: 'Machinery', slug: 'machinery' },
       { name: 'Raw Materials', slug: 'raw-materials' },
-      { name: 'Components', slug: 'components' }
+      { name: 'Components', slug: 'components' },
+      { name: 'Tools', slug: 'tools' },
+      { name: 'Equipment', slug: 'equipment' }
     ]);
     
     // Create buyer users
@@ -98,8 +100,8 @@ const seed = async () => {
     const products = await Product.bulkCreate([
       // Machinery products
       {
-        name: 'Torno Mecânico Industrial',
-        description: 'Torno mecânico de alta precisão para usinagem industrial',
+        name: 'Industrial Lathe',
+        description: 'High-precision mechanical lathe for industrial machining',
         price: 45000.00,
         stock: 5,
         category: 'Machinery',
@@ -116,8 +118,8 @@ const seed = async () => {
         featured: true
       },
       {
-        name: 'Fresadora CNC',
-        description: 'Fresadora com controle numérico computadorizado',
+        name: 'CNC Milling Machine',
+        description: 'Computer numerical control milling machine',
         price: 85000.00,
         stock: 3,
         category: 'Machinery',
@@ -135,8 +137,8 @@ const seed = async () => {
       
       // Raw Materials products
       {
-        name: 'Aço Inoxidável 304',
-        description: 'Chapas de aço inoxidável AISI 304 para uso industrial',
+        name: 'Stainless Steel 304',
+        description: 'AISI 304 stainless steel sheets for industrial use',
         price: 25.50,
         stock: 1000,
         category: 'Raw Materials',
@@ -153,8 +155,8 @@ const seed = async () => {
         featured: true
       },
       {
-        name: 'Alumínio 6061',
-        description: 'Barras de alumínio 6061-T6 para usinagem',
+        name: 'Aluminum 6061',
+        description: '6061-T6 aluminum bars for machining',
         price: 18.75,
         stock: 500,
         category: 'Raw Materials',
@@ -170,8 +172,8 @@ const seed = async () => {
         }
       },
       {
-        name: 'Ferro Fundido',
-        description: 'Blocos de ferro fundido para fundição industrial',
+        name: 'Cast Iron',
+        description: 'Cast iron blocks for industrial foundry',
         price: 12.00,
         stock: 2000,
         category: 'Raw Materials',
@@ -189,8 +191,8 @@ const seed = async () => {
       
       // Components products
       {
-        name: 'Rolamentos SKF',
-        description: 'Rolamentos de esferas para aplicações industriais',
+        name: 'SKF Bearings',
+        description: 'Ball bearings for industrial applications',
         price: 145.00,
         stock: 200,
         category: 'Components',
@@ -207,8 +209,8 @@ const seed = async () => {
         featured: true
       },
       {
-        name: 'Parafusos M8',
-        description: 'Parafusos sextavados M8 em aço galvanizado',
+        name: 'M8 Bolts',
+        description: 'M8 hex bolts in galvanized steel',
         price: 2.50,
         stock: 5000,
         category: 'Components',
@@ -224,8 +226,8 @@ const seed = async () => {
         }
       },
       {
-        name: 'Vedações O-Ring',
-        description: 'Anéis de vedação em borracha nitrílica',
+        name: 'O-Ring Seals',
+        description: 'Nitrile rubber sealing rings',
         price: 5.25,
         stock: 1000,
         category: 'Components',

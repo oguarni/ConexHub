@@ -153,9 +153,15 @@ const MainContent = () => {
     loadProducts();
   }, [loadProducts]);
 
-  // Filter products
+  // Filter products - Debug category mismatch
   console.log('MainContent: Products available:', products?.length || 0);
   console.log('MainContent: Selected category:', selectedCategory, 'Search term:', searchTerm);
+  
+  // Debug: Check actual product categories
+  if (products && products.length > 0) {
+    const uniqueCategories = [...new Set(products.map(p => p.category))];
+    console.log('Actual product categories found:', uniqueCategories);
+  }
   
   const filteredProducts = (products || []).filter(product => {
     if (!product || !product.name) return false;

@@ -251,7 +251,57 @@ const acceptQuote = async (req, res) => {
 
     await quote.update({ status: 'accepted' });
 
-    res.json({ message: 'Quote accepted successfully', quote });
+    // Create order from accepted quote
+    const { Order, OrderItem, Supplier } = require('../models');
+    
+    // Find supplier profile for the supplier user
+    const supplierProfile = await Supplier.findOne({
+      where: { userId: quote.supplierId }
+    });
+    
+    // Generate unique order number
+    const generateOrderNumber = () => {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      return `ORD-${year}${month}${day}-${random}`;
+    };
+
+    const subtotal = parseFloat(quote.unitPrice) * quote.quantity;
+    const order = await Order.create({
+      orderNumber: generateOrderNumber(),
+      userId: quote.buyerId,
+      supplierId: supplierProfile ? supplierProfile.id : null,
+      status: 'confirmed',
+      subtotal: subtotal,
+      totalAmount: subtotal,
+      notes: `Order created from quote #${quote.id}`
+    });
+
+    // Create order item
+    await OrderItem.create({
+      orderId: order.id,
+      productId: quote.productId,
+      quantity: quote.quantity,
+      price: quote.unitPrice,
+      subtotal: subtotal
+    });
+
+    // Link quote to order
+    await quote.update({ orderId: order.id });
+
+    res.json({ 
+      message: 'Quote accepted successfully and order created', 
+      quote, 
+      order: {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+        totalAmount: order.totalAmount
+      }
+    });
   } catch (error) {
     console.error('Error accepting quote:', error);
     res.status(500).json({ error: 'Error accepting quote' });
