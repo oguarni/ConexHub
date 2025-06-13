@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@babel/core": "^7.27.4",
+    "@babel/helper-module-imports": "^7.27.1",
+    "@babel/runtime": "^7.27.6",
+    "@babel/traverse": "^7.27.4",
+    "@svgr/webpack": "^5.5.0",
     "axios": "^1.6.0",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
@@ -12,14 +17,13 @@
     "web-vitals": "^3.5.0"
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0"
   },
   "scripts": {
-    "start": "SKIP_PREFLIGHT_CHECK=true react-scripts start",
-    "build": "SKIP_PREFLIGHT_CHECK=true react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "GENERATE_SOURCEMAP=false SKIP_PREFLIGHT_CHECK=true craco start",
+    "build": "SKIP_PREFLIGHT_CHECK=true craco build"
   },
   "eslintConfig": {
     "extends": [
@@ -44,5 +48,9 @@
     "webpack": "5.88.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0"
+  },
+  "overrides": {
+    "serialize-javascript": "6.0.1",
+    "terser-webpack-plugin": "5.3.9"
   }
 }
