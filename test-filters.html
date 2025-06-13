@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filter Test - B2B Marketplace</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .filters { margin: 20px 0; }
+        .filter-btn { 
+            margin: 5px; padding: 8px 16px; 
+            border: 1px solid #ccc; background: #f5f5f5; 
+            cursor: pointer; border-radius: 4px;
+        }
+        .filter-btn.active { background: #007bff; color: white; }
+        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .product { border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+        .product-name { font-weight: bold; margin-bottom: 8px; }
+        .product-category { color: #666; font-size: 14px; }
+        .product-price { color: #28a745; font-weight: bold; margin-top: 8px; }
+        .status { margin: 20px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #28a745; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h1>🔧 B2B Marketplace Filter Test</h1>
+    
+    <div id="status" class="status">Loading products from API...</div>
+    
+    <div class="filters">
+        <h3>Categories:</h3>
+        <button class="filter-btn active" data-category="all">All Products</button>
+        <button class="filter-btn" data-category="Tools">Tools</button>
+        <button class="filter-btn" data-category="Raw Materials">Raw Materials</button>
+        <button class="filter-btn" data-category="Components">Components</button>
+        <button class="filter-btn" data-category="Machinery">Machinery</button>
+        <button class="filter-btn" data-category="Equipment">Equipment</button>
+    </div>
+    
+    <div id="products" class="products">
+        <!-- Products will be loaded here -->
+    </div>
+
+    <script>
+        let allProducts = [];
+        let selectedCategory = 'all';
+        
+        // API Configuration
+        const API_BASE = 'http://localhost:3002/api';
+        
+        // Sample products fallback (from AppProvider.js)
+        const SAMPLE_PRODUCTS = [
+            {
+                id: 1,
+                name: "Furadeira Industrial HD-2000",
+                description: "Furadeira de alta precisão para uso industrial, com motor de 2000W",
+                price: 1299.99,
+                category: "Tools",
+                unit: "un",
+                image: "🔧",
+                supplier: "Industrial Tools Ltda"
+            },
+            {
+                id: 2,
+                name: "Chapa de Aço Inox 304",
+                description: "Chapa de aço inoxidável 304, espessura 2mm",
+                price: 89.50,
+                category: "Raw Materials",
+                unit: "m²",
+                image: "⚒️",
+                supplier: "Metalúrgica São Paulo"
+            },
+            {
+                id: 3,
+                name: "Motor Elétrico Trifásico 5CV",
+                description: "Motor elétrico trifásico de 5CV, 220/380V",
+                price: 2450.00,
+                category: "Components",
+                unit: "un",
+                image: "⚡",
+                supplier: "Eletro Motores Brasil"
+            },
+            {
+                id: 4,
+                name: "Válvula Pneumática 1/2\"",
+                description: "Válvula pneumática de 1/2 polegada",
+                price: 156.75,
+                category: "Components",
+                unit: "un",
+                image: "🔧",
+                supplier: "Pneumática Industrial"
+            },
+            {
+                id: 5,
+                name: "Torno CNC Compacto",
+                description: "Torno CNC compacto para pequenas peças",
+                price: 45000.00,
+                category: "Machinery",
+                unit: "un",
+                image: "🏭",
+                supplier: "CNC Brasil Máquinas"
+            },
+            {
+                id: 6,
+                name: "Compressor de Ar 50L",
+                description: "Compressor de ar de 50 litros, 2HP",
+                price: 1850.00,
+                category: "Equipment",
+                unit: "un",
+                image: "💨",
+                supplier: "Compressores Sul"
+            }
+        ];
+        
+        // Update status
+        function updateStatus(message, isError = false) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = isError ? 'status error' : 'status';
+        }
+        
+        // Load products from API
+        async function loadProducts() {
+            try {
+                updateStatus('Loading products from API...');
+                const response = await fetch(`${API_BASE}/products`);
+                const data = await response.json();
+                
+                if (data.products && data.products.length > 0) {
+                    allProducts = data.products;
+                    updateStatus(`✅ Loaded ${allProducts.length} products from API`);
+                } else {
+                    allProducts = SAMPLE_PRODUCTS;
+                    updateStatus(`⚠️ API returned no products, using ${allProducts.length} sample products`);
+                }
+                
+                displayProducts();
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                allProducts = SAMPLE_PRODUCTS;
+                updateStatus(`❌ API failed, using ${allProducts.length} sample products`, true);
+                displayProducts();
+            }
+        }
+        
+        // Filter products by category
+        function filterProducts() {
+            if (selectedCategory === 'all') {
+                return allProducts;
+            }
+            return allProducts.filter(product => product.category === selectedCategory);
+        }
+        
+        // Display products
+        function displayProducts() {
+            const filteredProducts = filterProducts();
+            const productsEl = document.getElementById('products');
+            
+            if (filteredProducts.length === 0) {
+                productsEl.innerHTML = '<p>No products found for selected category.</p>';
+                return;
+            }
+            
+            productsEl.innerHTML = filteredProducts.map(product => `
+                <div class="product">
+                    <div class="product-name">${product.image} ${product.name}</div>
+                    <div class="product-category">Category: ${product.category}</div>
+                    <div>${product.description}</div>
+                    <div class="product-price">R$ ${product.price.toFixed(2)}</div>
+                    <div>Supplier: ${product.Supplier?.companyName || product.supplier || 'N/A'}</div>
+                </div>
+            `).join('');
+            
+            updateStatus(`Showing ${filteredProducts.length} products (${selectedCategory})`);
+        }
+        
+        // Handle filter clicks
+        function setupFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active button
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Update selected category
+                    selectedCategory = btn.dataset.category;
+                    
+                    // Filter and display
+                    displayProducts();
+                });
+            });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFilters();
+            loadProducts();
+        });
+        
+        // Log for debugging
+        window.testFilters = {
+            products: () => allProducts,
+            category: () => selectedCategory,
+            filtered: () => filterProducts()
+        };
+    </script>
+</body>
+</html>
