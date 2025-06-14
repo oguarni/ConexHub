@@ -1,49 +1,26 @@
-const { Product, Supplier, Category } = require('../models');
-const { validationResult } = require('express-validator');
-const { Op } = require('sequelize');
+const productService = require('../services/productService');
 
 const getAllProducts = async (req, res) => {
   try {
-    const { category, search, page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
+    const filters = {
+      category: req.query.category,
+      search: req.query.search,
+      featured: req.query.featured,
+      inStock: req.query.inStock
+    };
 
-    const where = { isActive: true };
-    
-    if (category && category !== 'All') {
-      where.category = category;
-    }
-    
-    if (search) {
-      where.name = { [Op.iLike]: `%${search}%` };
-    }
+    const pagination = {
+      page: req.query.page || 1,
+      limit: req.query.limit || 20
+    };
 
-    const { rows: products, count } = await Product.findAndCountAll({
-      where,
-      include: [
-        {
-          model: Supplier,
-          attributes: ['id', 'companyName', 'verified'],
-          required: false
-        },
-        {
-          model: Category,
-          attributes: ['id', 'name', 'slug'],
-          required: false
-        }
-      ],
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      order: [['createdAt', 'DESC']]
-    });
+    const sorting = {
+      sortBy: req.query.sortBy,
+      sortOrder: req.query.sortOrder
+    };
 
-    res.json({
-      products,
-      pagination: {
-        total: count,
-        page: parseInt(page),
-        pages: Math.ceil(count / limit)
-      }
-    });
+    const result = await productService.getProducts(filters, pagination, sorting);
+    res.json(result);
   } catch (error) {
     console.error('Error fetching products:', error);
     res.status(500).json({ error: 'Error fetching products' });
@@ -52,50 +29,26 @@ const getAllProducts = async (req, res) => {
 
 const searchProducts = async (req, res) => {
   try {
-    const { q, category, minPrice, maxPrice, page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
+    const filters = {
+      q: req.query.q,
+      category: req.query.category,
+      minPrice: req.query.minPrice,
+      maxPrice: req.query.maxPrice,
+      supplierId: req.query.supplierId
+    };
 
-    const where = { isActive: true };
-    
-    if (q) {
-      where[Op.or] = [
-        { name: { [Op.iLike]: `%${q}%` } },
-        { description: { [Op.iLike]: `%${q}%` } }
-      ];
-    }
+    const pagination = {
+      page: req.query.page || 1,
+      limit: req.query.limit || 20
+    };
 
-    if (category && category !== 'All') {
-      where.category = category;
-    }
+    const sorting = {
+      sortBy: req.query.sortBy,
+      sortOrder: req.query.sortOrder
+    };
 
-    if (minPrice || maxPrice) {
-      where.price = {};
-      if (minPrice) where.price[Op.gte] = parseFloat(minPrice);
-      if (maxPrice) where.price[Op.lte] = parseFloat(maxPrice);
-    }
-
-    const { rows: products, count } = await Product.findAndCountAll({
-      where,
-      include: [
-        {
-          model: Supplier,
-          attributes: ['id', 'companyName', 'verified'],
-          required: false
-        }
-      ],
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      order: [['featured', 'DESC'], ['createdAt', 'DESC']]
-    });
-
-    res.json({
-      products,
-      pagination: {
-        total: count,
-        page: parseInt(page),
-        pages: Math.ceil(count / limit)
-      }
-    });
+    const result = await productService.getProducts(filters, pagination, sorting);
+    res.json(result);
   } catch (error) {
     console.error('Error searching products:', error);
     res.status(500).json({ error: 'Error searching products' });
@@ -104,18 +57,7 @@ const searchProducts = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id, {
-      include: [
-        {
-          model: Supplier,
-          attributes: ['id', 'companyName', 'verified', 'rating']
-        },
-        {
-          model: Category,
-          attributes: ['id', 'name', 'slug']
-        }
-      ]
-    });
+    const product = await productService.getProductById(req.params.id);
     
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
@@ -123,30 +65,27 @@ const getProductById = async (req, res) => {
 
     res.json(product);
   } catch (error) {
+    console.error('Error fetching product:', error);
     res.status(500).json({ error: 'Error fetching product' });
   }
 };
 
 const createProduct = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     let supplierId = req.user.Supplier?.id;
     
     // Se for admin e não tiver supplier, pegar o primeiro supplier disponível
     if (req.user.role === 'admin' && !supplierId) {
+      const { Supplier } = require('../models');
       const firstSupplier = await Supplier.findOne();
       supplierId = firstSupplier?.id;
     }
 
-    const product = await Product.create({
-      ...req.body,
-      supplierId
+    const product = await productService.createProduct(req.body, supplierId);
+    res.status(201).json({
+      message: 'Product created successfully',
+      product
     });
-    res.status(201).json(product);
   } catch (error) {
     console.error('Error creating product:', error);
     res.status(500).json({ error: 'Error creating product' });
@@ -155,30 +94,33 @@ const createProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = await productService.updateProduct(req.params.id, req.body);
     
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    await product.update(req.body);
-    res.json(product);
+    res.json({
+      message: 'Product updated successfully',
+      product
+    });
   } catch (error) {
+    console.error('Error updating product:', error);
     res.status(500).json({ error: 'Error updating product' });
   }
 };
 
 const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const success = await productService.deleteProduct(req.params.id);
     
-    if (!product) {
+    if (!success) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    await product.update({ isActive: false });
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
+    console.error('Error deleting product:', error);
     res.status(500).json({ error: 'Error deleting product' });
   }
 };

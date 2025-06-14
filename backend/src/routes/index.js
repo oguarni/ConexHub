@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const { authenticate, isAdmin, isSupplier, isSupplierOrAdmin } = require('../middleware/auth');
+const { 
+  productValidation, 
+  orderValidation, 
+  authValidation, 
+  paramValidation 
+} = require('../middleware/validation');
 
 // Controllers
 const authController = require('../controllers/authController');
@@ -24,18 +30,8 @@ router.get('/test', (req, res) => {
 });
 
 // Auth routes
-router.post('/auth/register', [
-  body('name').notEmpty().trim(),
-  body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }),
-  body('cpf').optional().trim(),
-  body('role').optional().isIn(['buyer', 'supplier'])
-], authController.register);
-
-router.post('/auth/login', [
-  body('email').isEmail().normalizeEmail(),
-  body('password').notEmpty()
-], authController.login.bind(authController));
+router.post('/auth/register', authValidation.register, authController.register);
+router.post('/auth/login', authValidation.login, authController.login.bind(authController));
 
 router.get('/auth/profile', authenticate, authController.getProfile);
 router.put('/auth/profile', authenticate, authController.updateProfile);
@@ -45,30 +41,24 @@ router.post('/auth/change-password', authenticate, [
 ], authController.changePassword);
 
 // Product routes
-router.get('/products', productController.getAllProducts);
-router.get('/products/search', productController.searchProducts);
-router.get('/products/:id', productController.getProductById);
-router.post('/products', authenticate, [
-  body('name').notEmpty().trim(),
-  body('category').notEmpty(),
-  body('price').isFloat({ min: 0 }),
-  body('unit').notEmpty(),
-  body('minOrder').isInt({ min: 1 })
-], (req, res, next) => {
+router.get('/products', productValidation.search, productController.getAllProducts);
+router.get('/products/search', productValidation.search, productController.searchProducts);
+router.get('/products/:id', paramValidation.id, productController.getProductById);
+router.post('/products', authenticate, productValidation.create, (req, res, next) => {
   // Permitir admin ou supplier criar produtos
   if (req.user.role === 'admin' || req.user.role === 'supplier') {
     return next();
   }
   return res.status(403).json({ error: 'Access denied' });
 }, productController.createProduct);
-router.put('/products/:id', authenticate, (req, res, next) => {
+router.put('/products/:id', authenticate, paramValidation.id, productValidation.update, (req, res, next) => {
   // Permitir admin ou supplier atualizar produtos
   if (req.user.role === 'admin' || req.user.role === 'supplier') {
     return next();
   }
   return res.status(403).json({ error: 'Access denied' });
 }, productController.updateProduct);
-router.delete('/products/:id', authenticate, (req, res, next) => {
+router.delete('/products/:id', authenticate, paramValidation.id, (req, res, next) => {
   // Permitir admin ou supplier deletar produtos
   if (req.user.role === 'admin' || req.user.role === 'supplier') {
     return next();

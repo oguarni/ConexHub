@@ -2,19 +2,69 @@
   "development": {
     "use_env_variable": "DATABASE_URL",
     "dialect": "postgres",
-    "logging": false
+    "logging": false,
+    "dialectOptions": {
+      "ssl": false,
+      "connectTimeout": 60000,
+      "socketPath": null
+    },
+    "pool": {
+      "max": "$DB_POOL_MAX",
+      "min": "$DB_POOL_MIN", 
+      "acquire": "$DB_POOL_ACQUIRE",
+      "idle": "$DB_POOL_IDLE"
+    },
+    "retry": {
+      "match": [
+        "ECONNRESET",
+        "ENOTFOUND",
+        "ECONNREFUSED",
+        "EHOSTUNREACH",
+        "ETIMEDOUT"
+      ],
+      "max": 3
+    }
   },
   "test": {
-    "username": "postgres",
-    "password": "password",
-    "database": "b2b_marketplace_test",
-    "host": "127.0.0.1",
-    "port": 5434,
-    "dialect": "postgres"
+    "use_env_variable": "TEST_DATABASE_URL",
+    "dialect": "postgres",
+    "logging": false,
+    "dialectOptions": {
+      "ssl": false
+    },
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+    }
   },
   "production": {
     "use_env_variable": "DATABASE_URL",
     "dialect": "postgres",
-    "logging": false
+    "logging": false,
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      },
+      "connectTimeout": 120000
+    },
+    "pool": {
+      "max": 20,
+      "min": 5,
+      "acquire": 60000,
+      "idle": 10000
+    },
+    "retry": {
+      "match": [
+        "ECONNRESET",
+        "ENOTFOUND", 
+        "ECONNREFUSED",
+        "EHOSTUNREACH",
+        "ETIMEDOUT"
+      ],
+      "max": 5
+    }
   }
 }

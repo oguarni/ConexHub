@@ -3,49 +3,156 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
-require('dotenv').config();
+const rateLimit = require('express-rate-limit');
 
-console.log('DATABASE_URL:', process.env.DATABASE_URL);
-
+// Load configuration
+const config = require('./src/config/environment');
 const { sequelize } = require('./src/models');
 const routes = require('./src/routes');
 const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(helmet());
-app.use(compression());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
+// Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: config.isProduction(),
 }));
-app.use(express.json());
-app.use(morgan('combined'));
 
-// Routes
-app.use('/api', routes);
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: config.security.rateLimit.windowMs,
+  max: config.security.rateLimit.max,
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: Math.ceil(config.security.rateLimit.windowMs / 1000)
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(limiter);
+
+// Compression
+app.use(compression());
+
+// CORS
+app.use(cors({
+  origin: config.security.cors.origin,
+  credentials: config.security.cors.credentials,
+  optionsSuccessStatus: 200
+}));
+
+// Body parsing
+app.use(express.json({ 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Logging
+if (!config.isTest()) {
+  app.use(morgan(config.isDevelopment() ? 'dev' : 'combined'));
+}
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: config.app.env,
+    version: config.app.apiVersion
+  });
+});
+
+// API Routes
+app.use(config.app.apiPrefix, routes);
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Route not found',
+    path: req.originalUrl,
+    method: req.method
+  });
+});
 
 // Error handling
 app.use(errorHandler);
 
 const startServer = async () => {
   try {
+    // Database connection
     await sequelize.authenticate();
-    console.log('Database connected');
+    console.log(`✅ Database connected successfully (${config.app.env})`);
     
-    if (process.env.NODE_ENV === 'development') {
+    // Sync database in development
+    if (config.isDevelopment()) {
       await sequelize.sync({ force: false });
+      console.log('📊 Database synchronized');
     }
     
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    // Start server
+    const server = app.listen(config.app.port, () => {
+      console.log(`🚀 ${config.app.name} server running`);
+      console.log(`📍 Environment: ${config.app.env}`);
+      console.log(`🌐 Port: ${config.app.port}`);
+      console.log(`📊 API: ${config.app.apiPrefix}/${config.app.apiVersion}`);
+      
+      if (config.isDevelopment()) {
+        console.log(`🔗 Health check: http://localhost:${config.app.port}/health`);
+        console.log(`🔗 API docs: http://localhost:${config.app.port}${config.app.apiPrefix}/docs`);
+      }
     });
+
+    // Graceful shutdown
+    const gracefulShutdown = (signal) => {
+      console.log(`\n⚠️  Received ${signal}. Starting graceful shutdown...`);
+      
+      server.close(async () => {
+        console.log('🔌 HTTP server closed');
+        
+        try {
+          await sequelize.close();
+          console.log('🔌 Database connection closed');
+          console.log('✅ Graceful shutdown completed');
+          process.exit(0);
+        } catch (error) {
+          console.error('❌ Error during graceful shutdown:', error);
+          process.exit(1);
+        }
+      });
+    };
+
+    // Handle shutdown signals
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    
   } catch (error) {
-    console.error('Unable to start server:', error);
+    console.error('❌ Unable to start server:', error);
     process.exit(1);
   }
 };
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
 
 startServer();
