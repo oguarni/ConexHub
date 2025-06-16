@@ -1,33 +1,42 @@
-# Use Node.js 18 Alpine - compatible with dependencies
-FROM node:18-alpine
+# =====================================
+# Development Dockerfile for Frontend
+# =====================================
 
-# Set working directory
+FROM node:18-alpine AS development
+
 WORKDIR /app
 
-# Fix permissions - create node user with proper ownership
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+# Install security updates and dependencies
+RUN apk update && apk upgrade && apk add --no-cache dumb-init
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S reactuser -u 1001 -G nodejs
 
 # Copy package files
-COPY package*.json ./
+COPY --chown=reactuser:nodejs package*.json ./
 
-# Remove lock file and install fresh
-RUN rm -f package-lock.json && npm install
+# Install all dependencies including dev dependencies
+RUN npm ci --include=dev && npm cache clean --force
 
 # Copy source code
-COPY . .
+COPY --chown=reactuser:nodejs . .
 
-# Create missing directories if needed
-RUN mkdir -p src/components/common src/components/layout
-
-# Fix cache permissions
-RUN mkdir -p node_modules/.cache && chown -R nextjs:nodejs node_modules/.cache
-RUN chown -R nextjs:nodejs /app
+# Create cache directories with proper permissions
+RUN mkdir -p node_modules/.cache && \
+    chown -R reactuser:nodejs node_modules/.cache
 
 # Switch to non-root user
-USER nextjs
+USER reactuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000 || exit 1
 
 EXPOSE 3000
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
 
 # Start development server
 CMD ["npm", "start"]

@@ -1,6 +1,8 @@
+const { AppError } = require('./errorHandler');
+
 const adminMiddleware = (req, res, next) => {
   if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Acesso negado. Apenas administradores.' });
+    return next(new AppError('Acesso negado. Apenas administradores.', 403, 'ADMIN_ACCESS_REQUIRED'));
   }
   next();
 };

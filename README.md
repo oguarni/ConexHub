@@ -153,49 +153,178 @@ ConexHub/
 
 ### Pré-requisitos
 
-- **Docker** e **Docker Compose** instalados
+Antes de iniciar, certifique-se de ter os seguintes softwares instalados:
+
+- **Docker** (versão 20.10 ou superior)
+- **Docker Compose** (versão 2.0 ou superior)
 - **Git** para clonar o repositório
 - **4GB RAM** disponível para os containers
+- **Portas 3000, 3001 e 5434** livres no sistema
 
-### 1. Clone o Repositório
+### 📋 Guia Passo a Passo
+
+#### 1. Clone o Repositório
 
 ```bash
-git clone [https://github.com/seu-usuario/conexhub.git](https://github.com/oguarni/conexhub)
+# Clone o projeto
+git clone https://github.com/seu-usuario/conexhub.git
 cd conexhub
+
+# Verifique se está na branch correta
+git branch
 ```
 
-### 2. Configuração do Ambiente
+#### 2. Navegue até a Raiz do Projeto
 
 ```bash
-# Copie o arquivo de ambiente (se necessário)
+# Confirme que está no diretório correto
+pwd
+# Deve mostrar: /caminho/para/conexhub
+
+# Liste os arquivos para confirmar
+ls -la
+# Deve mostrar: docker-compose.yml, backend/, frontend/, README.md
+```
+
+#### 3. Crie os Arquivos de Ambiente
+
+```bash
+# Backend - copie o arquivo de exemplo
+cd backend
 cp .env.example .env
 
-# As configurações padrão já funcionam para desenvolvimento
+# Frontend - copie o arquivo de exemplo (se existir)
+cd ../frontend
+cp .env.example .env || echo "Arquivo .env do frontend não necessário"
+
+# Volte para a raiz
+cd ..
 ```
 
-### 3. Iniciar a Aplicação
+#### 4. Configure as Variáveis de Ambiente
+
+Edite os arquivos `.env` conforme necessário:
+
+**Backend (.env):**
+```env
+# Database Configuration
+DATABASE_URL=postgresql://postgres:password@postgres:5432/b2b_marketplace
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=b2b_marketplace
+
+# JWT Configuration
+JWT_SECRET=DEV_A8x9K2mN5q7P1wT3uY6rE9sA2dF5gH8j
+JWT_REFRESH_SECRET=DEV_REFRESH_M6n5B4v3C2x1Z9y8A7s6D5f4G3h2J1k0
+JWT_EXPIRES_IN=7d
+
+# Server Configuration
+NODE_ENV=development
+PORT=3001
+API_PREFIX=/api
+
+# Frontend Configuration
+FRONTEND_URL=http://localhost:3000
+ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+CORS_CREDENTIALS=true
+
+# Security & Performance
+LOG_LEVEL=debug
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=1000
+```
+
+**Frontend (.env):**
+```env
+# API Configuration
+REACT_APP_API_URL=http://localhost:3001/api
+REACT_APP_NODE_ENV=development
+
+# Development Configuration
+SKIP_PREFLIGHT_CHECK=true
+GENERATE_SOURCEMAP=true
+FAST_REFRESH=true
+```
+
+#### 5. Execute docker-compose up -d --build
 
 ```bash
-# Construir e iniciar todos os serviços
-docker-compose up -d
+# Construa e inicie todos os serviços
+docker-compose up -d --build
 
-# Aguardar inicialização (30-60 segundos)
+# Acompanhe os logs durante a inicialização
 docker-compose logs -f
+
+# Para parar de acompanhar os logs, pressione Ctrl+C
 ```
 
-### 4. Popular o Banco de Dados
+#### 6. Aguarde a Inicialização Completa
 
 ```bash
-# Executar migrações (automático na inicialização)
-# Popular dados de exemplo
-curl -X POST http://localhost:3001/api/seed
+# Verifique o status dos containers
+docker-compose ps
+
+# Todos os serviços devem estar com status "Up"
+# Nome                Estado              Portas
+# b2b_postgres       Up (healthy)        0.0.0.0:5434->5432/tcp
+# b2b_backend        Up (healthy)        0.0.0.0:3001->3001/tcp  
+# b2b_frontend       Up (healthy)        0.0.0.0:3000->3000/tcp
+
+# Se algum serviço não estiver "healthy", aguarde alguns minutos
 ```
 
-### 5. Acessar a Aplicação
+#### 7. Popular o Banco de Dados
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
-- **Banco de Dados**: localhost:5434
+```bash
+# Aguarde o backend estar totalmente online (verifique logs)
+curl -f http://localhost:3001/health
+
+# Execute o seed para popular dados de exemplo
+curl -X POST http://localhost:3001/api/seed
+
+# Verificação: deve retornar dados sobre usuários criados
+# {
+#   "success": true,
+#   "message": "Dados de exemplo criados com sucesso!",
+#   "credentials": {
+#     "admin": {"email": "admin@b2bmarketplace.com", "password": "123456"},
+#     "user": {"email": "joao@empresa.com", "password": "123456"}
+#   }
+# }
+```
+
+#### 8. Verificar Funcionamento
+
+```bash
+# Teste o backend
+curl http://localhost:3001/health
+
+# Teste se o frontend está respondendo
+curl http://localhost:3000
+
+# Verifique se não há erros nos logs
+docker-compose logs --tail=20
+```
+
+### 🌐 Acessar a Aplicação
+
+Após a inicialização completa:
+
+- **🎯 Frontend Principal**: http://localhost:3000
+- **📱 API Backend**: http://localhost:3001  
+- **📚 Documentação da API**: http://localhost:3001/docs
+- **🔍 Health Check**: http://localhost:3001/health
+- **🗄️ Banco PostgreSQL**: localhost:5434 (usuário: postgres, senha: password)
+
+### ✅ Verificação de Sucesso
+
+A aplicação estará funcionando corretamente quando:
+
+1. ✅ **Frontend carrega sem erros** em http://localhost:3000
+2. ✅ **API responde** em http://localhost:3001/health
+3. ✅ **Documentação acessível** em http://localhost:3001/docs
+4. ✅ **Login funciona** com as credenciais de teste
+5. ✅ **Dados de exemplo visíveis** no catálogo de produtos
 
 ---
 
@@ -345,68 +474,165 @@ Chave Aleatória: 123e4567-e89b-12d3-a456-426614174000
 
 ## 📚 API Documentation
 
-### Endpoints Principais
+### 🚀 Documentação Interativa Swagger
 
-#### Autenticação
-```http
-POST /api/auth/register    # Registrar usuário
-POST /api/auth/login       # Login
-GET  /api/auth/profile     # Perfil do usuário
-```
+A API possui documentação completa e interativa disponível em:
 
-#### Produtos
-```http
-GET    /api/products       # Listar produtos
-GET    /api/products/:id   # Detalhes do produto
-POST   /api/products       # Criar produto (fornecedor)
-PUT    /api/products/:id   # Atualizar produto
-DELETE /api/products/:id   # Excluir produto
-```
+**📖 [http://localhost:3001/docs](http://localhost:3001/docs)**
 
-#### Cotações
-```http
-POST /api/quotes/request           # Solicitar cotação
-GET  /api/quotes/buyer             # Cotações do comprador
-GET  /api/quotes/supplier          # Cotações do fornecedor
-PUT  /api/quotes/:id/respond       # Responder cotação
-POST /api/quotes/:id/accept        # Aceitar cotação
-```
+#### Funcionalidades da Documentação:
 
-#### PIX
-```http
-POST /api/pix/quotes/:id/payment   # Criar pagamento PIX
-GET  /api/pix/payments/:id         # Status do pagamento
-POST /api/pix/validate-key         # Validar chave PIX
-```
+- ✅ **Interface interativa** para testar endpoints
+- ✅ **Autenticação integrada** com Bearer tokens
+- ✅ **Schemas completos** com validações
+- ✅ **Exemplos de requisições** e respostas
+- ✅ **Códigos de erro** documentados
+- ✅ **Filtros e busca** por endpoints
+- ✅ **Download do OpenAPI spec** em JSON
 
-### Autenticação
+### 📋 Resumo dos Endpoints
+
+#### 🔐 Autenticação
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/api/auth/register` | Registrar novo usuário | ❌ |
+| `POST` | `/api/auth/login` | Fazer login | ❌ |
+| `GET` | `/api/auth/profile` | Obter perfil do usuário | ✅ |
+| `PUT` | `/api/auth/profile` | Atualizar perfil | ✅ |
+| `POST` | `/api/auth/change-password` | Alterar senha | ✅ |
+
+#### 📦 Produtos
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/api/products` | Listar produtos (paginado) | ❌ |
+| `GET` | `/api/products/search` | Buscar produtos | ❌ |
+| `GET` | `/api/products/:id` | Obter produto por ID | ❌ |
+| `POST` | `/api/products` | Criar produto | ✅ Supplier/Admin |
+| `PUT` | `/api/products/:id` | Atualizar produto | ✅ Supplier/Admin |
+| `DELETE` | `/api/products/:id` | Excluir produto | ✅ Supplier/Admin |
+
+#### 💼 Cotações B2B
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/api/quotes/request` | Solicitar cotação | ✅ |
+| `GET` | `/api/quotes/buyer` | Cotações do comprador | ✅ |
+| `GET` | `/api/quotes/supplier` | Cotações do fornecedor | ✅ Supplier |
+| `PUT` | `/api/quotes/:id/respond` | Responder cotação | ✅ Supplier |
+| `POST` | `/api/quotes/:id/accept` | Aceitar cotação | ✅ |
+| `POST` | `/api/quotes/:id/reject` | Rejeitar cotação | ✅ |
+
+#### 🛒 Pedidos
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/api/orders` | Criar pedido | ✅ |
+| `GET` | `/api/orders` | Listar pedidos do usuário | ✅ |
+| `GET` | `/api/orders/:id` | Obter pedido por ID | ✅ |
+| `PUT` | `/api/orders/:id/status` | Atualizar status | ✅ Supplier/Admin |
+| `GET` | `/api/orders/:id/invoice` | Gerar nota fiscal | ✅ |
+
+#### 💳 Pagamentos PIX
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/api/pix/quotes/:id/payment` | Criar pagamento PIX | ✅ |
+| `GET` | `/api/pix/payments/:id` | Status do pagamento | ✅ |
+| `POST` | `/api/pix/validate-key` | Validar chave PIX | ❌ |
+
+#### 🏪 Fornecedores
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/api/suppliers` | Listar fornecedores | ❌ |
+| `GET` | `/api/suppliers/:id` | Perfil do fornecedor | ❌ |
+| `GET` | `/api/suppliers/:id/products` | Produtos do fornecedor | ❌ |
+| `PUT` | `/api/suppliers/profile` | Atualizar perfil | ✅ Supplier |
+
+#### 🏷️ Categorias
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/api/categories` | Listar categorias | ❌ |
+| `POST` | `/api/categories` | Criar categoria | ✅ Admin |
+| `PUT` | `/api/categories/:id` | Atualizar categoria | ✅ Admin |
+| `DELETE` | `/api/categories/:id` | Excluir categoria | ✅ Admin |
+
+#### 👥 Administração
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/api/admin/users` | Listar usuários | ✅ Admin |
+| `PUT` | `/api/admin/users/:id` | Atualizar usuário | ✅ Admin |
+| `POST` | `/api/admin/suppliers/verify/:id` | Verificar fornecedor | ✅ Admin |
+| `GET` | `/api/admin/reports` | Relatórios do sistema | ✅ Admin |
+
+### 🔑 Autenticação
+
+#### Como Obter Token JWT:
+
+1. **Registre um usuário** ou use credenciais de teste
+2. **Faça login** com POST `/api/auth/login`
+3. **Use o token** no header Authorization
 
 ```javascript
-// Headers necessários
+// Headers para requisições autenticadas
 {
-  "Authorization": "Bearer seu_jwt_token",
+  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "Content-Type": "application/json"
 }
 ```
 
-### Exemplos de Requisições
+### 📝 Exemplos Práticos
 
+#### Login e Obtenção de Token:
 ```bash
-# Login
+# 1. Fazer login
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"joao@empresa.com","password":"123456"}'
+  -d '{
+    "email": "joao@empresa.com",
+    "password": "123456"
+  }'
 
-# Listar produtos
-curl -X GET http://localhost:3001/api/products \
-  -H "Authorization: Bearer seu_token"
-
-# Solicitar cotação
-curl -X POST http://localhost:3001/api/quotes/request \
-  -H "Authorization: Bearer seu_token" \
-  -H "Content-Type: application/json" \
-  -d '{"productId":"uuid","quantity":10,"urgency":"normal"}'
+# Resposta:
+# {
+#   "success": true,
+#   "data": {
+#     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#     "user": { "id": "...", "name": "João Silva", "role": "buyer" }
+#   }
+# }
 ```
+
+#### Usar Token para Acessar Recursos:
+```bash
+# 2. Listar produtos (token não obrigatório)
+curl -X GET "http://localhost:3001/api/products?page=1&limit=10"
+
+# 3. Solicitar cotação (token obrigatório)
+curl -X POST http://localhost:3001/api/quotes/request \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "productId": "uuid-do-produto",
+    "quantity": 10,
+    "message": "Preciso desta quantidade para projeto urgente"
+  }'
+```
+
+#### Resposta Padrão da API:
+```json
+{
+  "success": true|false,
+  "message": "Mensagem descritiva",
+  "data": { /* dados retornados */ },
+  "errors": [ /* erros de validação */ ],
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### 🌐 Testando na Documentação Swagger
+
+1. **Acesse** http://localhost:3001/docs
+2. **Clique em "Authorize"** no topo da página
+3. **Insira o token** no formato: `Bearer SEU_TOKEN`
+4. **Teste qualquer endpoint** clicando em "Try it out"
+5. **Veja exemplos reais** de requisições e respostas
 
 ---
 

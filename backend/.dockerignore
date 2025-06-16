@@ -1,5 +1,5 @@
 # =====================================
-# Frontend .dockerignore
+# Backend .dockerignore
 # =====================================
 
 # Dependencies
@@ -16,11 +16,6 @@ yarn.lock
 .env.development
 .env.production
 .env.test
-
-# Build outputs (will be built inside container)
-build/
-dist/
-.build/
 
 # Git
 .git
@@ -49,21 +44,28 @@ docs/
 ehthumbs.db
 Thumbs.db
 
-# Testing and coverage
+# Logs
+logs/
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage and testing
 coverage/
 .nyc_output
 .coverage
 *.lcov
-src/**/*.test.js
-src/**/*.test.jsx
-src/**/*.test.ts
-src/**/*.test.tsx
-src/**/*.spec.js
-src/**/*.spec.jsx
-src/**/*.spec.ts
-src/**/*.spec.tsx
-src/__tests__/
-src/setupTests.js
+test/
+tests/
+spec/
+__tests__/
+
+# Build artifacts
+build/
+dist/
+.build/
 
 # Cache directories
 .cache
@@ -71,17 +73,13 @@ src/setupTests.js
 .temp
 tmp/
 temp/
-.eslintcache
-
-# Development tools
-.storybook/
-storybook-static/
 
 # Development and deployment files
 docker-compose*.yml
 Dockerfile*
 .dockerignore
-nginx.conf
+Vagrantfile
+.vagrant
 
 # CI/CD
 .github/
@@ -89,10 +87,6 @@ nginx.conf
 .travis.yml
 .circleci/
 Jenkinsfile
-
-# Logs
-logs/
-*.log
 
 # Security files
 *.pem
@@ -106,9 +100,7 @@ logs/
 *.bak
 *.old
 
-# Webpack stats
-webpack-stats.json
-bundle-analyzer-report.html
-
-# Source maps in development
-*.map
+# Runtime data
+.runtime
+uploads/*
+!uploads/.gitkeep

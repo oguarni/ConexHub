@@ -4,16 +4,117 @@ const { body, query, param, validationResult } = require('express-validator');
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    const formattedErrors = errors.array().map(error => ({
+      field: error.path || error.param,
+      message: error.msg,
+      value: error.value,
+      location: error.location
+    }));
+
     return res.status(400).json({
-      error: 'Validation failed',
-      details: errors.array().map(error => ({
-        field: error.path,
-        message: error.msg,
-        value: error.value
-      }))
+      success: false,
+      message: 'Dados de entrada inválidos',
+      errors: formattedErrors,
+      timestamp: new Date().toISOString()
     });
   }
   next();
+};
+
+// Sanitização de dados de entrada
+const sanitizeInput = (req, res, next) => {
+  // Sanitiza strings no body
+  if (req.body && typeof req.body === 'object') {
+    Object.keys(req.body).forEach(key => {
+      if (typeof req.body[key] === 'string') {
+        req.body[key] = req.body[key].trim();
+      }
+    });
+  }
+
+  // Sanitiza strings nos query parameters
+  if (req.query && typeof req.query === 'object') {
+    Object.keys(req.query).forEach(key => {
+      if (typeof req.query[key] === 'string') {
+        req.query[key] = req.query[key].trim();
+      }
+    });
+  }
+
+  next();
+};
+
+// Validador customizado para CEP brasileiro
+const validateCEP = (value) => {
+  const cepRegex = /^\d{5}-?\d{3}$/;
+  return cepRegex.test(value);
+};
+
+// Validador customizado para CPF brasileiro
+const validateCPF = (value) => {
+  const cpf = value.replace(/[^\d]/g, '');
+  
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
+    return false;
+  }
+  
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cpf.charAt(i)) * (10 - i);
+  }
+  
+  let remainder = (sum * 10) % 11;
+  if (remainder === 10 || remainder === 11) remainder = 0;
+  if (remainder !== parseInt(cpf.charAt(9))) return false;
+  
+  sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cpf.charAt(i)) * (11 - i);
+  }
+  
+  remainder = (sum * 10) % 11;
+  if (remainder === 10 || remainder === 11) remainder = 0;
+  if (remainder !== parseInt(cpf.charAt(10))) return false;
+  
+  return true;
+};
+
+// Validador customizado para CNPJ brasileiro
+const validateCNPJ = (value) => {
+  const cnpj = value.replace(/[^\d]/g, '');
+  
+  if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) {
+    return false;
+  }
+  
+  let length = cnpj.length - 2;
+  let numbers = cnpj.substring(0, length);
+  const digits = cnpj.substring(length);
+  let sum = 0;
+  let pos = length - 7;
+  
+  for (let i = length; i >= 1; i--) {
+    sum += numbers.charAt(length - i) * pos--;
+    if (pos < 2) pos = 9;
+  }
+  
+  let result = sum % 11 < 2 ? 0 : 11 - sum % 11;
+  if (result !== parseInt(digits.charAt(0))) return false;
+  
+  length = length + 1;
+  numbers = cnpj.substring(0, length);
+  sum = 0;
+  pos = length - 7;
+  
+  for (let i = length; i >= 1; i--) {
+    sum += numbers.charAt(length - i) * pos--;
+    if (pos < 2) pos = 9;
+  }
+  
+  result = sum % 11 < 2 ? 0 : 11 - sum % 11;
+  if (result !== parseInt(digits.charAt(1))) return false;
+  
+  return true;
 };
 
 // Product validation rules
@@ -167,8 +268,12 @@ const orderValidation = {
       .withMessage('State is required'),
     body('shippingAddress.zipCode')
       .isString()
-      .matches(/^\d{5}-?\d{3}$/)
-      .withMessage('ZIP code must be in format 12345-678 or 12345678'),
+      .custom((value) => {
+        if (!validateCEP(value)) {
+          throw new Error('CEP deve estar no formato 12345-678 ou 12345678');
+        }
+        return true;
+      }),
     body('paymentMethod')
       .isIn(['credit_card', 'bank_transfer', 'pix'])
       .withMessage('Payment method must be credit_card, bank_transfer, or pix'),
@@ -196,8 +301,12 @@ const authValidation = {
     body('cnpj')
       .optional()
       .isString()
-      .matches(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/)
-      .withMessage('CNPJ must be in format XX.XXX.XXX/XXXX-XX'),
+      .custom((value) => {
+        if (value && !validateCNPJ(value)) {
+          throw new Error('CNPJ inválido');
+        }
+        return true;
+      }),
     body('phone')
       .optional()
       .isString()
@@ -227,10 +336,59 @@ const paramValidation = {
   ]
 };
 
+// Validação para CPF
+const cpfValidation = [
+  body('cpf')
+    .optional()
+    .isString()
+    .custom((value) => {
+      if (value && !validateCPF(value)) {
+        throw new Error('CPF inválido');
+      }
+      return true;
+    }),
+  handleValidationErrors
+];
+
+// Validação para CEP
+const cepValidation = [
+  body('cep')
+    .isString()
+    .notEmpty()
+    .withMessage('CEP é obrigatório')
+    .custom((value) => {
+      if (!validateCEP(value)) {
+        throw new Error('CEP deve estar no formato 12345-678 ou 12345678');
+      }
+      return true;
+    }),
+  handleValidationErrors
+];
+
+// Validação para paginação
+const paginationValidation = [
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page deve ser um número inteiro maior que 0'),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit deve ser um número entre 1 e 100'),
+  handleValidationErrors
+];
+
 module.exports = {
   handleValidationErrors,
+  sanitizeInput,
+  validateCEP,
+  validateCPF,
+  validateCNPJ,
   productValidation,
   orderValidation,
   authValidation,
-  paramValidation
+  paramValidation,
+  cpfValidation,
+  cepValidation,
+  paginationValidation
 };

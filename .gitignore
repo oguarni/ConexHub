@@ -60,3 +60,84 @@ out/
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Security files (CRÍTICO - nunca commitar)
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+secrets.json
+credentials.json
+private.json
+config/secret.js
+config/keys.js
+auth.json
+service-account.json
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Upload directories
+uploads/
+public/uploads/
+static/uploads/
+
+# SSL certificates
+ssl/
+certs/
+
+# Docker secrets
+docker-compose.override.yml
+.docker/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Security scan results
+.snyk
+security-audit.json
+vulnerability-report.json
+
+# Testing artifacts
+test-results/
+screenshots/
+videos/
+coverage-reports/
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# MacOS specific
+*.dmg
+.AppleDouble
+.LSOverride
+
+# Windows specific
+*.exe
+*.msi
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux specific
+*.deb
+*.rpm
+*.AppImage

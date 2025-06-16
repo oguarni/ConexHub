@@ -1,0 +1,45 @@
+# =====================================
+# Development Dockerfile for Backend
+# =====================================
+
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Install security updates and development dependencies
+RUN apk update && apk upgrade && \
+    apk add --no-cache dumb-init python3 make g++ curl && \
+    rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodeuser -u 1001 -G nodejs
+
+# Copy package files
+COPY --chown=nodeuser:nodejs package*.json ./
+
+# Install all dependencies including dev dependencies
+RUN npm ci --include=dev
+
+# Copy source code
+COPY --chown=nodeuser:nodejs . .
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs /app/uploads /app/temp && \
+    chown -R nodeuser:nodejs /app
+
+# Switch to non-root user
+USER nodeuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3001/health || exit 1
+
+EXPOSE 3001
+EXPOSE 9229
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start with nodemon for development
+CMD ["npm", "run", "dev"]

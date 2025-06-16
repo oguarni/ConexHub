@@ -1,5 +1,5 @@
 # =====================================
-# Docker Compose - Local Development
+# Docker Compose - Development
 # =====================================
 
 version: '3.8'
@@ -7,20 +7,20 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: b2b_postgres
+    container_name: b2b_postgres_dev
     restart: unless-stopped
     environment:
-      POSTGRES_DB: b2b_marketplace
+      POSTGRES_DB: b2b_marketplace_dev
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: devpassword123
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
       - "5434:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./backend/scripts:/docker-entrypoint-initdb.d:ro
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./backend/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d b2b_marketplace"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d b2b_marketplace_dev"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,12 +30,12 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: b2b_redis
+    container_name: b2b_redis_dev
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redis_dev_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -47,15 +47,16 @@ services:
   backend:
     build: 
       context: ./backend
-      dockerfile: Dockerfile
-      target: production
-    container_name: b2b_backend
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: b2b_backend_dev
     restart: unless-stopped
     ports:
       - "3001:3001"
+      - "9229:9229"  # Node.js debugger port
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/b2b_marketplace
+      DATABASE_URL: postgresql://postgres:devpassword123@postgres:5432/b2b_marketplace_dev
       REDIS_URL: redis://redis:6379
       JWT_SECRET: DEV_A8x9K2mN5q7P1wT3uY6rE9sA2dF5gH8j
       JWT_REFRESH_SECRET: DEV_REFRESH_M6n5B4v3C2x1Z9y8A7s6D5f4G3h2J1k0
@@ -73,8 +74,10 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - ./backend/src:/app/src:ro
+      - ./backend/package*.json:/app/
+      - backend_node_modules:/app/node_modules
       - ./backend/logs:/app/logs
-      - ./backend/uploads:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
@@ -87,35 +90,50 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-      target: production
-    container_name: b2b_frontend
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: b2b_frontend_dev
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
       REACT_APP_API_URL: http://localhost:3001/api
       REACT_APP_NODE_ENV: development
+      SKIP_PREFLIGHT_CHECK: "true"
+      GENERATE_SOURCEMAP: "true"
+      FAST_REFRESH: "true"
     depends_on:
       backend:
         condition: service_healthy
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/public:/app/public:ro
+      - ./frontend/package*.json:/app/
+      - frontend_node_modules:/app/node_modules
+      - /app/build  # Exclude build directory
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 60s
     networks:
       - b2b_network
 
 volumes:
-  postgres_data:
+  postgres_dev_data:
     driver: local
-  redis_data:
+  redis_dev_data:
+    driver: local
+  backend_node_modules:
+    driver: local
+  frontend_node_modules:
     driver: local
 
 networks:
   b2b_network:
     driver: bridge
-    name: b2b_network
+    name: b2b_dev_network
