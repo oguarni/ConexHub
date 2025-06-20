@@ -29,7 +29,9 @@
       "!src/**/*.test.js",
       "!src/**/*.spec.js"
     ],
-    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ]
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -48,8 +50,8 @@
     "qrcode": "^1.5.3",
     "sequelize": "^6.35.1",
     "sqlite3": "^5.1.7",
-    "swagger-ui-express": "^5.0.0",
     "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {

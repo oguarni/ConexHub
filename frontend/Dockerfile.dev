@@ -17,7 +17,7 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --chown=reactuser:nodejs package*.json ./
 
 # Install all dependencies including dev dependencies
-RUN npm ci --include=dev && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 # Copy source code
 COPY --chown=reactuser:nodejs . .

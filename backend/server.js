@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import swaggerUi from 'swagger-ui-express';
+import * as swaggerUi from 'swagger-ui-express';
 
 // Load configuration
 import config from './src/config/index.js';
