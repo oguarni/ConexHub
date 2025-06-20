@@ -1,8 +1,8 @@
 // contexts/AppContext.js
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { useSecureAuth } from '../hooks/useSecureAuth';
-import { useQuotes } from '../hooks/useQuotes';
-import { useProducts } from '../hooks/useProducts';
+import { useBuyerQuotesQuery, useRequestQuoteMutation } from '../hooks/queries/useQuotesQuery';
+import { useProductsQuery } from '../hooks/queries/useProductsQuery';
 import { useForm } from '../hooks/useForm';
 
 const AppContext = createContext();
@@ -90,8 +90,58 @@ export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
   
   const auth = useSecureAuth();
-  const quotes = useQuotes();
-  const products = useProducts();
+  
+  // TanStack Query hooks for quotes
+  const { 
+    data: quotesResponse, 
+    isLoading: quotesLoading, 
+    error: quotesError,
+    refetch: refetchQuotes
+  } = useBuyerQuotesQuery({}, { enabled: !!auth.user });
+  
+  const requestQuoteMutation = useRequestQuoteMutation();
+  
+  // Create quotes object to maintain compatibility
+  const quotes = React.useMemo(() => ({
+    quotes: quotesResponse?.quotes || [],
+    loading: quotesLoading,
+    error: quotesError?.message || '',
+    lastQuoteId: '', // Managed by mutations
+    loadUserQuotes: refetchQuotes,
+    createQuote: async (quoteData) => {
+      try {
+        const result = await requestQuoteMutation.mutateAsync(quoteData);
+        return { success: true, quote: result };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+    clearError: () => {} // Error is handled by TanStack Query
+  }), [quotesResponse, quotesLoading, quotesError, refetchQuotes, requestQuoteMutation]);
+  
+  // Calculate filters for products query
+  const productFilters = React.useMemo(() => {
+    const filters = {};
+    if (state.ui.selectedCategory !== 'Todas') filters.category = state.ui.selectedCategory;
+    if (state.ui.searchTerm) filters.search = state.ui.searchTerm;
+    return filters;
+  }, [state.ui.selectedCategory, state.ui.searchTerm]);
+  
+  const { 
+    data: productsResponse, 
+    isLoading: productsLoading, 
+    error: productsError,
+    refetch: refetchProducts
+  } = useProductsQuery(productFilters);
+  
+  // Create products object to maintain compatibility
+  const products = React.useMemo(() => ({
+    products: productsResponse?.products || [],
+    loading: productsLoading,
+    error: productsError?.message || '',
+    loadProducts: refetchProducts,
+    clearError: () => {} // Error is handled by TanStack Query
+  }), [productsResponse, productsLoading, productsError, refetchProducts]);
 
   // Forms separados por responsabilidade
   const authForm = useForm({ 
@@ -155,21 +205,12 @@ export const AppProvider = ({ children }) => {
 
   const clearAllErrors = () => {
     auth.clearError();
-    quotes.clearError();
-    products.clearError();
+    // quotes.clearError and products.clearError are handled by TanStack Query
   };
 
-  // Effects otimizados
-  useEffect(() => {
-    if (auth.user) quotes.loadUserQuotes();
-  }, [auth.user?.id]); // Dependency otimizada
+  // Effects otimizados - quotes are automatically loaded by useBuyerQuotesQuery when user is available
 
-  useEffect(() => {
-    const filters = {};
-    if (state.ui.selectedCategory !== 'Todas') filters.category = state.ui.selectedCategory;
-    if (state.ui.searchTerm) filters.search = state.ui.searchTerm;
-    products.loadProducts(filters);
-  }, [state.ui.selectedCategory, state.ui.searchTerm]);
+  // Products are automatically loaded by useProductsQuery when filters change
 
   const contextValue = {
     // State
