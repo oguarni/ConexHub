@@ -5,8 +5,10 @@
   "dependencies": {
     "@babel/core": "^7.27.4",
     "@babel/helper-module-imports": "^7.27.1",
+    "@babel/helper-replace-supers": "^7.27.1",
     "@babel/runtime": "^7.27.6",
     "@babel/traverse": "^7.27.4",
+    "@rollup/pluginutils": "^5.2.0",
     "@svgr/webpack": "^5.5.0",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
@@ -18,8 +20,10 @@
     "postcss": "^8.5.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-error-boundary": "^6.0.0",
     "react-router-dom": "^6.30.1",
     "react-scripts": "^5.0.1",
+    "semver": "^7.7.2",
     "tailwindcss": "^4.1.10",
     "typescript": "^4.9.5",
     "web-vitals": "^3.5.0"

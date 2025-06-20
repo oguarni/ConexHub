@@ -1,0 +1,64 @@
+services:
+  - type: web
+    name: conexhub-backend
+    env: node
+    region: oregon
+    plan: free
+    branch: main
+    rootDir: ./backend
+    buildCommand: "npm install && npm run db:migrate:prod"
+    startCommand: "npm run start"
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: API_PREFIX
+        value: /api
+      - key: FRONTEND_URL
+        value: https://conexhub.vercel.app
+      - key: ALLOWED_ORIGINS
+        value: https://conexhub.vercel.app,https://www.conexhub.vercel.app
+      - key: CORS_CREDENTIALS
+        value: true
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      - key: ENABLE_REGISTRATION
+        value: true
+      - key: ENABLE_PASSWORD_RESET
+        value: true
+      - key: ENABLE_EMAIL_VERIFICATION
+        value: false
+      - key: ENABLE_2FA
+        value: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: LOG_LEVEL
+        value: info
+      - key: MAX_FILE_SIZE
+        value: 5242880
+      - fromGroup: conexhub-secrets
+
+  - type: pserv
+    name: conexhub-postgres
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./backend/Dockerfile.postgres
+    disk:
+      name: postgres-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 1
+
+databases:
+  - name: conexhub-db
+    databaseName: conexhub_production
+    user: conexhub_user
+    region: oregon
+    plan: free
+    postgresMajorVersion: 15

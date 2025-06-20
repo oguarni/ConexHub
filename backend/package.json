@@ -1,6 +1,7 @@
 {
   "name": "conexhub-backend",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
@@ -9,7 +10,12 @@
     "validate-config": "node scripts/validate-config.js",
     "generate-secrets": "node scripts/validate-config.js --generate",
     "prestart": "npm run validate-config",
-    "security-check": "node scripts/validate-config.js && echo 'Security check passed'"
+    "security-check": "node scripts/validate-config.js && echo 'Security check passed'",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:migrate:prod": "NODE_ENV=production npx sequelize-cli db:migrate",
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "build": "echo 'Backend build completed'",
+    "postinstall": "echo 'Backend dependencies installed'"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

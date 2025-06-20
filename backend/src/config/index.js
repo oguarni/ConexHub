@@ -1,6 +1,10 @@
-const dotenv = require('dotenv');
-const path = require('path');
-const crypto = require('crypto');
+import dotenv from 'dotenv';
+import path from 'path';
+import crypto from 'crypto';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../../.env') });
@@ -405,7 +409,7 @@ try {
 }
 
 // Exporta configuração e utilitários
-module.exports = {
+export default {
   ...configuration,
   
   // Utilitários
@@ -423,3 +427,6 @@ module.exports = {
   _validateConfigValue: validateConfigValue,
   ConfigurationError
 };
+
+// Named exports for specific utilities
+export { ConfigurationError, validators as _validators, validateConfigValue as _validateConfigValue };

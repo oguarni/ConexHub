@@ -1,18 +1,18 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const compression = require('compression');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const swaggerUi = require('swagger-ui-express');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
 
 // Load configuration
-const config = require('./src/config');
-const { sequelize } = require('./src/models');
-const routes = require('./src/routes');
-const { errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');
-const { fullConfigValidation } = require('./src/middleware/configValidation');
-const swaggerSpec = require('./src/docs/swagger');
+import config from './src/config/index.js';
+import { sequelize } from './src/models/index.js';
+import routes from './src/routes/index.js';
+import { errorHandler, notFoundHandler } from './src/middleware/errorHandler.js';
+import { fullConfigValidation } from './src/middleware/configValidation.js';
+import swaggerSpec from './src/docs/swagger.js';
 
 const app = express();
 

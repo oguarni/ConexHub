@@ -11,6 +11,9 @@ backend/.env
 frontend/.env
 *.env.local
 *.env.*.local
+.env.production
+backend/.env.production
+frontend/.env.production
 
 # Log files
 *.log

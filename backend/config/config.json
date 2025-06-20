@@ -1,28 +1,13 @@
 {
   "development": {
-    "use_env_variable": "DATABASE_URL",
-    "dialect": "postgres",
+    "storage": "./test.db",
+    "dialect": "sqlite",
     "logging": false,
-    "dialectOptions": {
-      "ssl": false,
-      "connectTimeout": 60000,
-      "socketPath": null
-    },
     "pool": {
-      "max": "$DB_POOL_MAX",
-      "min": "$DB_POOL_MIN", 
-      "acquire": "$DB_POOL_ACQUIRE",
-      "idle": "$DB_POOL_IDLE"
-    },
-    "retry": {
-      "match": [
-        "ECONNRESET",
-        "ENOTFOUND",
-        "ECONNREFUSED",
-        "EHOSTUNREACH",
-        "ETIMEDOUT"
-      ],
-      "max": 3
+      "max": 5,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
     }
   },
   "test": {
