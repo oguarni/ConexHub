@@ -1,16 +1,15 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { AppProvider, useAppContext } from './contexts/AppProvider';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { QuotationProvider } from './contexts/QuotationContext';
 import Header from './components/common/Header';
-import MainContent from './components/layout/MainContent';
+import AppRouter from './components/router/AppRouter';
 import AuthModal from './components/auth/AuthModal';
 import QuotesSidebar from './components/quotes/QuotesSidebar';
 import OrdersModal from './components/orders/OrdersModal';
 import QuotationModal from './components/quotation/QuotationModal';
 import CheckoutModal from './components/checkout/CheckoutModal';
-import About from './components/pages/About';
-import DebugProducts from './components/DebugProducts';
 import './App.css';
 
 // Simple notification container
@@ -107,10 +106,6 @@ class ErrorBoundary extends React.Component {
 // Main App content
 const AppContent = () => {
   const { uiState, quotes, loading, user, updateUI, loadQuotes, addNotification } = useAppContext();
-  const [currentPage, setCurrentPage] = useState('products');
-  
-  // Add debug mode for testing
-  const isDebug = window.location.search.includes('debug=true');
   
   // Load quotes when user logs in
   React.useEffect(() => {
@@ -119,42 +114,32 @@ const AppContent = () => {
     }
   }, [user, uiState.showQuotes, loadQuotes]);
   
-  // Simple page routing
-  const renderPage = () => {
-    if (isDebug) return <DebugProducts />;
-    
-    switch (currentPage) {
-      case 'about':
-        return <About />;
-      default:
-        return <MainContent />;
-    }
-  };
-  
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      {renderPage()}
-      <AuthModal />
-      <QuotesSidebar
-        showQuotes={uiState.showQuotes}
-        setShowQuotes={(show) => updateUI({ showQuotes: show })}
-        quotes={quotes}
-        loading={loading}
-        user={user}
-        setShowQuoteComparison={(show) => updateUI({ showQuoteComparison: show })}
-        setShowAuth={(show) => updateUI({ showAuth: show })}
-      />
-      <OrdersModal
-        show={uiState.showOrders}
-        onClose={() => updateUI({ showOrders: false })}
-        user={user}
-        addNotification={addNotification}
-      />
-      <QuotationModal />
-      <CheckoutModal />
-      <NotificationContainer />
-    </div>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <AppRouter />
+        <AuthModal />
+        <QuotesSidebar
+          showQuotes={uiState.showQuotes}
+          setShowQuotes={(show) => updateUI({ showQuotes: show })}
+          quotes={quotes}
+          loading={loading}
+          user={user}
+          setShowQuoteComparison={(show) => updateUI({ showQuoteComparison: show })}
+          setShowAuth={(show) => updateUI({ showAuth: show })}
+        />
+        <OrdersModal
+          show={uiState.showOrders}
+          onClose={() => updateUI({ showOrders: false })}
+          user={user}
+          addNotification={addNotification}
+        />
+        <QuotationModal />
+        <CheckoutModal />
+        <NotificationContainer />
+      </div>
+    </Router>
   );
 };
 

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { FileText, User, Menu, X, Building, Package, Globe, HelpCircle } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppProvider';
 import { useLanguage } from '../../contexts/LanguageContext';
 import QuotationButton from '../quotation/QuotationButton';
 
-const Header = ({ currentPage, setCurrentPage }) => {
+const Header = () => {
+  const location = useLocation();
   const { 
     user, 
     uiState, 
@@ -61,30 +63,30 @@ const Header = ({ currentPage, setCurrentPage }) => {
               {uiState.isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
             
-            <div className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2">
               <Building size={28} />
               <div>
                 <h1 className="text-xl font-bold">ConexHub</h1>
                 <p className="text-xs text-green-200 hidden lg:block">{t('industrialSolutions') || 'Soluções Industriais'}</p>
               </div>
-            </div>
+            </Link>
           </div>
           
           {/* Menu Desktop */}
           <nav className="hidden md:flex items-center space-x-6">
-            <button 
-              onClick={() => setCurrentPage && setCurrentPage('products')}
-              className={`hover:text-blue-200 text-sm ${currentPage === 'products' ? 'border-b-2 border-white' : ''}`}
+            <Link 
+              to="/products"
+              className={`hover:text-blue-200 text-sm ${(location.pathname === '/' || location.pathname === '/products') ? 'border-b-2 border-white' : ''}`}
             >
               {t('products')}
-            </button>
+            </Link>
             
-            <button 
-              onClick={() => setCurrentPage && setCurrentPage('about')}
-              className={`hover:text-blue-200 text-sm ${currentPage === 'about' ? 'border-b-2 border-white' : ''}`}
+            <Link 
+              to="/about"
+              className={`hover:text-blue-200 text-sm ${location.pathname === '/about' ? 'border-b-2 border-white' : ''}`}
             >
               {t('about')}
-            </button>
+            </Link>
             
             {/* Language Switcher */}
             <div className="relative group">
