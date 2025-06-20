@@ -1,5 +1,5 @@
-const { Supplier, Product, Review, Quote, Order, User, sequelize } = require('../models');
-const { Op } = require('sequelize');
+import { Supplier, Product, Review, Quote, Order, User, sequelize } from '../models/index.js';
+import { Op } from 'sequelize';
 
 const getSuppliers = async (req, res) => {
   try {
@@ -192,7 +192,7 @@ const updateSubscription = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   getSuppliers,
   getSupplierProfile,
   getSupplierProducts,

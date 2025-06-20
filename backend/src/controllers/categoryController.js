@@ -1,5 +1,5 @@
-const { Category } = require('../models');
-const { validationResult } = require('express-validator');
+import { Category } from '../models/index.js';
+import { validationResult } from 'express-validator';
 
 class CategoryController {
   async getAllCategories(req, res, next) {
@@ -59,4 +59,4 @@ class CategoryController {
   }
 }
 
-module.exports = new CategoryController();
+export default new CategoryController();

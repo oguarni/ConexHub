@@ -19,7 +19,7 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --chown=nodeuser:nodejs package*.json ./
 
 # Install all dependencies including dev dependencies
-RUN npm ci --include=dev
+RUN npm install
 
 # Copy source code
 COPY --chown=nodeuser:nodejs . .

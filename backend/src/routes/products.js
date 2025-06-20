@@ -1,10 +1,11 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const { Product } = require('../models');
-const authMiddleware = require('../middleware/auth');
-const adminMiddleware = require('../middleware/admin');
-const { handleValidationErrors, sanitizeInput, productValidation, paramValidation } = require('../middleware/validation');
-const { asyncHandler, AppError } = require('../middleware/errorHandler');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import { Product } from '../models/index.js';
+import authMiddleware from '../middleware/auth.js';
+import adminMiddleware from '../middleware/admin.js';
+import { handleValidationErrors, sanitizeInput, productValidation, paramValidation } from '../middleware/validation.js';
+import { asyncHandler, AppError } from '../middleware/errorHandler.js';
+import { Op } from 'sequelize';
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router.get('/', [sanitizeInput], asyncHandler(async (req, res) => {
   
   if (search) {
     whereClause.name = {
-      [require('sequelize').Op.iLike]: `%${search}%`
+      [Op.iLike]: `%${search}%`
     };
   }
 
@@ -114,4 +115,4 @@ router.delete('/:id', [authMiddleware, adminMiddleware, ...paramValidation.id], 
   });
 }));
 
-module.exports = router;
+export default router;

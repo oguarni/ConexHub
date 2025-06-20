@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const bcrypt = require('bcryptjs');
+import { DataTypes } from 'sequelize';
+import bcrypt from 'bcryptjs';
 
-module.exports = (sequelize) => {
+export default (sequelize) => {
   const User = sequelize.define('User', {
     id: {
       type: DataTypes.UUID,

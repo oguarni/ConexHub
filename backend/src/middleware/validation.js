@@ -1,4 +1,4 @@
-const { body, query, param, validationResult } = require('express-validator');
+import { body, query, param, validationResult } from 'express-validator';
 
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
@@ -378,7 +378,7 @@ const paginationValidation = [
   handleValidationErrors
 ];
 
-module.exports = {
+export {
   handleValidationErrors,
   sanitizeInput,
   validateCEP,

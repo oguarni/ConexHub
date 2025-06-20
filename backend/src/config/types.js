@@ -276,7 +276,7 @@ function createConfigProxy(config) {
   });
 }
 
-module.exports = {
+export {
   TypeValidator,
   configSchemas,
   createTypedConfiguration,

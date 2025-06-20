@@ -1,5 +1,5 @@
-const { Review, User, Order, Supplier, OrderItem, Product } = require('../models');
-const { validationResult } = require('express-validator');
+import { Review, User, Order, Supplier, OrderItem, Product } from '../models/index.js';
+import { validationResult } from 'express-validator';
 
 class ReviewController {
   async createReview(req, res, next) {
@@ -106,4 +106,4 @@ class ReviewController {
   }
 }
 
-module.exports = new ReviewController();
+export default new ReviewController();

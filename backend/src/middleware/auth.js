@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const { User, Supplier } = require('../models');
-const { AppError } = require('./errorHandler');
-const config = require('../config/environment');
+import jwt from 'jsonwebtoken';
+import { User, Supplier } from '../models/index.js';
+import { AppError } from './errorHandler.js';
+import config from '../config/environment.js';
 
 const authenticate = async (req, res, next) => {
   try {
@@ -54,9 +54,11 @@ const isSupplierOrAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = {
+export {
   authenticate,
   isAdmin,
   isSupplier,
   isSupplierOrAdmin
 };
+
+export default authenticate;

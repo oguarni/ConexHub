@@ -1,6 +1,6 @@
-const { User, Supplier } = require('../models');
-const { validationResult } = require('express-validator');
-const jwt = require('jsonwebtoken');
+import { User, Supplier } from '../models/index.js';
+import { validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
 
 class AuthController {
   async register(req, res, next) {
@@ -174,4 +174,4 @@ class AuthController {
 }
 
 const authController = new AuthController();
-module.exports = authController;  // Export the instance, not the class
+export default authController;  // Export the instance, not the class

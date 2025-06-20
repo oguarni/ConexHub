@@ -1,4 +1,4 @@
-const config = require('../config/environment');
+import config from '../config/environment.js';
 
 /**
  * Classe para erros customizados da aplicação
@@ -218,7 +218,7 @@ const asyncHandler = (fn) => {
   };
 };
 
-module.exports = {
+export {
   errorHandler,
   notFoundHandler,
   asyncHandler,

@@ -1,5 +1,5 @@
-const { Quote, Product, User, Supplier, sequelize } = require('../models');
-const { Op } = require('sequelize');
+import { Quote, Product, User, Supplier, sequelize } from '../models/index.js';
+import { Op } from 'sequelize';
 
 // Generate unique quote number
 const generateQuoteNumber = () => {
@@ -252,7 +252,7 @@ const acceptQuote = async (req, res) => {
     await quote.update({ status: 'accepted' });
 
     // Create order from accepted quote
-    const { Order, OrderItem, Supplier } = require('../models');
+    const { Order, OrderItem, Supplier } = await import('../models/index.js');
     
     // Find supplier profile for the supplier user
     const supplierProfile = await Supplier.findOne({
@@ -339,7 +339,7 @@ const rejectQuote = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   requestQuote,
   getSupplierQuotes,
   submitQuote,

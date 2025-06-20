@@ -1,6 +1,6 @@
-const crypto = require('crypto');
-const QRCode = require('qrcode');
-const { PixPayment } = require('../models');
+import crypto from 'crypto';
+import QRCode from 'qrcode';
+import { PixPayment } from '../models/index.js';
 
 class PixService {
   // Generate EMV QR Code string for PIX
@@ -272,4 +272,4 @@ class PixService {
   }
 }
 
-module.exports = PixService;
+export default PixService;

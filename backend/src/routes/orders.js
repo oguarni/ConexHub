@@ -1,9 +1,9 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const { Order, OrderItem, Product, User } = require('../models');
-const authMiddleware = require('../middleware/auth');
-const { handleValidationErrors, sanitizeInput, cepValidation } = require('../middleware/validation');
-const { asyncHandler, AppError } = require('../middleware/errorHandler');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import { Order, OrderItem, Product, User } from '../models/index.js';
+import authMiddleware from '../middleware/auth.js';
+import { handleValidationErrors, sanitizeInput, cepValidation } from '../middleware/validation.js';
+import { asyncHandler, AppError } from '../middleware/errorHandler.js';
 
 const router = express.Router();
 
@@ -184,4 +184,4 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

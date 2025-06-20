@@ -1,5 +1,5 @@
-const { Order, OrderItem, Product, User, Supplier, sequelize } = require('../models');
-const { Op } = require('sequelize');
+import { Order, OrderItem, Product, User, Supplier, sequelize } from '../models/index.js';
+import { Op } from 'sequelize';
 
 class AnalyticsController {
   async getDashboard(req, res, next) {
@@ -138,4 +138,4 @@ class AnalyticsController {
   }
 }
 
-module.exports = new AnalyticsController();
+export default new AnalyticsController();

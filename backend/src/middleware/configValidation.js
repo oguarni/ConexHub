@@ -3,8 +3,8 @@
  * Garante que a aplicação só funcione com configuração válida
  */
 
-const config = require('../config');
-const { AppError } = require('./errorHandler');
+import config from '../config/index.js';
+import { AppError } from './errorHandler.js';
 
 /**
  * Middleware que valida configuração crítica antes de processar requests
@@ -215,7 +215,7 @@ const fullConfigValidation = [
   monitorConfigUsage
 ];
 
-module.exports = {
+export {
   validateCriticalConfig,
   addConfigHeaders,
   checkFeatureFlag,

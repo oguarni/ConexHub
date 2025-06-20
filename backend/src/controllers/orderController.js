@@ -1,4 +1,4 @@
-const { Order, OrderItem, Product, User, Supplier, sequelize } = require('../models');
+import { Order, OrderItem, Product, User, Supplier, sequelize } from '../models/index.js';
 
 const createOrder = async (req, res) => {
   const t = await sequelize.transaction();
@@ -205,7 +205,7 @@ const getSupplierOrders = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createOrder,
   getUserOrders,
   getSupplierOrders,

@@ -1,7 +1,7 @@
-const { Product, Supplier, Category } = require('../models');
-const { Op } = require('sequelize');
-const ProductQueryBuilder = require('./queryBuilder/ProductQueryBuilder');
-const config = require('../config/environment');
+import { Product, Supplier, Category } from '../models/index.js';
+import { Op } from 'sequelize';
+import ProductQueryBuilder from './queryBuilder/ProductQueryBuilder.js';
+import config from '../config/environment.js';
 
 class ProductService {
   constructor() {
@@ -620,4 +620,4 @@ class ProductService {
   }
 }
 
-module.exports = new ProductService();
+export default new ProductService();

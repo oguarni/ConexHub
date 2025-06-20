@@ -1,5 +1,9 @@
-const dotenv = require('dotenv');
-const path = require('path');
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../../.env') });
@@ -190,8 +194,15 @@ const isDevelopment = () => finalConfig.app.env === 'development';
 const isProduction = () => finalConfig.app.env === 'production';
 const isTest = () => finalConfig.app.env === 'test';
 
-module.exports = {
+export default {
   ...finalConfig,
+  isDevelopment,
+  isProduction,
+  isTest,
+  validateConfig
+};
+
+export {
   isDevelopment,
   isProduction,
   isTest,

@@ -1,28 +1,28 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { body } = require('express-validator');
-const { authenticate, isAdmin, isSupplier, isSupplierOrAdmin } = require('../middleware/auth');
-const { 
+import { body } from 'express-validator';
+import { authenticate, isAdmin, isSupplier, isSupplierOrAdmin } from '../middleware/auth.js';
+import { 
   productValidation, 
   orderValidation, 
   authValidation, 
   paramValidation 
-} = require('../middleware/validation');
+} from '../middleware/validation.js';
 
 // Controllers
-const authController = require('../controllers/authController');
-const productController = require('../controllers/productController');
-const orderController = require('../controllers/orderController');
-const quoteController = require('../controllers/quoteController');
-const supplierController = require('../controllers/supplierController');
-const categoryController = require('../controllers/categoryController');
-const reviewController = require('../controllers/reviewController');
-const analyticsController = require('../controllers/analyticsController');
-const adminController = require('../controllers/adminController');
-const seedController = require('../controllers/seedController');
+import authController from '../controllers/authController.js';
+import * as productController from '../controllers/productController.js';
+import * as orderController from '../controllers/orderController.js';
+import * as quoteController from '../controllers/quoteController.js';
+import * as supplierController from '../controllers/supplierController.js';
+import categoryController from '../controllers/categoryController.js';
+import reviewController from '../controllers/reviewController.js';
+import analyticsController from '../controllers/analyticsController.js';
+import adminController from '../controllers/adminController.js';
+import seedController from '../controllers/seedController.js';
 
 // PIX routes
-const pixRoutes = require('./pix');
+import pixRoutes from './pix.js';
 
 // Test route
 router.get('/test', (req, res) => {
@@ -138,7 +138,7 @@ router.use('/pix', pixRoutes);
 // Seed route for development (simple version)
 router.post('/seed', async (req, res) => {
   try {
-    const { sequelize, Category, Supplier, Product, User } = require('../models');
+    const { sequelize, Category, Supplier, Product, User } = await import('../models/index.js');
     
     console.log('🌱 Iniciando seed do banco de dados...');
 
@@ -262,4 +262,4 @@ router.post('/seed', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,4 +1,4 @@
-const { User, Supplier, Order, Product } = require('../models');
+import { User, Supplier, Order, Product } from '../models/index.js';
 
 class AdminController {
   async getUsers(req, res, next) {
@@ -101,4 +101,4 @@ class AdminController {
   }
 }
 
-module.exports = new AdminController();
+export default new AdminController();

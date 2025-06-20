@@ -1,4 +1,4 @@
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Review = sequelize.define('Review', {
     id: {
       type: DataTypes.UUID,

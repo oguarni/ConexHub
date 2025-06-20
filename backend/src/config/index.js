@@ -405,7 +405,11 @@ try {
   }
 } catch (error) {
   console.error('❌ Erro fatal na configuração:', error.message);
-  process.exit(1);
+  if (process.env.NODE_ENV !== 'test') {
+    process.exit(1);
+  } else {
+    throw error;
+  }
 }
 
 // Exporta configuração e utilitários

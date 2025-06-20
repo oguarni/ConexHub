@@ -1,4 +1,4 @@
-const productService = require('../services/productService');
+import productService from '../services/productService.js';
 
 const getAllProducts = async (req, res) => {
   try {
@@ -76,7 +76,7 @@ const createProduct = async (req, res) => {
     
     // Se for admin e não tiver supplier, pegar o primeiro supplier disponível
     if (req.user.role === 'admin' && !supplierId) {
-      const { Supplier } = require('../models');
+      const { Supplier } = await import('../models/index.js');
       const firstSupplier = await Supplier.findOne();
       supplierId = firstSupplier?.id;
     }
@@ -125,7 +125,7 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   getAllProducts,
   searchProducts,
   getProductById,

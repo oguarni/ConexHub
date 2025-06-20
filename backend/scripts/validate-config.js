@@ -4,8 +4,12 @@
  * Uso: npm run validate-config
  */
 
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Cores para output
 const colors = {
@@ -82,7 +86,7 @@ async function validateConfiguration() {
     printSection('Validação de Configuração');
     
     try {
-      const config = require('../src/config');
+      const { default: config } = await import('../src/config/index.js');
       printSuccess('Configuração carregada com sucesso');
       
       // 3. Validações específicas
@@ -264,10 +268,10 @@ async function validateConfiguration() {
 }
 
 // Função para gerar configuração segura
-function generateSecureConfig() {
+async function generateSecureConfig() {
   printHeader('Gerador de Configuração Segura');
   
-  const config = require('../src/config');
+  const { default: config } = await import('../src/config/index.js');
   
   console.log('🔑 JWT Secrets seguros:');
   console.log(`JWT_SECRET=${config.generateSecureJwtSecret()}`);
@@ -281,17 +285,18 @@ async function main() {
   const args = process.argv.slice(2);
   
   if (args.includes('--generate') || args.includes('-g')) {
-    generateSecureConfig();
+    await generateSecureConfig();
   } else {
     await validateConfiguration();
   }
 }
 
-if (require.main === module) {
+// Check if this module is being run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(error => {
     console.error(colorize('❌ Erro fatal:', 'red'), error.message);
     process.exit(1);
   });
 }
 
-module.exports = { validateConfiguration, generateSecureConfig };
+export { validateConfiguration, generateSecureConfig };

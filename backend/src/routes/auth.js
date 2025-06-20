@@ -1,12 +1,12 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { body, validationResult } = require('express-validator');
-const { User } = require('../models');
-const authMiddleware = require('../middleware/auth');
-const { handleValidationErrors, sanitizeInput, authValidation, cpfValidation } = require('../middleware/validation');
-const { asyncHandler, AppError } = require('../middleware/errorHandler');
-const config = require('../config/environment');
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { body, validationResult } from 'express-validator';
+import { User } from '../models/index.js';
+import authMiddleware from '../middleware/auth.js';
+import { handleValidationErrors, sanitizeInput, authValidation, cpfValidation } from '../middleware/validation.js';
+import { asyncHandler, AppError } from '../middleware/errorHandler.js';
+import config from '../config/environment.js';
 
 const router = express.Router();
 
@@ -29,9 +29,12 @@ router.post('/register', [
     .withMessage('Senha deve conter ao menos uma letra minúscula, uma maiúscula e um número'),
   body('cpf')
     .optional()
-    .custom((value) => {
-      if (value && !require('../middleware/validation').validateCPF(value)) {
-        throw new Error('CPF inválido');
+    .custom(async (value) => {
+      if (value) {
+        const { validateCPF } = await import('../middleware/validation.js');
+        if (!validateCPF(value)) {
+          throw new Error('CPF inválido');
+        }
       }
       return true;
     }),
@@ -144,4 +147,4 @@ router.get('/profile', authMiddleware, asyncHandler(async (req, res) => {
   });
 }));
 
-module.exports = router;
+export default router;

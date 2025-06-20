@@ -1,6 +1,6 @@
-const PixService = require('../services/pixService');
-const { Quote, Order, User, Supplier } = require('../models');
-const { validationResult } = require('express-validator');
+import PixService from '../services/pixService.js';
+import { Quote, Order, User, Supplier } from '../models/index.js';
+import { validationResult } from 'express-validator';
 
 class PixController {
   // Create PIX payment for quote
@@ -431,4 +431,4 @@ class PixController {
   }
 }
 
-module.exports = PixController;
+export default PixController;

@@ -1,4 +1,4 @@
-const { Op, Sequelize } = require('sequelize');
+import { Op, Sequelize } from 'sequelize';
 
 /**
  * Advanced Product Query Builder
@@ -466,4 +466,4 @@ class ProductQueryBuilder {
   }
 }
 
-module.exports = ProductQueryBuilder;
+export default ProductQueryBuilder;

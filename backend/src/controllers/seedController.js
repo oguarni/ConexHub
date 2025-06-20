@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { sequelize } = require('../models');
+import { sequelize } from '../models/index.js';
 
 // Endpoint de teste
 router.get('/test', (req, res) => {
@@ -101,4 +101,4 @@ router.post('/reset', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

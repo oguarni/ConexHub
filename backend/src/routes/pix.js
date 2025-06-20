@@ -1,7 +1,7 @@
-const express = require('express');
-const { body } = require('express-validator');
-const { authenticate: auth } = require('../middleware/auth');
-const PixController = require('../controllers/pixController');
+import express from 'express';
+import { body } from 'express-validator';
+import { authenticate as auth } from '../middleware/auth.js';
+import PixController from '../controllers/pixController.js';
 
 const router = express.Router();
 
@@ -87,4 +87,4 @@ router.post('/validate-key',
   PixController.validatePixKey
 );
 
-module.exports = router;
+export default router;
