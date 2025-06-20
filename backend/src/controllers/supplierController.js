@@ -200,3 +200,12 @@ export {
   updateSupplierProfile,
   updateSubscription
 };
+
+export default {
+  getSuppliers,
+  getSupplierProfile,
+  getSupplierProducts,
+  getSupplierReviews,
+  updateSupplierProfile,
+  updateSubscription
+};

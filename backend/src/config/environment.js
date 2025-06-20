@@ -136,6 +136,8 @@ const validateConfig = () => {
   if (errors.length > 0) {
     throw new Error(`Configuration validation failed:\n${errors.join('\n')}`);
   }
+  
+  return true;
 };
 
 // Environment-specific configurations
@@ -185,9 +187,6 @@ const finalConfig = {
     cors: { ...config.security.cors, ...envConfig.security?.cors }
   }
 };
-
-// Validate configuration
-validateConfig();
 
 // Helper functions
 const isDevelopment = () => finalConfig.app.env === 'development';

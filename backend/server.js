@@ -138,7 +138,7 @@ const startServer = async () => {
   try {
     // Database connection
     await sequelize.authenticate();
-    console.log(`✅ Database connected successfully (${config.app.env})`);
+    console.log(`✅ Database connected successfully (${config.app?.env || 'unknown'})`);
     
     // Sync database in development
     if (config.isDevelopment()) {

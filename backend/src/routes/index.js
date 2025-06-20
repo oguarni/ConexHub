@@ -1,7 +1,7 @@
 import express from 'express';
-import * as swaggerUi from 'swagger-ui-express'; // Corrected import for ES module compatibility
-import productRoutes from './products.js';
+import * as swaggerUi from 'swagger-ui-express';
 import authRoutes from './auth.js';
+import productRoutes from './products.js';
 import orderRoutes from './orders.js';
 import pixRoutes from './pix.js';
 import seedRoutes from './seed.js';
@@ -11,12 +11,12 @@ const router = express.Router();
 
 // Health check endpoint
 router.get('/health', (req, res) => {
-  res.status(200).json({ status: 'UP' });
+  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 
-// API routes
-router.use('/products', productRoutes);
+// Existing routes
 router.use('/auth', authRoutes);
+router.use('/products', productRoutes);
 router.use('/orders', orderRoutes);
 router.use('/pix', pixRoutes);
 
@@ -26,7 +26,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Swagger API documentation
-// The swaggerUi object now has serve and setup properties that can be accessed directly.
 router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export default router;

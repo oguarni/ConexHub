@@ -347,3 +347,10 @@ export {
   acceptQuote,
   rejectQuote
 };
+
+export default {
+  submitQuote,
+  getBuyerQuotes,
+  acceptQuote,
+  rejectQuote
+};

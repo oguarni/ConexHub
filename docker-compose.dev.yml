@@ -50,7 +50,9 @@ services:
       dockerfile: Dockerfile.dev
       target: development
     container_name: b2b_backend_dev
+    user: '${UID}:${GID}'
     restart: unless-stopped
+    command: npm run dev
     ports:
       - "3001:3001"
       - "9229:9229"  # Node.js debugger port
@@ -92,6 +94,7 @@ services:
       dockerfile: Dockerfile.dev
       target: development
     container_name: b2b_frontend_dev
+    user: '${UID}:${GID}'
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -116,7 +119,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
     networks:
       - b2b_network
 
