@@ -11,7 +11,7 @@ import config from './src/config/index.js';
 import { sequelize } from './src/models/index.js';
 import routes from './src/routes/index.js';
 import { errorHandler, notFoundHandler } from './src/middleware/errorHandler.js';
-import { fullConfigValidation } from './src/middleware/configValidation.js';
+import validateConfig from './src/middleware/configValidation.js';
 import swaggerSpec from './src/docs/swagger.js';
 
 const app = express();
@@ -48,8 +48,8 @@ app.use(limiter);
 // Compression
 app.use(compression());
 
-// Configuration validation middleware
-app.use(fullConfigValidation);
+// Configuration validation middleware - now Docker-compatible
+app.use(validateConfig);
 
 // CORS
 app.use(cors({
@@ -103,26 +103,12 @@ if (config.isDevelopment() || process.env.ENABLE_DOCS === 'true') {
   console.log(`📚 API Documentation available at: http://localhost:${config.PORT}/docs`);
 }
 
-// Health check endpoint
+// Health check endpoint - simplified for Docker
 app.get('/health', (req, res) => {
-  const healthData = {
+  res.status(200).json({ 
     status: 'healthy',
-    timestamp: new Date().toISOString(),
-    environment: config.NODE_ENV,
-    version: process.env.npm_package_version || '1.0.0',
-    uptime: process.uptime(),
-    services: {
-      database: 'connected', // This should be checked dynamically
-      redis: 'connected' // This should be checked dynamically
-    }
-  };
-
-  // Add documentation link in development
-  if (config.isDevelopment() || process.env.ENABLE_DOCS === 'true') {
-    healthData.documentation = `http://localhost:${config.PORT}/docs`;
-  }
-
-  res.status(200).json(healthData);
+    timestamp: new Date().toISOString()
+  });
 });
 
 // API Routes

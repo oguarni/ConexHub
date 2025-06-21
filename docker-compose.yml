@@ -12,7 +12,7 @@ services:
     environment:
       POSTGRES_DB: b2b_marketplace
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: mysecurepassword123
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
       - "5434:5432"
@@ -53,11 +53,18 @@ services:
     restart: unless-stopped
     ports:
       - "3001:3001"
+    command: ["dumb-init", "--", "node", "server.js"]
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/b2b_marketplace
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:mysecurepassword123@postgres:5432/b2b_marketplace
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASSWORD: mysecurepassword123
+      DB_DATABASE: b2b_marketplace
+      DB_PORT: 5432
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: DEV_A8x9K2mN5q7P1wT3uY6rE9sA2dF5gH8j
+      JWT_SECRET: gDgQwj/ONp0vOLhmsWq/Wm0IHegEBXZwJzrxK7faJICWRPdcmXv5eRY/4LjnSfoTkdqnN9RE+gaFIYhSQ+4V0A==
       JWT_REFRESH_SECRET: DEV_REFRESH_M6n5B4v3C2x1Z9y8A7s6D5f4G3h2J1k0
       JWT_EXPIRES_IN: 7d
       FRONTEND_URL: http://localhost:3000

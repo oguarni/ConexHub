@@ -14,7 +14,7 @@ RUN apk update && apk upgrade && apk add --no-cache dumb-init
 COPY package*.json ./
 
 # Install dependencies with optimizations
-RUN npm ci --only=production --ignore-scripts && \
+RUN npm install --only=production --ignore-scripts && \
     npm cache clean --force
 
 # ===== STAGE 2: Build =====
@@ -26,7 +26,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci --include=dev --ignore-scripts
+RUN npm install --ignore-scripts
 
 # Copy source code
 COPY . .
@@ -60,8 +60,8 @@ COPY --from=builder --chown=reactuser:nodejs /app/package*.json ./
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 # Create nginx directories with proper permissions
-RUN mkdir -p /var/log/nginx /var/cache/nginx /var/run && \
-    chown -R reactuser:nodejs /var/log/nginx /var/cache/nginx /var/run
+RUN mkdir -p /tmp/nginx_client_temp /tmp/nginx_proxy_temp /tmp/nginx_fastcgi_temp /tmp/nginx_uwsgi_temp /tmp/nginx_scgi_temp && \
+    chown -R reactuser:nodejs /tmp/nginx_*
 
 # Switch to non-root user
 USER reactuser

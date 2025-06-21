@@ -16,7 +16,7 @@ RUN apk update && apk upgrade && \
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production --ignore-scripts && \
+RUN npm install --only=production --ignore-scripts && \
     npm cache clean --force
 
 # ===== STAGE 2: Build =====
@@ -31,7 +31,7 @@ RUN apk add --no-cache python3 make g++
 COPY package*.json ./
 
 # Install all dependencies (including devDependencies)
-RUN npm ci --include=dev
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -61,6 +61,7 @@ COPY --from=dependencies --chown=nodeuser:nodejs /app/node_modules ./node_module
 
 # Copy application source from builder stage
 COPY --from=builder --chown=nodeuser:nodejs /app/src ./src
+COPY --from=builder --chown=nodeuser:nodejs /app/server.js ./
 COPY --from=builder --chown=nodeuser:nodejs /app/package*.json ./
 COPY --from=builder --chown=nodeuser:nodejs /app/scripts ./scripts
 

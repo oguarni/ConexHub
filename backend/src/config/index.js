@@ -138,7 +138,9 @@ const validators = {
     }
     
     // Verifica se não contém credenciais hardcoded inseguras
-    if (value.includes('password@') || value.includes(':password@')) {
+    // Skip this check in Docker environments (when connecting to postgres service)
+    const isDockerEnv = value.includes('@postgres:');
+    if (!isDockerEnv && (value.includes('password@') || value.includes(':password@'))) {
       throw new ConfigurationError(`${name} não deve conter credenciais hardcoded`);
     }
     

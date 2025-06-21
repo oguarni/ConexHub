@@ -6,7 +6,7 @@ import { User } from '../models/index.js';
 import authMiddleware from '../middleware/auth.js';
 import { handleValidationErrors, sanitizeInput, authValidation, cpfValidation } from '../middleware/validation.js';
 import { asyncHandler, AppError } from '../middleware/errorHandler.js';
-import config from '../config/environment.js';
+import config from '../config/index.js';
 
 const router = express.Router();
 
@@ -41,7 +41,7 @@ router.post('/register', [
   body('address').optional().isString().isLength({ max: 500 }).withMessage('Endereço deve ter no máximo 500 caracteres'),
   handleValidationErrors
 ], asyncHandler(async (req, res) => {
-  const { name, email, password, cpf, address } = req.body;
+  const { name, email, password, cpf, address, role: requestedRole } = req.body;
 
   // Check if user already exists
   const existingUser = await User.findOne({ where: { email } });
@@ -52,8 +52,13 @@ router.post('/register', [
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  // Set admin role for specific email
-  const role = email === 'admin@b2bmarketplace.com' ? 'admin' : 'user';
+  // Set role: admin for specific email, requested role if valid, otherwise buyer as default
+  let role = 'buyer'; // default role for B2B marketplace
+  if (email === 'admin@b2bmarketplace.com') {
+    role = 'admin';
+  } else if (requestedRole && ['buyer', 'supplier'].includes(requestedRole)) {
+    role = requestedRole;
+  }
 
   // Create user
   const user = await User.create({
@@ -68,8 +73,8 @@ router.post('/register', [
   // Generate JWT
   const token = jwt.sign(
     { userId: user.id, email: user.email, role: user.role },
-    config.security.jwt.secret,
-    { expiresIn: config.security.jwt.expiresIn }
+    config.JWT_SECRET,
+    { expiresIn: config.JWT_EXPIRES_IN }
   );
 
   res.status(201).json({
@@ -98,15 +103,21 @@ router.post('/login', [
   handleValidationErrors
 ], asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  console.log('Login attempt for:', email);
 
   // Find user
   const user = await User.findOne({ where: { email } });
   if (!user) {
+    console.log('User not found:', email);
     throw new AppError('Credenciais inválidas', 401, 'INVALID_CREDENTIALS');
   }
+  console.log('User found, checking password...');
 
   // Check password
+  console.log('Input password:', JSON.stringify(password));
+  console.log('Stored hash:', user.password);
   const isValidPassword = await bcrypt.compare(password, user.password);
+  console.log('Password valid:', isValidPassword);
   if (!isValidPassword) {
     throw new AppError('Credenciais inválidas', 401, 'INVALID_CREDENTIALS');
   }
@@ -114,8 +125,8 @@ router.post('/login', [
   // Generate JWT
   const token = jwt.sign(
     { userId: user.id, email: user.email, role: user.role },
-    config.security.jwt.secret,
-    { expiresIn: config.security.jwt.expiresIn }
+    config.JWT_SECRET,
+    { expiresIn: config.JWT_EXPIRES_IN }
   );
 
   res.json({

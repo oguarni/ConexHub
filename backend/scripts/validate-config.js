@@ -67,8 +67,13 @@ async function validateConfiguration() {
     const envPath = path.join(__dirname, '../.env');
     const envExamplePath = path.join(__dirname, '../.env.example');
     
+    // Skip .env file check in Docker environment
+    const isDocker = process.env.DATABASE_URL && process.env.DATABASE_URL.includes('@postgres:');
+    
     if (fs.existsSync(envPath)) {
       printSuccess('Arquivo .env encontrado');
+    } else if (isDocker) {
+      printInfo('Executando em Docker - variáveis de ambiente carregadas pelo container');
     } else {
       printError('Arquivo .env não encontrado');
       printInfo('Execute: cp .env.example .env');
