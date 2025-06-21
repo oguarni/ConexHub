@@ -39,6 +39,13 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // JSON parsing errors
+  if (err.type === 'entity.parse.failed' || err.name === 'SyntaxError') {
+    return res.status(400).json({
+      error: 'Invalid JSON'
+    });
+  }
+
   // Sequelize validation errors
   if (err.name === 'SequelizeValidationError') {
     const errors = err.errors.map(error => ({

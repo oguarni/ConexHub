@@ -132,9 +132,14 @@ const validators = {
       throw new ConfigurationError(`${name} é obrigatório`);
     }
     
-    // Verifica formato básico
+    // Verifica formato básico - aceita sqlite:// e outros protocolos válidos
     if (!value.includes('://')) {
       throw new ConfigurationError(`${name} deve ser uma URL de conexão válida`);
+    }
+    
+    // Aceita SQLite URLs (incluindo :memory: para testes)
+    if (value.startsWith('sqlite://')) {
+      return value;
     }
     
     // Verifica se não contém credenciais hardcoded inseguras

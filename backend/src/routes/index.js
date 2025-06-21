@@ -7,6 +7,10 @@ import pixRoutes from './pix.js';
 import seedRoutes from './seed.js';
 import constantsRoutes from './constants.js';
 import permissionsRoutes from './permissions.js';
+import analyticsRoutes from './analytics.js';
+import adminRoutes from './admin.js';
+import recommendationRoutes from './recommendations.js';
+import notificationRoutes from './notifications.js';
 import swaggerSpec from '../docs/swagger.js';
 
 const router = express.Router();
@@ -23,6 +27,10 @@ router.use('/orders', orderRoutes);
 router.use('/pix', pixRoutes);
 router.use('/constants', constantsRoutes);
 router.use('/permissions', permissionsRoutes);
+router.use('/analytics', analyticsRoutes);
+router.use('/admin', adminRoutes);
+router.use('/recommendations', recommendationRoutes);
+router.use('/notifications', notificationRoutes);
 
 // Seed route (for development/testing)
 if (process.env.NODE_ENV !== 'production') {

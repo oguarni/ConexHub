@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 // Set test environment variables BEFORE loading config
 process.env.NODE_ENV = 'test';
 process.env.PORT = '3001';
-process.env.DATABASE_URL = 'sqlite::memory:';
+process.env.DATABASE_URL = 'sqlite:///:memory:';
 process.env.JWT_SECRET = 'Test123!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 process.env.JWT_REFRESH_SECRET = 'TestRefresh123!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 process.env.FRONTEND_URL = 'http://localhost:3000';

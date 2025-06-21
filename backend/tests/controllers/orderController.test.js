@@ -304,6 +304,10 @@ describe('Order Controller', () => {
     });
 
     it('should handle database transaction rollback on failure', async () => {
+      // Get current order count before the test
+      const ordersBefore = await Order.findAll({ where: { userId: buyerUser.id } });
+      const initialCount = ordersBefore.length;
+
       // Create an order with mixed valid and invalid products
       const mixedOrderData = {
         items: [
@@ -326,10 +330,9 @@ describe('Order Controller', () => {
 
       expect(response.body.error).toBe('Product 99999 not found');
 
-      // Verify no partial order was created
-      const orders = await Order.findAll({ where: { userId: buyerUser.id } });
-      const newOrdersCount = orders.length - 1; // Subtract the pre-existing test order
-      expect(newOrdersCount).toBe(0);
+      // Verify no partial order was created - order count should remain the same
+      const ordersAfter = await Order.findAll({ where: { userId: buyerUser.id } });
+      expect(ordersAfter.length).toBe(initialCount);
     });
   });
 
