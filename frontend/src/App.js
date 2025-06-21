@@ -1,8 +1,8 @@
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { AppProvider, useAppContext } from './contexts/AppProvider';
 import { LanguageProvider } from './contexts/LanguageContext';
-import { QuotationProvider } from './contexts/QuotationContext';
+import { useAuth } from './stores/authStore';
+import { useNotifications, useModals } from './stores/uiStore';
 import Header from './components/common/Header';
 import AppRouter from './components/router/AppRouter';
 import AuthModal from './components/auth/AuthModal';
@@ -13,15 +13,15 @@ import CheckoutModal from './components/checkout/CheckoutModal';
 import './App.css';
 import './styles/components.css';
 
-// Simple notification container
+// Updated notification container using Zustand
 const NotificationContainer = () => {
-  const { uiState, removeNotification } = useAppContext();
+  const { notifications, removeNotification } = useNotifications();
 
-  if (uiState.notifications.length === 0) return null;
+  if (notifications.length === 0) return null;
 
   return (
     <div className="fixed top-20 right-4 z-50 space-y-2 max-w-sm">
-      {uiState.notifications.map(notification => (
+      {notifications.map(notification => (
         <div
           key={notification.id}
           className={`p-4 rounded-lg shadow-lg border transition-all duration-300 ${
@@ -106,14 +106,15 @@ class ErrorBoundary extends React.Component {
 
 // Main App content
 const AppContent = () => {
-  const { uiState, quotes, loading, user, updateUI, loadQuotes, addNotification } = useAppContext();
+  const { user, isAuthenticated } = useAuth();
+  const { modals, showModal, hideModal } = useModals();
+  const { addNotification } = useNotifications();
   
-  // Load quotes when user logs in
+  // Initialize auth store on mount
   React.useEffect(() => {
-    if (user && uiState.showQuotes) {
-      loadQuotes();
-    }
-  }, [user, uiState.showQuotes, loadQuotes]);
+    const authStore = require('./stores/authStore').default;
+    authStore.getState().initializeAuth();
+  }, []);
   
   return (
     <Router>
@@ -122,17 +123,15 @@ const AppContent = () => {
         <AppRouter />
         <AuthModal />
         <QuotesSidebar
-          showQuotes={uiState.showQuotes}
-          setShowQuotes={(show) => updateUI({ showQuotes: show })}
-          quotes={quotes}
-          loading={loading}
+          showQuotes={modals.showQuotes}
+          setShowQuotes={(show) => show ? showModal('showQuotes') : hideModal('showQuotes')}
           user={user}
-          setShowQuoteComparison={(show) => updateUI({ showQuoteComparison: show })}
-          setShowAuth={(show) => updateUI({ showAuth: show })}
+          setShowQuoteComparison={(show) => show ? showModal('showQuoteComparison') : hideModal('showQuoteComparison')}
+          setShowAuth={(show) => show ? showModal('showAuth') : hideModal('showAuth')}
         />
         <OrdersModal
-          show={uiState.showOrders}
-          onClose={() => updateUI({ showOrders: false })}
+          show={modals.showOrders}
+          onClose={() => hideModal('showOrders')}
           user={user}
           addNotification={addNotification}
         />
@@ -169,13 +168,9 @@ function App() {
   return (
     <ErrorBoundary>
       <LanguageProvider>
-        <AppProvider>
-          <QuotationProvider>
-            <Suspense fallback={<LoadingFallback />}>
-              <AppContent />
-            </Suspense>
-          </QuotationProvider>
-        </AppProvider>
+        <Suspense fallback={<LoadingFallback />}>
+          <AppContent />
+        </Suspense>
       </LanguageProvider>
     </ErrorBoundary>
   );
