@@ -53,6 +53,16 @@ export default (sequelize) => {
       defaultValue: true
     }
   }, {
+    defaultScope: {
+      attributes: {
+        exclude: ['password']
+      }
+    },
+    scopes: {
+      withPassword: {
+        attributes: {}
+      }
+    },
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {

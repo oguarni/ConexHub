@@ -106,7 +106,7 @@ router.post('/login', [
   console.log('Login attempt for:', email);
 
   // Find user
-  const user = await User.findOne({ where: { email } });
+  const user = await User.scope('withPassword').findOne({ where: { email } });
   if (!user) {
     console.log('User not found:', email);
     throw new AppError('Credenciais inválidas', 401, 'INVALID_CREDENTIALS');

@@ -102,41 +102,84 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Main App content
+// Main App content with error boundary for context issues
 const AppContent = () => {
-  const { user, isAuthenticated } = useAuth();
-  const { modals, showModal, hideModal } = useModals();
-  const { addNotification } = useNotifications();
+  // Use a state to track if providers are ready
+  const [providersReady, setProvidersReady] = React.useState(false);
   
-  // Initialize auth store on mount
+  // Check if providers are available
   React.useEffect(() => {
-    const authStore = require('./stores/authStore').default;
-    authStore.getState().initializeAuth();
+    // Small delay to ensure all providers are mounted
+    const timer = setTimeout(() => {
+      setProvidersReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
   
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <AppRouter />
-      <AuthModal />
-      <QuotesSidebar
-        showQuotes={modals.showQuotes}
-        setShowQuotes={(show) => show ? showModal('showQuotes') : hideModal('showQuotes')}
-        user={user}
-        setShowQuoteComparison={(show) => show ? showModal('showQuoteComparison') : hideModal('showQuoteComparison')}
-        setShowAuth={(show) => show ? showModal('showAuth') : hideModal('showAuth')}
-      />
-      <OrdersModal
-        show={modals.showOrders}
-        onClose={() => hideModal('showOrders')}
-        user={user}
-        addNotification={addNotification}
-      />
-      <QuotationModal />
-      <CheckoutModal />
-      <NotificationContainer />
-    </div>
-  );
+  if (!providersReady) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+  
+  return <AppWithProviders />;
+};
+
+// Component that uses contexts - only rendered after providers are ready
+const AppWithProviders = () => {
+  try {
+    const { user, isAuthenticated } = useAuth();
+    const { modals, showModal, hideModal } = useModals();
+    const { addNotification } = useNotifications();
+    
+    // Initialize auth store on mount
+    React.useEffect(() => {
+      const authStore = require('./stores/authStore').default;
+      authStore.getState().initializeAuth();
+    }, []);
+    
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <AppRouter />
+        <AuthModal />
+        <QuotesSidebar
+          showQuotes={modals.showQuotes}
+          setShowQuotes={(show) => show ? showModal('showQuotes') : hideModal('showQuotes')}
+          user={user}
+          setShowQuoteComparison={(show) => show ? showModal('showQuoteComparison') : hideModal('showQuoteComparison')}
+          setShowAuth={(show) => show ? showModal('showAuth') : hideModal('showAuth')}
+        />
+        <OrdersModal
+          show={modals.showOrders}
+          onClose={() => hideModal('showOrders')}
+          user={user}
+          addNotification={addNotification}
+        />
+        <QuotationModal />
+        <CheckoutModal />
+        <NotificationContainer />
+      </div>
+    );
+  } catch (error) {
+    console.error('Context provider error:', error);
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center p-8">
+          <h1 className="text-xl font-bold text-red-600 mb-4">Context Provider Error</h1>
+          <p className="text-gray-600 mb-4">There was an issue with the application context providers.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Reload Application
+          </button>
+        </div>
+      </div>
+    );
+  }
 };
 
 // Main App component

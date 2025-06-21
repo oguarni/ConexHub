@@ -186,6 +186,7 @@ export const AppProvider = ({ children }) => {
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {
+    console.error('useAppContext called outside of AppProvider context. Component hierarchy issue detected.');
     throw new Error('useAppContext must be used within AppProvider');
   }
   return context;
