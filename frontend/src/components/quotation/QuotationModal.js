@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, Calculator } from 'lucide-react';
 import { useQuotation } from '../../contexts/QuotationContext';
-import { useLegacyAppContext } from "../../contexts/AppProvider";
+import useUIStore from '../../stores/uiStore';
 
 const QuotationModal = () => {
-  const { uiState, updateUI } = useLegacyAppContext();
+  const { uiState, updateUI } = useUIStore();
   const {
     quotationItems,
     shippingCost,

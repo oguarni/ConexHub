@@ -49,9 +49,6 @@ router.post('/register', [
     throw new AppError('Usuário já existe', 409, 'USER_ALREADY_EXISTS');
   }
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 12);
-
   // Set role: admin for specific email, requested role if valid, otherwise buyer as default
   let role = 'buyer'; // default role for B2B marketplace
   if (email === 'admin@b2bmarketplace.com') {
@@ -60,11 +57,11 @@ router.post('/register', [
     role = requestedRole;
   }
 
-  // Create user
+  // Create user (password will be hashed by the model's beforeCreate hook)
   const user = await User.create({
     name,
     email,
-    password: hashedPassword,
+    password,
     cpf,
     address,
     role

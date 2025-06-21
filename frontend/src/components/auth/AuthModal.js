@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Lock, Building } from 'lucide-react';
-import { useLegacyAppContext } from "../../contexts/AppProvider";
+import useAuthStore from '../../stores/authStore';
+import useUIStore from '../../stores/uiStore';
 
 const AuthModal = () => {
-  const { 
-    uiState, 
-    hideModal, 
-    login, 
-    register,
-    loading, 
-    error,
-    addNotification 
-  } = useLegacyAppContext();
+  const { login, register, loading, error } = useAuthStore();
+  const { uiState, hideModal, addNotification } = useUIStore();
 
   const [formData, setFormData] = useState({
     email: '',

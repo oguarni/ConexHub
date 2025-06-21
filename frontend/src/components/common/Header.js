@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, User, Menu, X, Building, Package, Globe, HelpCircle } from 'lucide-react';
-import { useLegacyAppContext } from "../../contexts/AppProvider";
+import useAuthStore from '../../stores/authStore';
+import useUIStore from '../../stores/uiStore';
 import { useLanguage } from '../../contexts/LanguageContext';
 import QuotationButton from '../quotation/QuotationButton';
 
 const Header = () => {
   const location = useLocation();
-  const { 
-    user, 
-    uiState, 
-    logout, 
-    showModal, 
-    toggleMenu,
-    addNotification 
-  } = useLegacyAppContext();
+  const { user, logout } = useAuthStore();
+  const { uiState, showModal, toggleMenu, addNotification } = useUIStore();
   
   const { t, language, changeLanguage, availableLanguages } = useLanguage();
   const [showHelp, setShowHelp] = useState(false);

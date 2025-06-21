@@ -1,19 +1,22 @@
-import React, { Suspense, useEffect } from 'react';
-import { useAuth } from './stores/authStore';
-import { useNotifications, useModals } from './stores/uiStore';
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import Header from './components/common/Header';
 import AppRouter from './components/router/AppRouter';
+import { AppProvider } from './contexts/AppProvider';
 import AuthModal from './components/auth/AuthModal';
-import QuotesSidebar from './components/quotes/QuotesSidebar';
-import OrdersModal from './components/orders/OrdersModal';
 import QuotationModal from './components/quotation/QuotationModal';
 import CheckoutModal from './components/checkout/CheckoutModal';
+import OrdersModal from './components/orders/OrdersModal';
+import QuotesSidebar from './components/quotes/QuotesSidebar';
+import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
+import useAuthStore from './stores/authStore';
+import useUIStore from './stores/uiStore';
 import './App.css';
 import './styles/components.css';
 
-// Updated notification container using Zustand
+// Notification container using Zustand
 const NotificationContainer = () => {
-  const { notifications, removeNotification } = useNotifications();
+  const { notifications, removeNotification } = useUIStore();
 
   if (notifications.length === 0) return null;
 
@@ -46,170 +49,46 @@ const NotificationContainer = () => {
   );
 };
 
-// Loading fallback
-const LoadingFallback = () => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <h2 className="text-xl font-semibold text-gray-700">Carregando B2B Marketplace...</h2>
-    </div>
-  </div>
-);
-
-// Error boundary
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('App Error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-            <div className="text-red-500 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold text-gray-900 mb-2">
-              B2B Marketplace - Erro
-            </h1>
-            <p className="text-gray-600 mb-4">
-              Ocorreu um erro inesperado na aplicação.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              Recarregar Página
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
-// Main App content with error boundary for context issues
+// This component centralizes the content that depends on the providers
 const AppContent = () => {
-  // Use a state to track if providers are ready
-  const [providersReady, setProvidersReady] = React.useState(false);
-  
-  // Check if providers are available
-  React.useEffect(() => {
-    // Small delay to ensure all providers are mounted
-    const timer = setTimeout(() => {
-      setProvidersReady(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-  
-  if (!providersReady) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-  
-  return <AppWithProviders />;
-};
-
-// Component that uses contexts - only rendered after providers are ready
-const AppWithProviders = () => {
-  try {
-    const { user, isAuthenticated } = useAuth();
-    const { modals, showModal, hideModal } = useModals();
-    const { addNotification } = useNotifications();
-    
-    // Initialize auth store on mount
-    React.useEffect(() => {
-      const authStore = require('./stores/authStore').default;
-      authStore.getState().initializeAuth();
-    }, []);
-    
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <AppRouter />
-        <AuthModal />
-        <QuotesSidebar
-          showQuotes={modals.showQuotes}
-          setShowQuotes={(show) => show ? showModal('showQuotes') : hideModal('showQuotes')}
-          user={user}
-          setShowQuoteComparison={(show) => show ? showModal('showQuoteComparison') : hideModal('showQuoteComparison')}
-          setShowAuth={(show) => show ? showModal('showAuth') : hideModal('showAuth')}
-        />
-        <OrdersModal
-          show={modals.showOrders}
-          onClose={() => hideModal('showOrders')}
-          user={user}
-          addNotification={addNotification}
-        />
-        <QuotationModal />
-        <CheckoutModal />
-        <NotificationContainer />
-      </div>
-    );
-  } catch (error) {
-    console.error('Context provider error:', error);
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center p-8">
-          <h1 className="text-xl font-bold text-red-600 mb-4">Context Provider Error</h1>
-          <p className="text-gray-600 mb-4">There was an issue with the application context providers.</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Reload Application
-          </button>
-        </div>
-      </div>
-    );
-  }
-};
-
-// Main App component
-function App() {
-  // Security checks
-  useEffect(() => {
-    // Check for DOMPurify in production
-    if (process.env.NODE_ENV === 'production' && !window.DOMPurify) {
-      console.warn('DOMPurify not found - limited security functionality');
-    }
-
-    // Performance check
-    if (!window.IntersectionObserver) {
-      console.warn('IntersectionObserver not supported - performance may be affected');
-    }
-
-    // CSP violation handler
-    if (process.env.NODE_ENV === 'development') {
-      window.addEventListener('securitypolicyviolation', (e) => {
-        console.warn('CSP Violation:', e.violatedDirective, e.blockedURI);
-      });
-    }
-  }, []);
+  const { user } = useAuthStore();
+  const { modals, showModal, hideModal, addNotification } = useUIStore();
 
   return (
-    <ErrorBoundary>
-      <Suspense fallback={<LoadingFallback />}>
-        <AppContent />
-      </Suspense>
-    </ErrorBoundary>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <AppRouter />
+      <AuthModal />
+      <QuotesSidebar
+        showQuotes={modals.showQuotes}
+        setShowQuotes={(show) => show ? showModal('showQuotes') : hideModal('showQuotes')}
+        user={user}
+        setShowQuoteComparison={(show) => show ? showModal('showQuoteComparison') : hideModal('showQuoteComparison')}
+        setShowAuth={(show) => show ? showModal('showAuth') : hideModal('showAuth')}
+      />
+      <OrdersModal
+        show={modals.showOrders}
+        onClose={() => hideModal('showOrders')}
+        user={user}
+        addNotification={addNotification}
+      />
+      <QuotationModal />
+      <CheckoutModal />
+      <NotificationContainer />
+    </div>
+  );
+};
+
+// The main App component with the correct provider hierarchy
+function App() {
+  return (
+    <EnhancedErrorBoundary>
+      <Router>
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
+      </Router>
+    </EnhancedErrorBoundary>
   );
 }
 
