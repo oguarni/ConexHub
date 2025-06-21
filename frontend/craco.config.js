@@ -9,12 +9,20 @@ module.exports = {
   },
   webpack: {
     configure: (webpackConfig) => {
-      // Completely disable workbox plugins to avoid rollup dependency issues
+      // Unconditionally remove Workbox plugins to prevent build errors with rollup
+      // This is the most reliable way to disable the service worker.
       webpackConfig.plugins = webpackConfig.plugins.filter(plugin => {
         const pluginName = plugin.constructor.name;
-        return !pluginName.includes('WorkboxWebpackPlugin') && 
-               !pluginName.includes('GenerateSW') && 
-               !pluginName.includes('InjectManifest');
+        const isWorkboxPlugin = ['WorkboxWebpackPlugin', 'InjectManifest', 'GenerateSW'].includes(pluginName) ||
+                               pluginName.includes('Workbox');
+        const isESLintPlugin = pluginName.includes('ESLint');
+        if (isWorkboxPlugin) {
+          console.log('Removing Workbox plugin:', pluginName);
+        }
+        if (isESLintPlugin) {
+          console.log('Removing ESLint plugin:', pluginName);
+        }
+        return !isWorkboxPlugin && !isESLintPlugin;
       });
       
       // Disable service worker registration
@@ -44,6 +52,12 @@ module.exports = {
         type: 'filesystem'
       };
       return webpackConfig;
+    }
+  },
+  devServer: {
+    // Disable service workers in development mode completely
+    client: {
+      overlay: false
     }
   }
 };

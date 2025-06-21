@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/helper-annotate-as-pure": "^7.27.3",
     "@babel/traverse": "^7.27.4",
     "@rollup/pluginutils": "^5.2.0",
     "bcryptjs": "^2.4.3",
@@ -31,6 +32,7 @@
     "morgan": "^1.10.0",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
+    "react-dev-utils": "^12.0.1",
     "rollup": "^2.79.2",
     "sequelize": "^6.35.1"
   },
