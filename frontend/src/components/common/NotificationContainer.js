@@ -1,7 +1,7 @@
 // components/common/NotificationContainer.js
 import React from 'react';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
-import { useAppContext } from '../../contexts/AppContext';
+import { useLegacyAppContext } from '../../contexts/AppProvider';
 import { NOTIFICATION_TYPES } from '../../utils/constants';
 
 const NotificationItem = ({ notification, onRemove }) => {
@@ -64,7 +64,7 @@ const NotificationItem = ({ notification, onRemove }) => {
 };
 
 const NotificationContainer = () => {
-  const { uiState, removeNotification } = useAppContext();
+  const { uiState, removeNotification } = useLegacyAppContext();
 
   if (uiState.notifications.length === 0) return null;
 

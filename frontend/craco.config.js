@@ -7,32 +7,23 @@ module.exports = {
       ],
     },
   },
+  eslint: {
+    enable: false,
+  },
   webpack: {
     configure: (webpackConfig) => {
-      // Unconditionally remove Workbox plugins to prevent build errors with rollup
-      // This is the most reliable way to disable the service worker.
+      // Remove all problematic plugins
       webpackConfig.plugins = webpackConfig.plugins.filter(plugin => {
         const pluginName = plugin.constructor.name;
         const isWorkboxPlugin = ['WorkboxWebpackPlugin', 'InjectManifest', 'GenerateSW'].includes(pluginName) ||
-                               pluginName.includes('Workbox');
-        const isESLintPlugin = pluginName.includes('ESLint');
-        if (isWorkboxPlugin) {
-          console.log('Removing Workbox plugin:', pluginName);
-        }
-        if (isESLintPlugin) {
-          console.log('Removing ESLint plugin:', pluginName);
-        }
-        return !isWorkboxPlugin && !isESLintPlugin;
+                                pluginName.includes('Workbox');
+        const isESLintPlugin = pluginName.includes('ESLint') || pluginName === 'ESLintWebpackPlugin';
+        const isForkTsChecker = pluginName.includes('ForkTsChecker');
+        
+        return !isWorkboxPlugin && !isESLintPlugin && !isForkTsChecker;
       });
-      
-      // Disable service worker registration
-      if (process.env.NODE_ENV === 'development') {
-        webpackConfig.entry = {
-          ...webpackConfig.entry,
-          // Remove service worker registration
-        };
-      }
-      
+
+      // Disable problematic optimizations
       webpackConfig.optimization = {
         ...webpackConfig.optimization,
         splitChunks: {
@@ -48,16 +39,20 @@ module.exports = {
           }
         }
       };
-      webpackConfig.cache = {
-        type: 'filesystem'
-      };
+      
+      // Disable cache to avoid issues
+      webpackConfig.cache = false;
+      
       return webpackConfig;
     }
   },
   devServer: {
-    // Disable service workers in development mode completely
     client: {
-      overlay: false
+      overlay: false,
+      logging: 'none'
+    },
+    setupMiddlewares: (middlewares, devServer) => {
+      return middlewares;
     }
   }
 };

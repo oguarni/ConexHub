@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Lock, Building } from 'lucide-react';
-import { useAppContext } from '../../contexts/AppProvider';
+import { useLegacyAppContext } from "../../contexts/AppProvider";
 
 const AuthModal = () => {
   const { 
@@ -11,7 +11,7 @@ const AuthModal = () => {
     loading, 
     error,
     addNotification 
-  } = useAppContext();
+  } = useLegacyAppContext();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -223,11 +223,14 @@ const AuthModal = () => {
           {/* Test accounts info */}
           {isLogin && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800 font-medium mb-2">Contas de Teste:</p>
+              <p className="text-sm text-blue-800 font-medium mb-2">Contas Demo Disponíveis:</p>
               <div className="text-xs text-blue-700 space-y-1">
-                <p><strong>Comprador:</strong> joao@empresa.com / buyer123</p>
-                <p><strong>Fornecedor:</strong> carlos@fornecedor.com / supplier123</p>
+                <p><strong>Comprador:</strong> demo.buyer@marketplace.com / DemoBuyer123</p>
+                <p><strong>Fornecedor:</strong> demo.supplier@marketplace.com / DemoSupplier123</p>
+                <p><strong>Admin:</strong> demo.admin@marketplace.com / DemoAdmin123</p>
               </div>
+              <p className="text-xs text-blue-600 mt-2 italic">* Senhas: 8+ caracteres, maiúscula, minúscula e número</p>
+              <p className="text-xs text-red-600 mt-1">⚠️ Se login falhar, crie uma nova conta usando "Cadastrar"</p>
             </div>
           )}
         </div>

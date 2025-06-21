@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, CreditCard, MapPin, User, Mail, Phone } from 'lucide-react';
 import { useQuotation } from '../../contexts/QuotationContext';
-import { useAppContext } from '../../contexts/AppProvider';
+import { useLegacyAppContext } from "../../contexts/AppProvider";
 
 const CheckoutModal = () => {
   const { 
@@ -14,7 +14,7 @@ const CheckoutModal = () => {
     setIsCheckoutOpen
   } = useQuotation();
   
-  const { addNotification, user } = useAppContext();
+  const { addNotification, user } = useLegacyAppContext();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

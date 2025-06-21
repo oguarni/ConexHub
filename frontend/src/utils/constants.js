@@ -108,3 +108,5 @@ export const calculateShipping = (cep) => {
     return shippingZones.national;
   }
 };
+
+export const USER_ROLES = userRoles;

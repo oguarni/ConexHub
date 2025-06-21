@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Package } from 'lucide-react';
-import { useAppContext } from '../../contexts/AppProvider';
+import { useLegacyAppContext } from "../../contexts/AppProvider";
 import { useLanguage } from '../../contexts/LanguageContext';
 import { apiService } from '../../services/api';
 import QuoteModal from '../products/QuoteModal';
@@ -130,7 +130,7 @@ const MainContent = () => {
     handleRequestQuote, 
     loadProducts,
     addNotification 
-  } = useAppContext();
+  } = useLegacyAppContext();
   
   const { t } = useLanguage();
 

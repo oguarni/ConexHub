@@ -1,11 +1,11 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { useQuotation } from '../../contexts/QuotationContext';
-import { useAppContext } from '../../contexts/AppProvider';
+import { useLegacyAppContext } from "../../contexts/AppProvider";
 
 const QuotationButton = () => {
   const { quotationItems, getQuotationCount } = useQuotation();
-  const { updateUI } = useAppContext();
+  const { updateUI } = useLegacyAppContext();
   
   const itemCount = getQuotationCount();
 

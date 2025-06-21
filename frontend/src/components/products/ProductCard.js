@@ -1,11 +1,11 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { FileText, Building, Package, ShoppingCart } from 'lucide-react';
 import { useQuotation } from '../../contexts/QuotationContext';
-import { useAppContext } from '../../contexts/AppProvider';
+import { useLegacyAppContext } from "../../contexts/AppProvider";
 
 const ProductCard = memo(({ product, onRequestQuote, user }) => {
   const { addToQuotation } = useQuotation();
-  const { addNotification, updateUI } = useAppContext();
+  const { addNotification, updateUI } = useLegacyAppContext();
   
   const userPermissions = useMemo(() => ({
     canRequest: user && (user.role === 'buyer' || user.role === 'admin'),

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, User, Menu, X, Building, Package, Globe, HelpCircle } from 'lucide-react';
-import { useAppContext } from '../../contexts/AppProvider';
+import { useLegacyAppContext } from "../../contexts/AppProvider";
 import { useLanguage } from '../../contexts/LanguageContext';
 import QuotationButton from '../quotation/QuotationButton';
 
@@ -14,7 +14,7 @@ const Header = () => {
     showModal, 
     toggleMenu,
     addNotification 
-  } = useAppContext();
+  } = useLegacyAppContext();
   
   const { t, language, changeLanguage, availableLanguages } = useLanguage();
   const [showHelp, setShowHelp] = useState(false);

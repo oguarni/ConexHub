@@ -1,5 +1,4 @@
 import React, { Suspense, useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
 import { useAuth } from './stores/authStore';
 import { useNotifications, useModals } from './stores/uiStore';
 import Header from './components/common/Header';
@@ -116,29 +115,27 @@ const AppContent = () => {
   }, []);
   
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <AppRouter />
-        <AuthModal />
-        <QuotesSidebar
-          showQuotes={modals.showQuotes}
-          setShowQuotes={(show) => show ? showModal('showQuotes') : hideModal('showQuotes')}
-          user={user}
-          setShowQuoteComparison={(show) => show ? showModal('showQuoteComparison') : hideModal('showQuoteComparison')}
-          setShowAuth={(show) => show ? showModal('showAuth') : hideModal('showAuth')}
-        />
-        <OrdersModal
-          show={modals.showOrders}
-          onClose={() => hideModal('showOrders')}
-          user={user}
-          addNotification={addNotification}
-        />
-        <QuotationModal />
-        <CheckoutModal />
-        <NotificationContainer />
-      </div>
-    </Router>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <AppRouter />
+      <AuthModal />
+      <QuotesSidebar
+        showQuotes={modals.showQuotes}
+        setShowQuotes={(show) => show ? showModal('showQuotes') : hideModal('showQuotes')}
+        user={user}
+        setShowQuoteComparison={(show) => show ? showModal('showQuoteComparison') : hideModal('showQuoteComparison')}
+        setShowAuth={(show) => show ? showModal('showAuth') : hideModal('showAuth')}
+      />
+      <OrdersModal
+        show={modals.showOrders}
+        onClose={() => hideModal('showOrders')}
+        user={user}
+        addNotification={addNotification}
+      />
+      <QuotationModal />
+      <CheckoutModal />
+      <NotificationContainer />
+    </div>
   );
 };
 

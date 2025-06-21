@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, Truck } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { useAppContext } from '../../contexts/AppProvider';
+import { useLegacyAppContext } from "../../contexts/AppProvider";
 
 const CartModal = () => {
   const { 
@@ -17,7 +17,7 @@ const CartModal = () => {
     getTotal 
   } = useCart();
   
-  const { uiState, hideModal, showModal, addNotification } = useAppContext();
+  const { uiState, hideModal, showModal, addNotification } = useLegacyAppContext();
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingOptions, setShippingOptions] = useState(null);
   const [cepInput, setCepInput] = useState(shipping.cep || '');

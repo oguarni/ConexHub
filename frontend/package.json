@@ -41,13 +41,13 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
     "jest-environment-jsdom": "^30.0.0",
     "rollup": "^2.79.2"
   },
   "scripts": {
-    "start": "GENERATE_SOURCEMAP=false SKIP_PREFLIGHT_CHECK=true DISABLE_ESLINT_PLUGIN=true DISABLE_NEW_JSX_TRANSFORM=true craco start",
+    "start": "GENERATE_SOURCEMAP=false SKIP_PREFLIGHT_CHECK=true DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "build": "SKIP_PREFLIGHT_CHECK=true craco build",
     "test": "craco test --watchAll=false --testEnvironment=jsdom",
     "test:watch": "craco test --testEnvironment=jsdom",
