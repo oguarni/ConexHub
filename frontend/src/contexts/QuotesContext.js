@@ -2,13 +2,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useBuyerQuotesQuery, useRequestQuoteMutation, useAcceptQuoteMutation, useRejectQuoteMutation } from '../hooks/queries/useQuotesQuery';
 import { useForm } from '../hooks/useForm';
-import { useAuth } from './AuthContext';
+import useAuthStore from '../stores/authStore';
 import { useUI } from './UIContext';
 
 const QuotesContext = createContext();
 
 export const QuotesProvider = ({ children }) => {
-  const { auth } = useAuth();
+  const auth = useAuthStore();
   const { addNotification, updateUI } = useUI();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [lastQuoteId, setLastQuoteId] = useState('');

@@ -2,6 +2,13 @@ import React, { createContext, useContext, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { GeneralStateProvider } from './AppContext';
+import { UIProvider } from './UIContext';
+import { CartProvider } from './CartContext';
+import { QuotationProvider } from './QuotationContext';
+import { QuotesProvider } from './QuotesContext';
+import { LanguageProvider } from './LanguageContext';
+import NotificationSystem from '../components/notifications/NotificationSystem';
+import EnhancedErrorBoundary from '../components/common/EnhancedErrorBoundary';
 import useAuthStore from '../stores/authStore';
 import useUIStore from '../stores/uiStore';
 
@@ -24,6 +31,16 @@ const queryClient = new QueryClient({
 
 // Create a simplified App context for any remaining shared functionality
 const AppContext = createContext(null);
+
+// Create a simplified NotificationProvider wrapper
+const NotificationProvider = ({ children }) => {
+  return (
+    <>
+      {children}
+      <NotificationSystem />
+    </>
+  );
+};
 
 // Sample products moved here for backwards compatibility
 const SAMPLE_PRODUCTS = [
@@ -140,14 +157,28 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <GeneralStateProvider>
-        <AppContext.Provider value={contextValue}>
-          {children}
-          <ReactQueryDevtools initialIsOpen={false} />
-        </AppContext.Provider>
-      </GeneralStateProvider>
-    </QueryClientProvider>
+    <EnhancedErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <LanguageProvider>
+          <NotificationProvider>
+            <GeneralStateProvider>
+              <UIProvider>
+                <CartProvider>
+                  <QuotesProvider>
+                    <QuotationProvider>
+                      <AppContext.Provider value={contextValue}>
+                        {children}
+                        <ReactQueryDevtools initialIsOpen={false} />
+                      </AppContext.Provider>
+                    </QuotationProvider>
+                  </QuotesProvider>
+                </CartProvider>
+              </UIProvider>
+            </GeneralStateProvider>
+          </NotificationProvider>
+        </LanguageProvider>
+      </QueryClientProvider>
+    </EnhancedErrorBoundary>
   );
 };
 
