@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { Order, OrderItem, Product, User } from '../models/index.js';
 import authMiddleware from '../middleware/auth.js';
+import { requirePermission, requireResourceOwnership } from '../middleware/rbac.js';
 import { handleValidationErrors, sanitizeInput, cepValidation } from '../middleware/validation.js';
 import { asyncHandler, AppError } from '../middleware/errorHandler.js';
 
@@ -10,6 +11,7 @@ const router = express.Router();
 // Create order
 router.post('/', [
   authMiddleware,
+  requirePermission('orders:write'),
   sanitizeInput,
   body('items')
     .isArray({ min: 1 })
@@ -106,8 +108,11 @@ router.post('/', [
   });
 }));
 
-// Get user orders
-router.get('/', authMiddleware, asyncHandler(async (req, res) => {
+// Get user orders  
+router.get('/user', [
+  authMiddleware,
+  requirePermission('orders:read_own')
+], asyncHandler(async (req, res) => {
   const orders = await Order.findAll({
     where: { userId: req.user.userId },
     include: [{
@@ -128,7 +133,10 @@ router.get('/', authMiddleware, asyncHandler(async (req, res) => {
 }));
 
 // Get supplier orders
-router.get('/supplier', authMiddleware, async (req, res) => {
+router.get('/supplier', [
+  authMiddleware,
+  requirePermission('orders:read_own')
+], async (req, res) => {
   try {
     // For suppliers, find orders where they are the supplier
     const orders = await Order.findAll({
@@ -155,14 +163,15 @@ router.get('/supplier', authMiddleware, async (req, res) => {
   }
 });
 
-// Get order by ID
-router.get('/:id', authMiddleware, async (req, res) => {
+// Get order by ID with resource ownership check
+router.get('/:id', [
+  authMiddleware,
+  requireResourceOwnership('order', async (req) => {
+    return await Order.findByPk(req.params.id);
+  })
+], async (req, res) => {
   try {
-    const order = await Order.findOne({
-      where: { 
-        id: req.params.id,
-        userId: req.user.userId
-      },
+    const order = await Order.findByPk(req.params.id, {
       include: [{
         model: OrderItem,
         as: 'items',
@@ -183,5 +192,57 @@ router.get('/:id', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
+
+// Update order status (for suppliers and admins)
+router.put('/:id/status', [
+  authMiddleware,
+  requirePermission('orders:update_status'),
+  body('status')
+    .isIn(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'])
+    .withMessage('Status deve ser: pending, confirmed, shipped, delivered ou cancelled'),
+  handleValidationErrors,
+  requireResourceOwnership('order', async (req) => {
+    return await Order.findByPk(req.params.id);
+  })
+], asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  const orderId = req.params.id;
+
+  const order = await Order.findByPk(orderId);
+  
+  if (!order) {
+    throw new AppError('Pedido não encontrado', 404, 'ORDER_NOT_FOUND');
+  }
+
+  // Business logic for status transitions
+  const validTransitions = {
+    pending: ['confirmed', 'cancelled'],
+    confirmed: ['shipped', 'cancelled'],
+    shipped: ['delivered'],
+    delivered: [], // Final state
+    cancelled: [] // Final state
+  };
+
+  if (!validTransitions[order.status].includes(status)) {
+    throw new AppError(
+      `Transição inválida de ${order.status} para ${status}`,
+      400,
+      'INVALID_STATUS_TRANSITION'
+    );
+  }
+
+  await order.update({ status });
+
+  res.json({
+    success: true,
+    message: 'Status do pedido atualizado com sucesso',
+    order: {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      updatedAt: order.updatedAt
+    }
+  });
+}));
 
 export default router;

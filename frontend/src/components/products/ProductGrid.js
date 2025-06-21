@@ -13,15 +13,31 @@ const GridItem = memo(({ columnIndex, rowIndex, style, data }) => {
   const index = rowIndex * itemsPerRow + columnIndex;
   const product = products[index];
 
-  if (!product) return <div style={style} />;
+  if (!product) {
+    return (
+      <div 
+        className="virtual-grid-item" 
+        style={{ 
+          left: style.left, 
+          top: style.top, 
+          width: style.width, 
+          height: style.height 
+        }} 
+      />
+    );
+  }
 
   return (
-    <div style={{ 
-      ...style, 
-      padding: ITEM_PADDING / 2,
-      display: 'flex',
-      alignItems: 'stretch'
-    }}>
+    <div 
+      className="virtual-grid-item" 
+      data-padding="true"
+      style={{ 
+        left: style.left, 
+        top: style.top, 
+        width: style.width, 
+        height: style.height 
+      }}
+    >
       <ProductCard 
         product={product} 
         onRequestQuote={onRequestQuote} 
@@ -218,10 +234,9 @@ const ProductGrid = memo(({ products = [], loading = false, onRequestQuote, user
       {/* Grid Container */}
       <div 
         ref={containerRef} 
-        className="w-full"
+        className={`w-full virtual-grid-container ${useWindowing ? 'virtual-grid-windowed' : ''}`}
         style={{ 
-          minHeight: useWindowing ? containerHeight : 'auto',
-          position: 'relative'
+          '--container-height': useWindowing ? `${containerHeight}px` : 'auto'
         }}
       >
         {useWindowing ? renderWindowedGrid() : renderTraditionalGrid()}

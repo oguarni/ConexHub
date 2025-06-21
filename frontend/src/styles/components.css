@@ -1,0 +1,284 @@
+/* Component-specific styles to replace inline styles for CSP compliance */
+
+/* ProductGrid Virtual Scrolling Styles */
+.virtual-grid-container {
+  position: relative;
+}
+
+.virtual-grid-windowed {
+  min-height: var(--container-height, auto);
+}
+
+.virtual-grid-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+.virtual-grid-item[data-padding="true"] {
+  padding: 4px; /* Half of ITEM_PADDING (8px) */
+}
+
+.virtual-grid-item[data-padding="false"] {
+  padding: 0;
+}
+
+/* Toast System Progress Bar Styles */
+.toast-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  transition: width 0.1s ease;
+  border-radius: 0 0 4px 4px;
+}
+
+.toast-progress--paused {
+  animation-play-state: paused;
+}
+
+.toast-progress--running {
+  animation-play-state: running;
+}
+
+.toast-progress--success {
+  background-color: #10b981;
+}
+
+.toast-progress--error {
+  background-color: #ef4444;
+}
+
+.toast-progress--warning {
+  background-color: #f59e0b;
+}
+
+.toast-progress--info {
+  background-color: #3b82f6;
+}
+
+/* Debug Components Styles */
+.debug-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 300px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Debug page container override */
+.debug-container.debug-page {
+  position: static;
+  width: 100%;
+  max-width: none;
+  background: white;
+  color: black;
+  padding: 20px;
+}
+
+.debug-error {
+  background-color: #ffe6e6;
+  border: 1px solid #ff0000;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.debug-response {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: auto;
+  max-height: 300px;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.debug-title {
+  font-weight: bold;
+  color: #60a5fa;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #374151;
+}
+
+.debug-section {
+  margin-bottom: 8px;
+}
+
+.debug-label {
+  color: #9ca3af;
+  font-weight: bold;
+}
+
+.debug-value {
+  color: #fbbf24;
+  margin-left: 5px;
+}
+
+.debug-button {
+  background: #1e40af;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+.debug-button:hover {
+  background: #1d4ed8;
+}
+
+.debug-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.debug-metric {
+  text-align: center;
+  padding: 3px;
+  background: rgba(55, 65, 81, 0.5);
+  border-radius: 3px;
+}
+
+/* LoadingStates specific styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-skeleton {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.loading-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.loading-dot:nth-child(2) { animation-delay: -0.16s; }
+.loading-dot:nth-child(3) { animation-delay: 0s; }
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Dynamic Grid Positioning Utilities */
+.grid-position-0 { transform: translateX(0px); }
+.grid-position-1 { transform: translateX(calc(100% + 8px)); }
+.grid-position-2 { transform: translateX(calc(200% + 16px)); }
+.grid-position-3 { transform: translateX(calc(300% + 24px)); }
+.grid-position-4 { transform: translateX(calc(400% + 32px)); }
+
+/* Grid row positioning */
+.grid-row-0 { transform: translateY(0px); }
+.grid-row-1 { transform: translateY(calc(100% + 8px)); }
+.grid-row-2 { transform: translateY(calc(200% + 16px)); }
+.grid-row-3 { transform: translateY(calc(300% + 24px)); }
+.grid-row-4 { transform: translateY(calc(400% + 32px)); }
+
+/* Combined positioning utility */
+.grid-item-positioned {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .debug-container {
+    top: 10px;
+    right: 10px;
+    max-width: 250px;
+    font-size: 11px;
+  }
+  
+  .virtual-grid-item[data-padding="true"] {
+    padding: 2px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .toast-progress--success { background-color: #059669; }
+  .toast-progress--error { background-color: #dc2626; }
+  .toast-progress--warning { background-color: #d97706; }
+  .toast-progress--info { background-color: #2563eb; }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+    border-top-color: transparent;
+  }
+  
+  .loading-skeleton {
+    animation: none;
+    background: #e5e7eb;
+  }
+  
+  .loading-dot {
+    animation: none;
+  }
+  
+  .grid-item-positioned {
+    transition: none;
+  }
+}

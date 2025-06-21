@@ -159,6 +159,42 @@ export const useAuth = () => {
     localStorage.removeItem('user');
   }, []);
 
+  // Permission checking function that matches backend RBAC
+  const hasPermission = useCallback((permission) => {
+    if (!user || !user.role) return false;
+    
+    // Define role permissions (should match backend RBAC)
+    const rolePermissions = {
+      admin: [
+        'users:read', 'users:write', 'users:delete',
+        'suppliers:read', 'suppliers:write', 'suppliers:delete', 'suppliers:approve', 'suppliers:reject',
+        'products:read', 'products:write', 'products:delete', 'products:approve',
+        'orders:read', 'orders:write', 'orders:delete', 'orders:update_status',
+        'quotes:read', 'quotes:write', 'quotes:delete', 'quotes:respond',
+        'analytics:read', 'reports:read',
+        'system:read', 'system:write', 'config:read', 'config:write',
+        'constants:read', 'constants:write'
+      ],
+      supplier: [
+        'profile:read', 'profile:write',
+        'products:read', 'products:write', 'products:delete_own',
+        'orders:read_own', 'orders:update_status_own',
+        'quotes:read_own', 'quotes:respond',
+        'constants:read'
+      ],
+      buyer: [
+        'profile:read', 'profile:write',
+        'products:read',
+        'orders:read_own', 'orders:write',
+        'quotes:read_own', 'quotes:write', 'quotes:accept', 'quotes:reject',
+        'constants:read'
+      ]
+    };
+    
+    const userPermissions = rolePermissions[user.role] || [];
+    return userPermissions.includes(permission);
+  }, [user]);
+
   return {
     user,
     loading,
@@ -167,6 +203,7 @@ export const useAuth = () => {
     login,
     register,
     logout,
-    validateCNPJ
+    validateCNPJ,
+    hasPermission
   };
 };

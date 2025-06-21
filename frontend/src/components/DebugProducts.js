@@ -27,48 +27,28 @@ const DebugProducts = () => {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'monospace' }}>
-      <h1>Debug Products API</h1>
+    <div className="debug-container debug-page">
+      <h1 className="debug-title">Debug Products API</h1>
       
       <button 
         onClick={testAPI} 
         disabled={loading}
-        style={{ 
-          padding: '10px 20px', 
-          marginBottom: '20px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: loading ? 'not-allowed' : 'pointer'
-        }}
+        className="debug-button"
+        style={{ marginBottom: '20px' }}
       >
         {loading ? 'Loading...' : 'Test API'}
       </button>
 
       {error && (
-        <div style={{ 
-          padding: '10px', 
-          backgroundColor: '#ffe6e6', 
-          border: '1px solid #ff0000',
-          marginBottom: '20px',
-          borderRadius: '4px'
-        }}>
+        <div className="debug-error">
           <strong>Error:</strong> {error}
         </div>
       )}
 
       {rawResponse && (
-        <div style={{ marginBottom: '20px' }}>
+        <div className="debug-section">
           <h3>Raw API Response:</h3>
-          <pre style={{ 
-            backgroundColor: '#f5f5f5', 
-            padding: '10px', 
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            overflow: 'auto',
-            maxHeight: '300px'
-          }}>
+          <pre className="debug-response">
             {rawResponse}
           </pre>
         </div>

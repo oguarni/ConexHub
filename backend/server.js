@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import crypto from 'crypto';
 import * as swaggerUi from 'swagger-ui-express';
 
 // Load configuration
@@ -16,18 +17,45 @@ import swaggerSpec from './src/docs/swagger.js';
 
 const app = express();
 
-// Security Middleware - relaxed CSP for Swagger UI
+// Security Middleware - strict CSP with nonce support
+
+// Generate nonce for each request
+app.use((req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
+// Apply strict CSP to all routes except docs
+app.use((req, res, next) => {
+  if (req.path.startsWith('/docs')) {
+    // Relaxed CSP for Swagger UI only
+    res.setHeader('Content-Security-Policy', [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: https: https://validator.swagger.io",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://validator.swagger.io"
+    ].join('; '));
+  } else {
+    // Strict CSP for application routes
+    res.setHeader('Content-Security-Policy', [
+      "default-src 'self'",
+      `script-src 'self' 'nonce-${res.locals.nonce}'`,
+      "style-src 'self' https://fonts.googleapis.com",
+      "img-src 'self' data: https:",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].join('; '));
+  }
+  next();
+});
+
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // unsafe-eval needed for Swagger UI
-      imgSrc: ["'self'", "data:", "https:", "https://validator.swagger.io"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      connectSrc: ["'self'", "https://validator.swagger.io"],
-    },
-  },
+  contentSecurityPolicy: false, // We're handling CSP manually above
   hsts: config.isProduction(),
 }));
 

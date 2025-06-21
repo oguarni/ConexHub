@@ -410,6 +410,44 @@ class ApiService {
       return response.data;
     }, 1, 500);
   }
+
+  // Constants methods for externalized data
+  async getSampleOrders(role = 'buyer') {
+    return this.withRetry(async () => {
+      const response = await this.api.get('/constants/sample-orders', { 
+        params: { role } 
+      });
+      return response.data.data;
+    });
+  }
+
+  async getSampleProducts() {
+    return this.withRetry(async () => {
+      const response = await this.api.get('/constants/sample-products');
+      return response.data.data;
+    });
+  }
+
+  async getAppConstants() {
+    return this.withRetry(async () => {
+      const response = await this.api.get('/constants/app-constants');
+      return response.data.data;
+    });
+  }
+
+  async getStaticContent() {
+    return this.withRetry(async () => {
+      const response = await this.api.get('/constants/static-content');
+      return response.data.data;
+    });
+  }
+
+  async getShippingConfig() {
+    return this.withRetry(async () => {
+      const response = await this.api.get('/constants/shipping-zones');
+      return response.data.data;
+    });
+  }
 }
 
 export const apiService = new ApiService();

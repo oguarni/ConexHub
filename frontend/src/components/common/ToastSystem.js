@@ -118,12 +118,8 @@ const Toast = memo(({
       {/* ✅ Progress bar */}
       {showProgress && finalDuration && type !== 'loading' && (
         <div 
-          className="absolute top-0 left-0 h-1 transition-all duration-100"
-          style={{ 
-            width: `${progress}%`,
-            backgroundColor: config.progressColor.replace('bg-', ''),
-            animationPlayState: isPaused ? 'paused' : 'running'
-          }}
+          className={`toast-progress toast-progress--${type} ${isPaused ? 'toast-progress--paused' : 'toast-progress--running'}`}
+          style={{ width: `${progress}%` }}
           aria-hidden="true"
         />
       )}

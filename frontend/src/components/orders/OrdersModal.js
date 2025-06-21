@@ -9,10 +9,12 @@ const OrdersModal = ({ show, onClose, user }) => {
   const [shippingCalculations, setShippingCalculations] = useState({});
   const [calculatingShipping, setCalculatingShipping] = useState({});
   const [shippingCeps, setShippingCeps] = useState({});
+  const [shippingConfig, setShippingConfig] = useState(null);
 
   useEffect(() => {
     if (show && user) {
       loadOrders();
+      loadShippingConfig();
       // Load saved shipping calculations
       const savedShippingCalculations = localStorage.getItem('shippingCalculations');
       if (savedShippingCalculations) {
@@ -44,9 +46,9 @@ const OrdersModal = ({ show, onClose, user }) => {
           : await apiService.getUserOrders();
         setOrders(data.orders || []);
       } catch (apiError) {
-        // If API fails, use sample data
+        // If API fails, use sample data from new endpoint
         console.log('API not available, using sample orders');
-        const sampleOrders = generateSampleOrders(user);
+        const sampleOrders = await loadSampleOrders(user.role);
         setOrders(sampleOrders);
       }
     } catch (error) {
@@ -57,97 +59,44 @@ const OrdersModal = ({ show, onClose, user }) => {
     }
   };
 
-  const generateSampleOrders = (user) => {
-    if (user.role === 'supplier') {
-      return [
-        {
-          id: 1,
-          orderNumber: 'PED-2024-001',
-          productName: 'Furadeira Industrial HD-2000',
-          quantity: 2,
-          unit: 'un',
-          supplierName: user.companyName || 'Sua Empresa',
-          supplierEmail: user.email,
-          totalPrice: 2599.98,
-          status: 'pending',
-          createdAt: new Date('2024-06-10').toISOString()
+  const loadSampleOrders = async (userRole) => {
+    try {
+      const response = await apiService.getSampleOrders(userRole);
+      return response.orders || [];
+    } catch (error) {
+      console.error('Error loading sample orders from API:', error);
+      // Fallback to minimal local data if API fails
+      return [{
+        id: 1,
+        orderNumber: 'SAMPLE-001',
+        productName: 'Produto de Exemplo',
+        quantity: 1,
+        unit: 'un',
+        supplierName: 'Fornecedor Exemplo',
+        totalPrice: 100.00,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }];
+    }
+  };
+
+  const loadShippingConfig = async () => {
+    try {
+      const config = await apiService.getShippingConfig();
+      setShippingConfig(config);
+    } catch (error) {
+      console.error('Error loading shipping config:', error);
+      // Set fallback config
+      setShippingConfig({
+        zones: {
+          '0': { region: 'São Paulo', multiplier: 1.8, baseDays: 2 }
         },
-        {
-          id: 2,
-          orderNumber: 'PED-2024-002',
-          productName: 'Motor Elétrico Trifásico 5CV',
-          quantity: 1,
-          unit: 'un',
-          supplierName: user.companyName || 'Sua Empresa',
-          supplierEmail: user.email,
-          totalPrice: 2450.00,
-          status: 'confirmed',
-          createdAt: new Date('2024-06-08').toISOString()
-        },
-        {
-          id: 5,
-          orderNumber: 'PED-2024-005',
-          productName: 'Compressor de Ar 50L',
-          quantity: 3,
-          unit: 'un',
-          supplierName: user.companyName || 'Sua Empresa',
-          supplierEmail: user.email,
-          totalPrice: 5550.00,
-          status: 'shipped',
-          createdAt: new Date('2024-06-07').toISOString()
-        }
-      ];
-    } else {
-      return [
-        {
-          id: 3,
-          orderNumber: 'COT-2024-003',
-          productName: 'Chapa de Aço Inox 304',
-          quantity: 20,
-          unit: 'm²',
-          supplierName: 'Metalúrgica São Paulo',
-          supplierEmail: 'vendas@metalsp.com.br',
-          totalPrice: 1790.00,
-          status: 'shipped',
-          createdAt: new Date('2024-06-09').toISOString()
-        },
-        {
-          id: 4,
-          orderNumber: 'COT-2024-004',
-          productName: 'Válvula Pneumática 1/2"',
-          quantity: 10,
-          unit: 'un',
-          supplierName: 'Pneumática Industrial',
-          supplierEmail: 'pedidos@pneumatica.com.br',
-          totalPrice: 1567.50,
-          status: 'delivered',
-          createdAt: new Date('2024-06-05').toISOString()
-        },
-        {
-          id: 6,
-          orderNumber: 'COT-2024-006',
-          productName: 'Torno CNC Compacto',
-          quantity: 1,
-          unit: 'un',
-          supplierName: 'CNC Brasil Máquinas',
-          supplierEmail: 'vendas@cncbrasil.com.br',
-          totalPrice: 45000.00,
-          status: 'pending',
-          createdAt: new Date('2024-06-11').toISOString()
-        },
-        {
-          id: 7,
-          orderNumber: 'COT-2024-007',
-          productName: 'Parafusos Inox M8 (Lote)',
-          quantity: 100,
-          unit: 'un',
-          supplierName: 'Fixadores Industriais',
-          supplierEmail: 'vendas@fixadores.com.br',
-          totalPrice: 850.00,
-          status: 'confirmed',
-          createdAt: new Date('2024-06-06').toISOString()
-        }
-      ];
+        baseShipping: 25.50,
+        weightMultiplier: 2.5,
+        insuranceRate: 0.01,
+        bulkDiscount: 0.15,
+        bulkThreshold: 10
+      });
     }
   };
 
@@ -175,42 +124,28 @@ const OrdersModal = ({ show, onClose, user }) => {
 
   // Shipping calculation functions
   const calculateShipping = (order, cep) => {
-    if (!cep || cep.length < 8) return 0;
+    if (!cep || cep.length < 8 || !shippingConfig) return 0;
 
-    // Simular diferentes custos baseado no CEP e características do pedido
-    const baseShipping = 25.50;
+    const config = shippingConfig;
     const productWeight = order.quantity * 0.5; // 0.5kg por unidade
     const productValue = order.totalPrice || 0;
     
     // Multiplicador baseado na região (primeiro dígito do CEP)
     const region = cep.charAt(0);
-    const regionMultipliers = {
-      '0': 1.8, // São Paulo
-      '1': 1.5, // São Paulo interior
-      '2': 1.3, // Rio de Janeiro
-      '3': 1.4, // Minas Gerais
-      '4': 1.6, // Bahia
-      '5': 1.7, // Paraná
-      '6': 1.9, // Pernambuco
-      '7': 1.8, // Ceará
-      '8': 2.0, // Pará
-      '9': 2.2  // Rondônia
-    };
+    const regionData = config.zones[region] || { multiplier: 1.5 };
     
-    const regionMultiplier = regionMultipliers[region] || 1.5;
-    
-    // Cálculo do frete
-    let shippingCost = baseShipping + (productWeight * 2.5);
-    shippingCost *= regionMultiplier;
+    // Cálculo do frete usando configuração do backend
+    let shippingCost = config.baseShipping + (productWeight * config.weightMultiplier);
+    shippingCost *= regionData.multiplier;
     
     // Taxa adicional para produtos caros (seguro)
     if (productValue > 1000) {
-      shippingCost += productValue * 0.01; // 1% do valor como seguro
+      shippingCost += productValue * config.insuranceRate;
     }
     
     // Desconto para grandes quantidades
-    if (order.quantity >= 10) {
-      shippingCost *= 0.85; // 15% de desconto
+    if (order.quantity >= config.bulkThreshold) {
+      shippingCost *= (1 - config.bulkDiscount);
     }
     
     return Math.round(shippingCost * 100) / 100;
@@ -252,21 +187,12 @@ const OrdersModal = ({ show, onClose, user }) => {
   };
 
   const getEstimatedDeliveryDays = (cep) => {
-    const region = cep.charAt(0);
-    const deliveryDays = {
-      '0': 2, // São Paulo
-      '1': 3, // São Paulo interior
-      '2': 3, // Rio de Janeiro
-      '3': 4, // Minas Gerais
-      '4': 6, // Bahia
-      '5': 4, // Paraná
-      '6': 7, // Pernambuco
-      '7': 8, // Ceará
-      '8': 10, // Pará
-      '9': 12  // Rondônia
-    };
+    if (!shippingConfig) return 5;
     
-    return deliveryDays[region] || 5;
+    const region = cep.charAt(0);
+    const regionData = shippingConfig.zones[region];
+    
+    return regionData?.baseDays || 5;
   };
 
   const formatCep = (value) => {

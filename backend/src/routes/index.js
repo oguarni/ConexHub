@@ -5,6 +5,8 @@ import productRoutes from './products.js';
 import orderRoutes from './orders.js';
 import pixRoutes from './pix.js';
 import seedRoutes from './seed.js';
+import constantsRoutes from './constants.js';
+import permissionsRoutes from './permissions.js';
 import swaggerSpec from '../docs/swagger.js';
 
 const router = express.Router();
@@ -19,6 +21,8 @@ router.use('/auth', authRoutes);
 router.use('/products', productRoutes);
 router.use('/orders', orderRoutes);
 router.use('/pix', pixRoutes);
+router.use('/constants', constantsRoutes);
+router.use('/permissions', permissionsRoutes);
 
 // Seed route (for development/testing)
 if (process.env.NODE_ENV !== 'production') {

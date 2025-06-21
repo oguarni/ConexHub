@@ -11,6 +11,7 @@ import OrdersModal from './components/orders/OrdersModal';
 import QuotationModal from './components/quotation/QuotationModal';
 import CheckoutModal from './components/checkout/CheckoutModal';
 import './App.css';
+import './styles/components.css';
 
 // Simple notification container
 const NotificationContainer = () => {
