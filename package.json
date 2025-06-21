@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/traverse": "^7.27.4",
     "@rollup/pluginutils": "^5.2.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
@@ -30,6 +31,7 @@
     "morgan": "^1.10.0",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
+    "rollup": "^2.79.2",
     "sequelize": "^6.35.1"
   },
   "devDependencies": {
