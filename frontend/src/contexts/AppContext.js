@@ -86,7 +86,7 @@ const appReducer = (state, action) => {
   }
 };
 
-export const AppProvider = ({ children }) => {
+export const GeneralStateProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
   
   const auth = useSecureAuth();
@@ -240,7 +240,7 @@ export const AppProvider = ({ children }) => {
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {
-    throw new Error('useAppContext deve ser usado dentro de AppProvider');
+    throw new Error('useAppContext deve ser usado dentro de GeneralStateProvider');
   }
   return context;
 };

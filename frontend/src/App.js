@@ -1,6 +1,5 @@
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { LanguageProvider } from './contexts/LanguageContext';
 import { useAuth } from './stores/authStore';
 import { useNotifications, useModals } from './stores/uiStore';
 import Header from './components/common/Header';
@@ -167,11 +166,9 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <LanguageProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <AppContent />
-        </Suspense>
-      </LanguageProvider>
+      <Suspense fallback={<LoadingFallback />}>
+        <AppContent />
+      </Suspense>
     </ErrorBoundary>
   );
 }
