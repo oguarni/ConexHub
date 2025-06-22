@@ -14,32 +14,32 @@ const useAuthStore = create(
           loading: false,
           error: null,
 
-          // Sample users for demo
+          // Sample users for demo (fallback when API fails)
           sampleUsers: {
-            'buyer@demo.com': {
+            'joao@empresa.com': {
               id: 1,
               name: 'João Silva',
-              email: 'buyer@demo.com',
+              email: 'joao@empresa.com', 
               role: 'buyer',
-              companyName: 'Indústria Demo Ltda',
-              address: 'Rua das Indústrias, 123',
+              companyName: 'Empresa Demo Ltda',
+              address: 'Rua das Empresas, 123',
               phone: '(11) 99999-1234'
             },
-            'supplier@demo.com': {
+            'carlos@fornecedor.com': {
               id: 2,
-              name: 'Maria Santos',
-              email: 'supplier@demo.com',
+              name: 'Carlos Fornecedor',
+              email: 'carlos@fornecedor.com',
               role: 'supplier',
-              companyName: 'Fornecimentos Industriais',
-              address: 'Av. dos Fornecedores, 456',
+              companyName: 'Carlos Santos - Fornecedor',
+              address: 'Av. dos Fornecedores, 456', 
               phone: '(11) 99999-5678'
             },
-            'admin@demo.com': {
+            'admin@b2bmarketplace.com': {
               id: 3,
-              name: 'Admin Sistema',
-              email: 'admin@demo.com',
+              name: 'Admin',
+              email: 'admin@b2bmarketplace.com',
               role: 'admin',
-              companyName: 'ConexHub Admin',
+              companyName: 'B2B Marketplace Admin',
               address: 'Sede Principal',
               phone: '(11) 99999-0000'
             }
@@ -90,7 +90,9 @@ const useAuthStore = create(
                 const { sampleUsers } = get();
                 const sampleUser = sampleUsers[email];
                 
-                if (sampleUser && password === 'demo123') {
+                if (sampleUser && ((email === 'joao@empresa.com' && password === 'buyer123') || 
+                                   (email === 'carlos@fornecedor.com' && password === 'supplier123') ||
+                                   (email === 'admin@b2bmarketplace.com' && password === 'admin123'))) {
                   const demoToken = 'demo-token-' + Date.now();
                   get().setUser(sampleUser, demoToken);
                   
@@ -103,7 +105,7 @@ const useAuthStore = create(
                   
                   return { success: true };
                 } else {
-                  throw new Error('Credenciais inválidas. Use um dos emails de demo: buyer@demo.com, supplier@demo.com, admin@demo.com com senha: demo123');
+                  throw new Error('Credenciais inválidas. Use: joao@empresa.com/buyer123, carlos@fornecedor.com/supplier123, ou admin@b2bmarketplace.com/admin123');
                 }
               }
             } catch (error) {

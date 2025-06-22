@@ -6,6 +6,10 @@ import useUIStore from '../../stores/uiStore';
 const AuthModal = () => {
   const { login, register, loading, error } = useAuthStore();
   const { modals, hideModal, addNotification } = useUIStore();
+  
+  // Debug logging
+  console.log('AuthModal render - showAuth:', modals.showAuth);
+  console.log('AuthModal render - all modals:', modals);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -217,14 +221,14 @@ const AuthModal = () => {
           {/* Test accounts info */}
           {isLogin && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800 font-medium mb-2">Contas Demo Disponíveis:</p>
+              <p className="text-sm text-blue-800 font-medium mb-2">Contas de Teste Disponíveis:</p>
               <div className="text-xs text-blue-700 space-y-1">
-                <p><strong>Comprador:</strong> demo.buyer@marketplace.com / DemoBuyer123</p>
-                <p><strong>Fornecedor:</strong> demo.supplier@marketplace.com / DemoSupplier123</p>
-                <p><strong>Admin:</strong> demo.admin@marketplace.com / DemoAdmin123</p>
+                <p><strong>Comprador:</strong> joao@empresa.com / buyer123</p>
+                <p><strong>Fornecedor:</strong> carlos@fornecedor.com / supplier123</p>
+                <p><strong>Admin:</strong> admin@b2bmarketplace.com / admin123</p>
               </div>
-              <p className="text-xs text-blue-600 mt-2 italic">* Senhas: 8+ caracteres, maiúscula, minúscula e número</p>
-              <p className="text-xs text-red-600 mt-1">⚠️ Se login falhar, crie uma nova conta usando "Cadastrar"</p>
+              <p className="text-xs text-blue-600 mt-2 italic">* Use as credenciais exatas como mostrado acima</p>
+              <p className="text-xs text-green-600 mt-1">✅ API funcionando - containers online</p>
             </div>
           )}
         </div>

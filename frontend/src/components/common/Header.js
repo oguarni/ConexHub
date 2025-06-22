@@ -2,28 +2,32 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, User, Menu, X, Building, Package, Globe, HelpCircle } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
-import { useUI } from '../../contexts/UIContext';
+import useUIStore from '../../stores/uiStore';
 import { useLanguage } from '../../contexts/LanguageContext';
 import QuotationButton from '../quotation/QuotationButton';
 
 const Header = () => {
   const location = useLocation();
   const { user, logout } = useAuthStore();
-  const { uiState, showModal, toggleMenu, addNotification } = useUI();
+  const { showModal, toggleMenu, addNotification, isMenuOpen } = useUIStore();
   
   const { t, language, changeLanguage, availableLanguages } = useLanguage();
   const [showHelp, setShowHelp] = useState(false);
 
   const handleLogin = async () => {
     if (user) {
-      console.log('Login button clicked'); // For debugging
+      console.log('Logout button clicked - user exists:', user.email);
       logout();
       addNotification({
         type: 'info',
         message: t('logoutSuccess') || 'Logout realizado com sucesso'
       });
     } else {
+      console.log('Login button clicked - no user, showing auth modal');
+      console.log('showModal function:', typeof showModal);
+      console.log('About to call showModal with showAuth');
       showModal('showAuth');
+      console.log('showModal called with showAuth - modal should now be visible');
     }
   };
 
@@ -53,9 +57,9 @@ const Header = () => {
             <button 
               onClick={toggleMenu}
               className="md:hidden"
-              aria-label={uiState.isMenuOpen ? "Fechar menu" : "Abrir menu"}
+              aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
             >
-              {uiState.isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
             
             <Link to="/" className="flex items-center space-x-2">
@@ -203,20 +207,20 @@ const Header = () => {
                 <div className="space-y-3">
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <div className="font-medium text-blue-900">👤 Comprador</div>
-                    <div className="text-sm text-blue-700">buyer@demo.com</div>
-                    <div className="text-sm text-blue-700">Senha: demo123</div>
+                    <div className="text-sm text-blue-700">joao@empresa.com</div>
+                    <div className="text-sm text-blue-700">Senha: buyer123</div>
                   </div>
                   
                   <div className="p-3 bg-green-50 rounded-lg">
                     <div className="font-medium text-green-900">🏭 Fornecedor</div>
-                    <div className="text-sm text-green-700">supplier@demo.com</div>
-                    <div className="text-sm text-green-700">Senha: demo123</div>
+                    <div className="text-sm text-green-700">carlos@fornecedor.com</div>
+                    <div className="text-sm text-green-700">Senha: supplier123</div>
                   </div>
                   
                   <div className="p-3 bg-purple-50 rounded-lg">
                     <div className="font-medium text-purple-900">⚙️ Admin</div>
-                    <div className="text-sm text-purple-700">admin@demo.com</div>
-                    <div className="text-sm text-purple-700">Senha: demo123</div>
+                    <div className="text-sm text-purple-700">admin@b2bmarketplace.com</div>
+                    <div className="text-sm text-purple-700">Senha: admin123</div>
                   </div>
                 </div>
                 
