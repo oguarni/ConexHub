@@ -11,6 +11,7 @@ import analyticsRoutes from './analytics.js';
 import adminRoutes from './admin.js';
 import recommendationRoutes from './recommendations.js';
 import notificationRoutes from './notifications.js';
+import errorRoutes from './errors.js';
 import swaggerSpec from '../docs/swagger.js';
 
 const router = express.Router();
@@ -31,6 +32,7 @@ router.use('/analytics', analyticsRoutes);
 router.use('/admin', adminRoutes);
 router.use('/recommendations', recommendationRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/errors', errorRoutes);
 
 // Seed route (for development/testing)
 if (process.env.NODE_ENV !== 'production') {

@@ -1,5 +1,4 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
 import Header from './components/common/Header';
 import AppRouter from './components/router/AppRouter';
 import { AppProvider } from './contexts/AppProvider';
@@ -83,11 +82,9 @@ const AppContent = () => {
 function App() {
   return (
     <EnhancedErrorBoundary>
-      <Router>
-        <AppProvider>
-          <AppContent />
-        </AppProvider>
-      </Router>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
     </EnhancedErrorBoundary>
   );
 }

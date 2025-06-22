@@ -412,42 +412,87 @@ class ApiService {
     }, 1, 500);
   }
 
-  // Constants methods for externalized data
+  // Constants methods for externalized data (requires authentication)
   async getSampleOrders(role = 'buyer') {
-    return this.withRetry(async () => {
-      const response = await this.api.get('/constants/sample-orders', { 
-        params: { role } 
+    try {
+      return this.withRetry(async () => {
+        const response = await this.api.get('/constants/sample-orders', { 
+          params: { role } 
+        });
+        return response.data.data;
       });
-      return response.data.data;
-    });
+    } catch (error) {
+      // Return empty array if not authenticated or endpoint not available
+      if (error.status === 401 || error.status === 404) {
+        console.warn('Sample orders not available:', error.message);
+        return [];
+      }
+      throw error;
+    }
   }
 
   async getSampleProducts() {
-    return this.withRetry(async () => {
-      const response = await this.api.get('/constants/sample-products');
-      return response.data.data;
-    });
+    try {
+      return this.withRetry(async () => {
+        const response = await this.api.get('/constants/sample-products');
+        return response.data.data;
+      });
+    } catch (error) {
+      // Return empty array if not authenticated or endpoint not available
+      if (error.status === 401 || error.status === 404) {
+        console.warn('Sample products not available:', error.message);
+        return [];
+      }
+      throw error;
+    }
   }
 
   async getAppConstants() {
-    return this.withRetry(async () => {
-      const response = await this.api.get('/constants/app-constants');
-      return response.data.data;
-    });
+    try {
+      return this.withRetry(async () => {
+        const response = await this.api.get('/constants/app-constants');
+        return response.data.data;
+      });
+    } catch (error) {
+      // Return default constants if not available
+      if (error.status === 401 || error.status === 404) {
+        console.warn('App constants not available:', error.message);
+        return {};
+      }
+      throw error;
+    }
   }
 
   async getStaticContent() {
-    return this.withRetry(async () => {
-      const response = await this.api.get('/constants/static-content');
-      return response.data.data;
-    });
+    try {
+      return this.withRetry(async () => {
+        const response = await this.api.get('/constants/static-content');
+        return response.data.data;
+      });
+    } catch (error) {
+      // Return empty object if not available
+      if (error.status === 401 || error.status === 404) {
+        console.warn('Static content not available:', error.message);
+        return {};
+      }
+      throw error;
+    }
   }
 
   async getShippingConfig() {
-    return this.withRetry(async () => {
-      const response = await this.api.get('/constants/shipping-zones');
-      return response.data.data;
-    });
+    try {
+      return this.withRetry(async () => {
+        const response = await this.api.get('/constants/shipping-zones');
+        return response.data.data;
+      });
+    } catch (error) {
+      // Return empty array if not available
+      if (error.status === 401 || error.status === 404) {
+        console.warn('Shipping config not available:', error.message);
+        return [];
+      }
+      throw error;
+    }
   }
 }
 
