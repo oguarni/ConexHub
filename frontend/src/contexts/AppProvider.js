@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { AuthProvider } from './AuthContext';
 import { GeneralStateProvider } from './AppContext';
 import { UIProvider } from './UIContext';
 import { CartProvider } from './CartContext';
@@ -159,24 +160,26 @@ export const AppProvider = ({ children }) => {
   return (
     <EnhancedErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <LanguageProvider>
-          <NotificationProvider>
-            <GeneralStateProvider>
-              <UIProvider>
-                <CartProvider>
-                  <QuotesProvider>
-                    <QuotationProvider>
-                      <AppContext.Provider value={contextValue}>
-                        {children}
-                        <ReactQueryDevtools initialIsOpen={false} />
-                      </AppContext.Provider>
-                    </QuotationProvider>
-                  </QuotesProvider>
-                </CartProvider>
-              </UIProvider>
-            </GeneralStateProvider>
-          </NotificationProvider>
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <NotificationProvider>
+              <GeneralStateProvider>
+                <UIProvider>
+                  <CartProvider>
+                    <QuotesProvider>
+                      <QuotationProvider>
+                        <AppContext.Provider value={contextValue}>
+                          {children}
+                          <ReactQueryDevtools initialIsOpen={false} />
+                        </AppContext.Provider>
+                      </QuotationProvider>
+                    </QuotesProvider>
+                  </CartProvider>
+                </UIProvider>
+              </GeneralStateProvider>
+            </NotificationProvider>
+          </LanguageProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </EnhancedErrorBoundary>
   );

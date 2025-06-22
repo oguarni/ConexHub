@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, User, Menu, X, Building, Package, Globe, HelpCircle } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
-import useUIStore from '../../stores/uiStore';
+import { useUI } from '../../contexts/UIContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import QuotationButton from '../quotation/QuotationButton';
 
 const Header = () => {
   const location = useLocation();
   const { user, logout } = useAuthStore();
-  const { uiState, showModal, toggleMenu, addNotification } = useUIStore();
+  const { uiState, showModal, toggleMenu, addNotification } = useUI();
   
   const { t, language, changeLanguage, availableLanguages } = useLanguage();
   const [showHelp, setShowHelp] = useState(false);

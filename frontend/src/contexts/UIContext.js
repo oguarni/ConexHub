@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useMemo } from 'react';
 
 const UIContext = createContext();
 
@@ -190,7 +190,7 @@ export const UIProvider = ({ children }) => {
     }
   };
 
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     // Estado
     uiState: state,
     
@@ -199,7 +199,7 @@ export const UIProvider = ({ children }) => {
     
     // Getters
     ...getters
-  };
+  }), [state]);
 
   return (
     <UIContext.Provider value={contextValue}>
@@ -210,8 +210,8 @@ export const UIProvider = ({ children }) => {
 
 export const useUI = () => {
   const context = useContext(UIContext);
-  if (!context) {
-    throw new Error('useUI deve ser usado dentro de UIProvider');
+  if (context === undefined || context === null) {
+    throw new Error('useUI() must be used within a <UIProvider> and the provider must have a value.');
   }
   return context;
 };
