@@ -243,7 +243,7 @@ class EnhancedErrorBoundary extends Component {
 
   sendToErrorService = async (errorData) => {
     try {
-      await fetch('/api/errors', {
+      await fetch('/api/admin/errors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(errorData)

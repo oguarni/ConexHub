@@ -80,5 +80,6 @@
   "overrides": {
     "serialize-javascript": "6.0.1",
     "terser-webpack-plugin": "5.3.9"
-  }
+  },
+  "proxy": "http://localhost:3001"
 }
