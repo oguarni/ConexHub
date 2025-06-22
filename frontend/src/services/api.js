@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { secureAuthService } from './authService';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3006/api';
+const API_URL = process.env.REACT_APP_API_URL;
 
 // Error handler centralizado
 class ApiErrorHandler {

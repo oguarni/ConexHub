@@ -1,79 +1,34 @@
-# =====================================
-# Multi-Stage Dockerfile for Frontend
-# =====================================
-
-# ===== STAGE 1: Dependencies =====
-FROM node:18-alpine AS dependencies
+# Stage 1: Build the React application with the correct API URL
+FROM node:18-alpine as builder
 
 WORKDIR /app
 
-# Install security updates
-RUN apk update && apk upgrade && apk add --no-cache dumb-init
+# -- FIX: Add ARG and ENV to receive the API URL at build time --
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
-# Copy package files for dependency installation
 COPY package*.json ./
+RUN npm install
 
-# Install dependencies with optimizations
-RUN npm install --only=production --ignore-scripts && \
-    npm cache clean --force
-
-# ===== STAGE 2: Build =====
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install all dependencies (including devDependencies for build)
-RUN npm install --ignore-scripts
-
-# Copy source code
 COPY . .
 
-# Build the application
+# The build process will now embed the correct backend URL
 RUN npm run build
 
-# Remove dev dependencies after build
-RUN npm prune --production
+# Stage 2: Serve the application with Nginx
+FROM nginx:1.25-alpine
 
-# ===== STAGE 3: Production =====
-FROM node:18-alpine AS production
+# Copy the built app from the builder stage
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Install security updates and runtime dependencies
-RUN apk update && apk upgrade && \
-    apk add --no-cache dumb-init nginx && \
-    rm -rf /var/cache/apk/*
+# Copy the custom Nginx configuration
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S reactuser -u 1001 -G nodejs
+# Create log directory and set permissions for the nginx user
+RUN mkdir -p /var/lib/nginx/logs && \
+    chown -R nginx:nginx /var/lib/nginx/logs && \
+    chmod -R 755 /var/lib/nginx
 
-WORKDIR /app
+EXPOSE 80
 
-# Copy built application from builder stage
-COPY --from=builder --chown=reactuser:nodejs /app/build ./build
-COPY --from=dependencies --chown=reactuser:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=reactuser:nodejs /app/package*.json ./
-
-# Copy nginx configuration
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-
-# Create nginx directories with proper permissions
-RUN mkdir -p /tmp/nginx_client_temp /tmp/nginx_proxy_temp /tmp/nginx_fastcgi_temp /tmp/nginx_uwsgi_temp /tmp/nginx_scgi_temp && \
-    chown -R reactuser:nodejs /tmp/nginx_*
-
-# Switch to non-root user
-USER reactuser
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
-
-EXPOSE 3000
-
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["dumb-init", "--"]
-
-# Start nginx in foreground
 CMD ["nginx", "-g", "daemon off;"]

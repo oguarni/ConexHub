@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/', [sanitizeInput], asyncHandler(async (req, res) => {
   const { category, search } = req.query;
   
-  let whereClause = { active: true };
+  let whereClause = { isActive: true };
   
   if (category && category !== 'Todas') {
     whereClause.category = category;
@@ -40,7 +40,7 @@ router.get('/', [sanitizeInput], asyncHandler(async (req, res) => {
 router.get('/:id', paramValidation.id, asyncHandler(async (req, res) => {
   const product = await Product.findByPk(req.params.id);
   
-  if (!product || !product.active) {
+  if (!product || !product.isActive) {
     throw new AppError('Produto não encontrado', 404, 'PRODUCT_NOT_FOUND');
   }
 
@@ -211,7 +211,7 @@ router.delete('/:id', [authMiddleware, adminMiddleware, ...paramValidation.id], 
   }
 
   // Soft delete
-  await product.update({ active: false });
+  await product.update({ isActive: false });
 
   res.json({ 
     success: true,

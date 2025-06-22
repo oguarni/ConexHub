@@ -67,6 +67,19 @@ class ProductQueryBuilder {
   }
 
   /**
+   * Status filter (for query parameter compatibility)
+   */
+  addStatusFilter(status) {
+    if (status) {
+      // Explicitly check for 'active' or 'inactive' and map to boolean
+      if (['active', 'inactive'].includes(status)) {
+        this.whereConditions.isActive = status === 'active';
+      }
+    }
+    return this;
+  }
+
+  /**
    * Price range filters
    */
   wherePriceRange(minPrice, maxPrice) {

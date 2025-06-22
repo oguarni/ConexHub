@@ -95,20 +95,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: production
+      args:
+        REACT_APP_API_URL: http://backend:3001/api
     container_name: b2b_frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: development
-      REACT_APP_API_URL: http://localhost:3001/api
-      REACT_APP_NODE_ENV: development
+      - "3000:80"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 30s
       timeout: 10s
       retries: 3
