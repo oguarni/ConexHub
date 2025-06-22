@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { secureAuthService } from './authService';
 
-// Use a relative path for the API URL. This works with both the local proxy and the Nginx proxy in Docker.
-const API_URL = '/api';
+// Use environment variable for API URL with fallback to relative path
+const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 // Error handler centralizado
 class ApiErrorHandler {
