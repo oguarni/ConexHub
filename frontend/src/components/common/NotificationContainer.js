@@ -1,7 +1,7 @@
 // components/common/NotificationContainer.js
 import React from 'react';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
-import { useLegacyAppContext } from '../../contexts/AppProvider';
+import { useNotifications } from '../../stores/uiStore';
 import { NOTIFICATION_TYPES } from '../../utils/constants';
 
 const NotificationItem = ({ notification, onRemove }) => {
@@ -64,16 +64,16 @@ const NotificationItem = ({ notification, onRemove }) => {
 };
 
 const NotificationContainer = () => {
-  const { uiState, removeNotification } = useLegacyAppContext();
+  const { notifications, removeNotification } = useNotifications();
 
-  if (uiState.notifications.length === 0) return null;
+  if (notifications.length === 0) return null;
 
   return (
     <div 
       className="fixed top-20 right-4 z-50 space-y-2 max-w-sm w-full"
       aria-label="Notificações"
     >
-      {uiState.notifications.map(notification => (
+      {notifications.map(notification => (
         <NotificationItem
           key={notification.id}
           notification={notification}

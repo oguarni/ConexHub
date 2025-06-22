@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Package } from 'lucide-react';
-import { useLegacyAppContext } from "../../contexts/AppProvider";
+import useAuthStore from '../../stores/authStore';
+import { useNotifications } from '../../stores/uiStore';
+import { useProductsQuery } from '../../hooks/queries/useProductsQuery';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { apiService } from '../../services/api';
 import QuoteModal from '../products/QuoteModal';
@@ -122,15 +124,10 @@ const SearchAndFilters = ({ searchTerm, setSearchTerm, selectedCategory, setSele
 
 // Main Content Component
 const MainContent = () => {
-  const { 
-    products, 
-    loading, 
-    error, 
-    user, 
-    handleRequestQuote, 
-    loadProducts,
-    addNotification 
-  } = useLegacyAppContext();
+  const { user } = useAuthStore();
+  const { addNotification } = useNotifications();
+  const { data: productsResponse, isLoading: loading, error } = useProductsQuery();
+  const products = productsResponse?.products || [];
   
   const { t } = useLanguage();
 
@@ -147,11 +144,7 @@ const MainContent = () => {
     message: ''
   });
 
-  // Load products on mount
-  useEffect(() => {
-    console.log('MainContent: Loading products on mount');
-    loadProducts();
-  }, [loadProducts]);
+  // Products are automatically loaded by useProductsQuery
 
   // Filter products - Debug category mismatch
   console.log('MainContent: Products available:', products?.length || 0);
@@ -240,7 +233,7 @@ const MainContent = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+          {error.message || 'Erro ao carregar produtos'}
         </div>
       </div>
     );

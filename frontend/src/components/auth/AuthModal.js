@@ -5,7 +5,7 @@ import useUIStore from '../../stores/uiStore';
 
 const AuthModal = () => {
   const { login, register, loading, error } = useAuthStore();
-  const { uiState, hideModal, addNotification } = useUIStore();
+  const { modals, hideModal, addNotification } = useUIStore();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -71,7 +71,7 @@ const AuthModal = () => {
     });
   };
 
-  if (!uiState.showAuth) return null;
+  if (!modals.showAuth) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

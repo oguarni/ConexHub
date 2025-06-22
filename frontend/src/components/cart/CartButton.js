@@ -1,11 +1,11 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { useLegacyAppContext } from "../../contexts/AppProvider";
+import useUIStore from '../../stores/uiStore';
 
 const CartButton = () => {
   const { getItemsCount } = useCart();
-  const { showModal } = useLegacyAppContext();
+  const { showModal } = useUIStore();
   const itemsCount = getItemsCount();
 
   return (

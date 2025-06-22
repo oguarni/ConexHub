@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useLegacyAppContext } from "../../contexts/AppProvider";
+import useAuthStore from '../../stores/authStore';
 
 const ProtectedRoute = ({ children, requiredRole = null, requireAuth = true }) => {
-  const { user } = useLegacyAppContext();
+  const { user } = useAuthStore();
   const location = useLocation();
 
   // If authentication is required but user is not logged in

@@ -1,16 +1,16 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { useQuotation } from '../../contexts/QuotationContext';
-import { useLegacyAppContext } from "../../contexts/AppProvider";
+import useUIStore from '../../stores/uiStore';
 
 const QuotationButton = () => {
   const { quotationItems, getQuotationCount } = useQuotation();
-  const { updateUI } = useLegacyAppContext();
+  const { showModal } = useUIStore();
   
   const itemCount = getQuotationCount();
 
   const handleClick = () => {
-    updateUI({ showQuotation: true });
+    showModal('showQuotation');
   };
 
   return (

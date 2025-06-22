@@ -4,7 +4,7 @@ import { useQuotation } from '../../contexts/QuotationContext';
 import useUIStore from '../../stores/uiStore';
 
 const QuotationModal = () => {
-  const { uiState, updateUI } = useUIStore();
+  const { modals, hideModal } = useUIStore();
   const {
     quotationItems,
     shippingCost,
@@ -20,10 +20,10 @@ const QuotationModal = () => {
   const [cep, setCep] = useState('');
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
 
-  const isOpen = uiState.showQuotation;
+  const isOpen = modals.showQuotation;
 
   const handleClose = () => {
-    updateUI({ showQuotation: false });
+    hideModal('showQuotation');
   };
 
   const handleQuantityChange = (productId, newQuantity) => {

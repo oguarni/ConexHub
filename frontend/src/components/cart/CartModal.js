@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, Truck } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { useLegacyAppContext } from "../../contexts/AppProvider";
+import { useModals, useNotifications } from '../../stores/uiStore';
 
 const CartModal = () => {
   const { 
@@ -17,12 +17,13 @@ const CartModal = () => {
     getTotal 
   } = useCart();
   
-  const { uiState, hideModal, showModal, addNotification } = useLegacyAppContext();
+  const { modals, hideModal, showModal } = useModals();
+  const { addNotification } = useNotifications();
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingOptions, setShippingOptions] = useState(null);
   const [cepInput, setCepInput] = useState(shipping.cep || '');
 
-  if (!uiState.showCart) return null;
+  if (!modals.showCart) return null;
 
   console.log('🛒 CartModal render:', { 
     itemsCount: items.length, 
