@@ -97,7 +97,7 @@ services:
       dockerfile: Dockerfile
       # IMPORTANT: Use a relative path for the API URL
       args:
-        REACT_APP_API_URL: /api
+        REACT_APP_API_URL: http://localhost:3001/api
     container_name: b2b_frontend
     restart: unless-stopped
     ports:

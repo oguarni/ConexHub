@@ -148,7 +148,8 @@ const environmentConfigs = {
     },
     security: {
       cors: {
-        origin: true // Allow all origins in development
+        origin: true, // Allow all origins in development
+        credentials: true
       }
     }
   },
