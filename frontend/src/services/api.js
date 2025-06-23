@@ -376,7 +376,7 @@ class ApiService {
 
   async convertQuoteToOrder(quoteId, orderData) {
     try {
-      const response = await this.api.post(`/quotes/${quoteId}/convert`, orderData);
+      const response = await this.api.post(`/quotes/${quoteId}/create-order`, orderData);
       return response.data;
     } catch (error) {
       throw error;
