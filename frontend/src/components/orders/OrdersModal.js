@@ -15,6 +15,14 @@ const OrdersModal = ({ show, onClose, user }) => {
     refetch: refetchOrders
   } = useOrdersModalQuery();
 
+  // Add debug logging
+  useEffect(() => {
+    console.log('[OrdersModal] Query state:', { orders, isLoading: loading, error });
+    if (error) {
+      console.error('[OrdersModal] Error details:', error.message, error.stack);
+    }
+  }, [orders, loading, error]);
+
   // React Query for Shipping Config using custom hook
   const { data: shippingConfig } = useShippingConfigQuery({
     enabled: show && !!user,

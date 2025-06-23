@@ -1,3 +1,4 @@
+console.log('[API Service] Module loading started');
 import axios from 'axios';
 import { secureAuthService } from './authService';
 
@@ -318,9 +319,64 @@ class ApiService {
     });
   }
 
+  async getOrders(filters = {}) {
+    return this.withRetry(async () => {
+      const response = await this.api.get('/orders', { params: filters });
+      return response.data;
+    });
+  }
+
+  async getOrder(orderId) {
+    return this.withRetry(async () => {
+      const response = await this.api.get(`/orders/${orderId}`);
+      return response.data;
+    });
+  }
+
   async updateOrderStatus(orderId, status) {
     try {
       const response = await this.api.put(`/orders/${orderId}/status`, { status });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getOrderHistory(userId) {
+    return this.withRetry(async () => {
+      const response = await this.api.get(`/orders/history/${userId}`);
+      return response.data;
+    });
+  }
+
+  async getOrderAnalytics(period = '30d') {
+    return this.withRetry(async () => {
+      const response = await this.api.get(`/orders/analytics?period=${period}`);
+      return response.data;
+    });
+  }
+
+  async cancelOrder(id, reason) {
+    try {
+      const response = await this.api.put(`/orders/${id}/cancel`, { reason });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async processOrderPayment(orderId, paymentData) {
+    try {
+      const response = await this.api.post(`/orders/${orderId}/payment`, paymentData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async convertQuoteToOrder(quoteId, orderData) {
+    try {
+      const response = await this.api.post(`/quotes/${quoteId}/convert`, orderData);
       return response.data;
     } catch (error) {
       throw error;
@@ -546,5 +602,16 @@ class ApiService {
   }
 }
 
-export const apiService = new ApiService();
-export { ApiErrorHandler };
+const apiService = new ApiService();
+console.log('[API Service] Module loaded, available methods:', Object.keys(apiService));
+
+// Development only
+if (process.env.NODE_ENV === 'development') {
+  import('./mocks/ordersMock.js').then(({ mockOrderEndpoints }) => {
+    mockOrderEndpoints(apiService);
+  }).catch(error => {
+    console.warn('Could not load order mocks:', error.message);
+  });
+}
+
+export { apiService, ApiErrorHandler };

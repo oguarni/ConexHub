@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { queryKeys, invalidateQueries, updateQueryData, handleQueryError } from '../../lib/queryClient';
-import { apiService } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
+
+console.log('[useOrdersQuery] Module loading started');
 
 // =================== ORDER QUERIES ===================
 
@@ -18,9 +19,12 @@ export const useOrdersModalQuery = () => {
       if (!user?.role) return [];
       
       try {
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
+        
         const data = user.role === 'supplier'
-          ? await apiService.getSupplierOrders()
-          : await apiService.getUserOrders();
+          ? await dynamicApiService.getSupplierOrders()
+          : await dynamicApiService.getUserOrders();
         
         // Handle both direct array and wrapped object API responses
         return Array.isArray(data) ? data : (data?.orders || []);
@@ -30,7 +34,8 @@ export const useOrdersModalQuery = () => {
         
         // Fallback to sample orders
         try {
-          const response = await apiService.getSampleOrders(user.role);
+          const { apiService: dynamicApiService } = await import('../../services/api');
+          const response = await dynamicApiService.getSampleOrders(user.role);
           return response.orders || [];
         } catch (error) {
           console.error('Error loading sample orders from API:', error);
@@ -62,7 +67,9 @@ export const useOrdersQuery = (filters = {}, options = {}) => {
     queryKey: queryKeys.orders.list(filters.userId || 'current'),
     queryFn: async () => {
       try {
-        const response = await apiService.getOrders(filters);
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
+        const response = await dynamicApiService.getOrders(filters);
         return response;
       } catch (error) {
         throw handleQueryError(error, 'useOrdersQuery');
@@ -82,11 +89,13 @@ export const useInfiniteOrdersQuery = (baseFilters = {}, options = {}) => {
     queryKey: queryKeys.orders.list({ ...baseFilters, infinite: true }),
     queryFn: async ({ pageParam = 1 }) => {
       try {
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
         const filters = { ...baseFilters, page: pageParam, limit: 20 };
-        const response = await apiService.getOrders(filters);
+        const response = await dynamicApiService.getOrders(filters);
         return {
           ...response,
-          nextCursor: response.pagination.hasNextPage ? pageParam + 1 : undefined,
+          nextCursor: response.pagination?.hasNextPage ? pageParam + 1 : undefined,
         };
       } catch (error) {
         throw handleQueryError(error, 'useInfiniteOrdersQuery');
@@ -107,7 +116,9 @@ export const useOrderQuery = (id, options = {}) => {
     queryKey: queryKeys.orders.detail(id),
     queryFn: async () => {
       try {
-        return await apiService.getOrder(id);
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
+        return await dynamicApiService.getOrder(id);
       } catch (error) {
         throw handleQueryError(error, 'useOrderQuery');
       }
@@ -126,7 +137,9 @@ export const useOrdersByStatusQuery = (status, options = {}) => {
     queryKey: queryKeys.orders.byStatus(status),
     queryFn: async () => {
       try {
-        const response = await apiService.getOrders({ status });
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
+        const response = await dynamicApiService.getOrders({ status });
         return response.orders || [];
       } catch (error) {
         throw handleQueryError(error, 'useOrdersByStatusQuery');
@@ -146,7 +159,15 @@ export const useOrderHistoryQuery = (userId, options = {}) => {
     queryKey: queryKeys.orders.history(userId),
     queryFn: async () => {
       try {
-        return await apiService.getOrderHistory(userId);
+        const module = await import('../../services/api');
+        const dynamicApiService = module.default || module.apiService;
+        
+        if (!dynamicApiService?.getOrderHistory) {
+          console.error('getOrderHistory not found in:', Object.keys(dynamicApiService || {}));
+          throw new Error('API service method not available');
+        }
+        
+        return await dynamicApiService.getOrderHistory(userId);
       } catch (error) {
         throw handleQueryError(error, 'useOrderHistoryQuery');
       }
@@ -165,7 +186,15 @@ export const useOrderAnalyticsQuery = (period = '30d', options = {}) => {
     queryKey: queryKeys.orders.analytics(period),
     queryFn: async () => {
       try {
-        return await apiService.getOrderAnalytics(period);
+        const module = await import('../../services/api');
+        const dynamicApiService = module.default || module.apiService;
+        
+        if (!dynamicApiService?.getOrderAnalytics) {
+          console.error('getOrderAnalytics not found in:', Object.keys(dynamicApiService || {}));
+          throw new Error('API service method not available');
+        }
+        
+        return await dynamicApiService.getOrderAnalytics(period);
       } catch (error) {
         throw handleQueryError(error, 'useOrderAnalyticsQuery');
       }
@@ -199,7 +228,15 @@ export const useCreateOrderMutation = (options = {}) => {
         throw new Error('Endereço de entrega é obrigatório');
       }
 
-      return await apiService.createOrder(orderData);
+      const module = await import('../../services/api');
+      const dynamicApiService = module.default || module.apiService;
+      
+      if (!dynamicApiService?.createOrder) {
+        console.error('createOrder not found in:', Object.keys(dynamicApiService || {}));
+        throw new Error('API service method not available');
+      }
+      
+      return await dynamicApiService.createOrder(orderData);
     },
     onSuccess: (newOrder, variables) => {
       // Add to order lists
@@ -263,7 +300,15 @@ export const useUpdateOrderStatusMutation = (options = {}) => {
       if (!id) throw new Error('ID do pedido é obrigatório');
       if (!status) throw new Error('Status é obrigatório');
       
-      return await apiService.updateOrderStatus(id, status, notes);
+      const module = await import('../../services/api');
+      const dynamicApiService = module.default || module.apiService;
+      
+      if (!dynamicApiService?.updateOrderStatus) {
+        console.error('updateOrderStatus not found in:', Object.keys(dynamicApiService || {}));
+        throw new Error('API service method not available');
+      }
+      
+      return await dynamicApiService.updateOrderStatus(id, status, notes);
     },
     onMutate: async ({ id, status }) => {
       // Cancel outgoing refetches
@@ -331,7 +376,15 @@ export const useCancelOrderMutation = (options = {}) => {
         }
       }
       
-      return await apiService.cancelOrder(id, reason);
+      const module = await import('../../services/api');
+      const dynamicApiService = module.default || module.apiService;
+      
+      if (!dynamicApiService?.cancelOrder) {
+        console.error('cancelOrder not found in:', Object.keys(dynamicApiService || {}));
+        throw new Error('API service method not available');
+      }
+      
+      return await dynamicApiService.cancelOrder(id, reason);
     },
     onMutate: async ({ id }) => {
       // Cancel outgoing refetches
@@ -397,7 +450,15 @@ export const useProcessPaymentMutation = (options = {}) => {
       if (!orderId) throw new Error('ID do pedido é obrigatório');
       if (!paymentData) throw new Error('Dados de pagamento são obrigatórios');
       
-      return await apiService.processOrderPayment(orderId, paymentData);
+      const module = await import('../../services/api');
+      const dynamicApiService = module.default || module.apiService;
+      
+      if (!dynamicApiService?.processOrderPayment) {
+        console.error('processOrderPayment not found in:', Object.keys(dynamicApiService || {}));
+        throw new Error('API service method not available');
+      }
+      
+      return await dynamicApiService.processOrderPayment(orderId, paymentData);
     },
     onSuccess: (paymentResult, { orderId }) => {
       // Update order status to paid
@@ -438,7 +499,15 @@ export const useShippingConfigQuery = (options = {}) => {
     queryKey: ['shippingConfig'],
     queryFn: async () => {
       try {
-        const config = await apiService.getShippingConfig();
+        const module = await import('../../services/api');
+        const dynamicApiService = module.default || module.apiService;
+        
+        if (!dynamicApiService?.getShippingConfig) {
+          console.error('getShippingConfig not found in:', Object.keys(dynamicApiService || {}));
+          throw new Error('API service method not available');
+        }
+        
+        const config = await dynamicApiService.getShippingConfig();
         return config;
       } catch (error) {
         console.error('Error loading shipping config:', error);
@@ -466,7 +535,15 @@ export const useOrdersModalStatusMutation = (onSuccess) => {
   return useMutation({
     mutationFn: async ({ orderId, status }) => {
       try {
-        await apiService.updateOrderStatus(orderId, status);
+        const module = await import('../../services/api');
+        const dynamicApiService = module.default || module.apiService;
+        
+        if (!dynamicApiService?.updateOrderStatus) {
+          console.error('updateOrderStatus not found in:', Object.keys(dynamicApiService || {}));
+          throw new Error('API service method not available');
+        }
+        
+        await dynamicApiService.updateOrderStatus(orderId, status);
       } catch (apiError) {
         console.log('API not available, updating status locally');
         // Return a mock successful response for local update
@@ -494,14 +571,34 @@ export const usePrefetchOrder = () => {
     prefetchOrder: (id) => {
       queryClient.prefetchQuery({
         queryKey: queryKeys.orders.detail(id),
-        queryFn: () => apiService.getOrder(id),
+        queryFn: async () => {
+          const module = await import('../../services/api');
+          const dynamicApiService = module.default || module.apiService;
+          
+          if (!dynamicApiService?.getOrder) {
+            console.error('getOrder not found in:', Object.keys(dynamicApiService || {}));
+            throw new Error('API service method not available');
+          }
+          
+          return await dynamicApiService.getOrder(id);
+        },
         staleTime: 1 * 60 * 1000,
       });
     },
     prefetchOrders: (filters) => {
       queryClient.prefetchQuery({
         queryKey: queryKeys.orders.list(filters.userId || 'current'),
-        queryFn: () => apiService.getOrders(filters),
+        queryFn: async () => {
+          const module = await import('../../services/api');
+          const dynamicApiService = module.default || module.apiService;
+          
+          if (!dynamicApiService?.getOrders) {
+            console.error('getOrders not found in:', Object.keys(dynamicApiService || {}));
+            throw new Error('API service method not available');
+          }
+          
+          return await dynamicApiService.getOrders(filters);
+        },
         staleTime: 30 * 1000,
       });
     },
