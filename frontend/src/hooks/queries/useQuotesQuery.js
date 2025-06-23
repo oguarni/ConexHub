@@ -43,6 +43,12 @@ export const useBuyerQuotesQuery = (filters = {}, options = {}) => {
     queryKey: queryKeys.quotes.buyer(),
     queryFn: async () => {
       try {
+        // Defensive check to see what methods are available on the apiService object at runtime
+        if (typeof apiService.getBuyerQuotes !== 'function') {
+          console.error('CRITICAL: getBuyerQuotes is NOT a function on apiService!', apiService);
+          console.log('Available keys:', Object.keys(apiService));
+          throw new Error('API service is not initialized correctly.');
+        }
         const response = await apiService.getBuyerQuotes(filters);
         return response;
       } catch (error) {

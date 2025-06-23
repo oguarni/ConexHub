@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Package, Truck, CheckCircle, Clock, Calculator, MapPin } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiService } from '../../services/api';
-import { useOrdersModalQuery } from '../../hooks/queries/useOrdersQuery';
+import { useOrdersModalQuery, useShippingConfigQuery, useOrdersModalStatusMutation } from '../../hooks/queries/useOrdersQuery';
 
 const OrdersModal = ({ show, onClose, user }) => {
-  const queryClient = useQueryClient();
   const [shippingCalculations, setShippingCalculations] = useState({});
   const [calculatingShipping, setCalculatingShipping] = useState({});
   const [shippingCeps, setShippingCeps] = useState({});
@@ -18,49 +15,13 @@ const OrdersModal = ({ show, onClose, user }) => {
     refetch: refetchOrders
   } = useOrdersModalQuery();
 
-  // React Query for Shipping Config
-  const { data: shippingConfig } = useQuery({
-    queryKey: ['shippingConfig'],
-    queryFn: async () => {
-      try {
-        const config = await apiService.getShippingConfig();
-        return config;
-      } catch (error) {
-        console.error('Error loading shipping config:', error);
-        return {
-          zones: {
-            '0': { region: 'São Paulo', multiplier: 1.8, baseDays: 2 }
-          },
-          baseShipping: 25.50,
-          weightMultiplier: 2.5,
-          insuranceRate: 0.01,
-          bulkDiscount: 0.15,
-          bulkThreshold: 10
-        };
-      }
-    },
+  // React Query for Shipping Config using custom hook
+  const { data: shippingConfig } = useShippingConfigQuery({
     enabled: show && !!user,
-    staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Mutation for updating order status
-  const updateOrderStatusMutation = useMutation({
-    mutationFn: async ({ orderId, status }) => {
-      try {
-        await apiService.updateOrderStatus(orderId, status);
-      } catch (apiError) {
-        console.log('API not available, updating status locally');
-        // Return a mock successful response for local update
-        return { id: orderId, status };
-      }
-    },
-    onSuccess: () => {
-      refetchOrders();
-    },
-    onError: (error) => {
-      console.error('Error updating order status:', error);
-    }
-  });
+  // Mutation for updating order status using custom hook
+  const updateOrderStatusMutation = useOrdersModalStatusMutation(refetchOrders);
 
   useEffect(() => {
     if (show && user) {

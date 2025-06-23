@@ -428,6 +428,60 @@ export const useProcessPaymentMutation = (options = {}) => {
   });
 };
 
+// =================== SHIPPING HOOKS ===================
+
+/**
+ * Hook for fetching shipping configuration
+ */
+export const useShippingConfigQuery = (options = {}) => {
+  return useQuery({
+    queryKey: ['shippingConfig'],
+    queryFn: async () => {
+      try {
+        const config = await apiService.getShippingConfig();
+        return config;
+      } catch (error) {
+        console.error('Error loading shipping config:', error);
+        return {
+          zones: {
+            '0': { region: 'São Paulo', multiplier: 1.8, baseDays: 2 }
+          },
+          baseShipping: 25.50,
+          weightMultiplier: 2.5,
+          insuranceRate: 0.01,
+          bulkDiscount: 0.15,
+          bulkThreshold: 10
+        };
+      }
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    ...options,
+  });
+};
+
+/**
+ * Hook for order status update mutation (extracted from OrdersModal)
+ */
+export const useOrdersModalStatusMutation = (onSuccess) => {
+  return useMutation({
+    mutationFn: async ({ orderId, status }) => {
+      try {
+        await apiService.updateOrderStatus(orderId, status);
+      } catch (apiError) {
+        console.log('API not available, updating status locally');
+        // Return a mock successful response for local update
+        return { id: orderId, status };
+      }
+    },
+    onSuccess: () => {
+      if (onSuccess) onSuccess();
+    },
+    onError: (error) => {
+      console.error('Error updating order status:', error);
+    }
+  });
+};
+
 // =================== UTILITY HOOKS ===================
 
 /**

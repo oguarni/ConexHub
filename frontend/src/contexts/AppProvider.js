@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { queryClient } from '../lib/queryClient';
 import { AuthProvider } from './AuthContext';
 import { GeneralStateProvider } from './AppContext';
 import { UIProvider } from './UIContext';
@@ -13,22 +14,7 @@ import EnhancedErrorBoundary from '../components/common/EnhancedErrorBoundary';
 import useAuthStore from '../stores/authStore';
 import useUIStore from '../stores/uiStore';
 
-// Create QueryClient instance
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 3,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: 'always',
-    },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
+// Using consolidated queryClient from lib/queryClient.js
 
 // Create a simplified App context for any remaining shared functionality
 const AppContext = createContext(null);
@@ -196,7 +182,6 @@ export const useAppContext = () => {
 };
 
 
-// Export QueryClient for use in tests or advanced scenarios
-export { queryClient };
+// QueryClient is exported from lib/queryClient.js
 
 export default AppProvider;

@@ -175,6 +175,24 @@ const useAuthStore = create(
                 get().logout();
               }
             }
+
+            // Listen for auth errors from API interceptor
+            const handleAuthError = (event) => {
+              console.log('Auth error detected, logging out user');
+              get().logout();
+              
+              // Show auth modal for re-login
+              window.dispatchEvent(new CustomEvent('ui:show-auth', {
+                detail: { message: event.detail?.message || 'Sessão expirada. Faça login novamente.' }
+              }));
+            };
+
+            window.addEventListener('auth:error', handleAuthError);
+            
+            // Store cleanup function for potential future use
+            get()._authErrorCleanup = () => {
+              window.removeEventListener('auth:error', handleAuthError);
+            };
           },
 
           // Refresh token if needed

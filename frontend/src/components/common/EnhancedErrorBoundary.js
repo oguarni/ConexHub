@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { AlertTriangle, RefreshCw, Home, Bug, Wifi, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // ✅ Tipos de erro categorizados
 const ErrorTypes = {
@@ -271,7 +272,13 @@ class EnhancedErrorBoundary extends Component {
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    // Use navigate function passed via props instead of hard refresh
+    if (this.props.navigate) {
+      this.props.navigate('/');
+    } else {
+      // Fallback to custom event dispatch
+      window.dispatchEvent(new CustomEvent('navigate:home'));
+    }
   };
 
   renderErrorView() {
@@ -330,13 +337,24 @@ class EnhancedErrorBoundary extends Component {
   }
 }
 
+// ✅ HOC to inject navigation into class component
+const withNavigation = (WrappedComponent) => {
+  return function NavigationWrapper(props) {
+    const navigate = useNavigate();
+    return <WrappedComponent {...props} navigate={navigate} />;
+  };
+};
+
+// ✅ Enhanced Error Boundary with navigation support
+const EnhancedErrorBoundaryWithNavigation = withNavigation(EnhancedErrorBoundary);
+
 // ✅ HOCs especializados
 export const withNetworkErrorBoundary = (Component) => {
   return function NetworkErrorBoundaryComponent(props) {
     return (
-      <EnhancedErrorBoundary>
+      <EnhancedErrorBoundaryWithNavigation>
         <Component {...props} />
-      </EnhancedErrorBoundary>
+      </EnhancedErrorBoundaryWithNavigation>
     );
   };
 };
@@ -344,9 +362,9 @@ export const withNetworkErrorBoundary = (Component) => {
 export const withSecurityErrorBoundary = (Component) => {
   return function SecurityErrorBoundaryComponent(props) {
     return (
-      <EnhancedErrorBoundary>
+      <EnhancedErrorBoundaryWithNavigation>
         <Component {...props} />
-      </EnhancedErrorBoundary>
+      </EnhancedErrorBoundaryWithNavigation>
     );
   };
 };
@@ -404,4 +422,5 @@ export const ErrorProvider = ({ children }) => {
   );
 };
 
-export default EnhancedErrorBoundary;
+export default EnhancedErrorBoundaryWithNavigation;
+export { EnhancedErrorBoundary };
