@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, FileText, Clock, CheckCircle, Building, CreditCard } from 'lucide-react';
+import { X, FileText, Clock, CheckCircle, Building, CreditCard, ShoppingCart } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import PixPaymentModal from '../payments/PixPaymentModal';
+import { useConvertQuoteToOrderMutation } from '../../hooks/queries/useQuotesQuery';
 
 const QuotesSidebar = ({ 
   showQuotes, 
@@ -15,6 +16,7 @@ const QuotesSidebar = ({
   const { t } = useLanguage();
   const [showPixPayment, setShowPixPayment] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
+  const convertQuoteToOrderMutation = useConvertQuoteToOrderMutation();
   
   if (!showQuotes) return null;
 
@@ -49,6 +51,17 @@ const QuotesSidebar = ({
   const handlePayWithPix = (quote) => {
     setSelectedQuote(quote);
     setShowPixPayment(true);
+  };
+
+  const handleConvertToOrder = async (quote) => {
+    try {
+      await convertQuoteToOrderMutation.mutateAsync({
+        quoteId: quote.id
+      });
+    } catch (error) {
+      // Error handling is done by the mutation hook
+      console.error('Failed to convert quote to order:', error);
+    }
   };
 
   const respondedQuotes = quotes.filter(q => q.status === 'responded');
@@ -132,7 +145,17 @@ const QuotesSidebar = ({
                   </div>
 
                   {quote.status === 'accepted' && (
-                    <div className="mt-3 pt-2 border-t border-gray-200">
+                    <div className="mt-3 pt-2 border-t border-gray-200 space-y-2">
+                      <button
+                        onClick={() => handleConvertToOrder(quote)}
+                        disabled={convertQuoteToOrderMutation.isLoading}
+                        className="w-full bg-blue-600 text-white py-2 px-3 rounded-md hover:bg-blue-700 disabled:bg-blue-400 flex items-center justify-center space-x-2 text-sm"
+                      >
+                        <ShoppingCart size={16} />
+                        <span>
+                          {convertQuoteToOrderMutation.isLoading ? 'Processando...' : 'Finalizar Compra'}
+                        </span>
+                      </button>
                       <button
                         onClick={() => handlePayWithPix(quote)}
                         className="w-full bg-green-600 text-white py-2 px-3 rounded-md hover:bg-green-700 flex items-center justify-center space-x-2 text-sm"

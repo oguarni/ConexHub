@@ -488,11 +488,8 @@ export const useConvertQuoteToOrderMutation = (options = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ quoteId, orderData }) => {
+    mutationFn: async ({ quoteId, orderData = {} }) => {
       if (!quoteId) throw new Error('ID da cotação é obrigatório');
-      if (!orderData.shippingAddress) {
-        throw new Error('Endereço de entrega é obrigatório');
-      }
       
       return await apiService.convertQuoteToOrder(quoteId, orderData);
     },

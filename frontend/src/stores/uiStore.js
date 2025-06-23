@@ -16,6 +16,7 @@ const useUIStore = create(
           showOrders: false,
           showQuotation: false,
           showCheckout: false,
+          showCart: false,
         },
 
         // Navigation state
@@ -122,6 +123,7 @@ const useUIStore = create(
               showOrders: false,
               showQuotation: false,
               showCheckout: false,
+              showCart: false,
             },
             isMenuOpen: false,
             selectedCategory: 'all',

@@ -1,4 +1,4 @@
-import { Quote, Product, User, Supplier, sequelize } from '../models/index.js';
+import { Quote, Product, User, Supplier, Order, OrderItem, sequelize } from '../models/index.js';
 import { Op } from 'sequelize';
 
 // Generate unique quote number
@@ -251,56 +251,9 @@ const acceptQuote = async (req, res) => {
 
     await quote.update({ status: 'accepted' });
 
-    // Create order from accepted quote
-    const { Order, OrderItem, Supplier } = await import('../models/index.js');
-    
-    // Find supplier profile for the supplier user
-    const supplierProfile = await Supplier.findOne({
-      where: { userId: quote.supplierId }
-    });
-    
-    // Generate unique order number
-    const generateOrderNumber = () => {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-      return `ORD-${year}${month}${day}-${random}`;
-    };
-
-    const subtotal = parseFloat(quote.unitPrice) * quote.quantity;
-    const order = await Order.create({
-      orderNumber: generateOrderNumber(),
-      userId: quote.buyerId,
-      supplierId: supplierProfile ? supplierProfile.id : null,
-      status: 'confirmed',
-      subtotal: subtotal,
-      totalAmount: subtotal,
-      notes: `Order created from quote #${quote.id}`
-    });
-
-    // Create order item
-    await OrderItem.create({
-      orderId: order.id,
-      productId: quote.productId,
-      quantity: quote.quantity,
-      price: quote.unitPrice,
-      subtotal: subtotal
-    });
-
-    // Link quote to order
-    await quote.update({ orderId: order.id });
-
     res.json({ 
-      message: 'Quote accepted successfully and order created', 
-      quote, 
-      order: {
-        id: order.id,
-        orderNumber: order.orderNumber,
-        status: order.status,
-        totalAmount: order.totalAmount
-      }
+      message: 'Quote accepted successfully. You can now convert it to an order.', 
+      quote
     });
   } catch (error) {
     console.error('Error accepting quote:', error);
@@ -372,6 +325,139 @@ const getQuote = async (req, res) => {
   }
 };
 
+// Generate unique order number
+const generateOrderNumber = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  return `ORD-${year}${month}${day}-${random}`;
+};
+
+const convertQuoteToOrder = async (req, res) => {
+  const { quoteId } = req.params;
+  const userId = req.user.id;
+
+  const transaction = await sequelize.transaction();
+  try {
+    // Find the quote with all necessary data
+    const quote = await Quote.findOne({
+      where: { 
+        id: quoteId, 
+        buyerId: userId, 
+        status: 'accepted' 
+      },
+      include: [
+        {
+          model: Product,
+          attributes: ['id', 'name', 'description', 'price', 'unit']
+        },
+        {
+          model: User,
+          as: 'Supplier',
+          attributes: ['id', 'name', 'email', 'companyName']
+        }
+      ],
+      transaction
+    });
+
+    if (!quote) {
+      await transaction.rollback();
+      return res.status(404).json({ 
+        error: 'Accepted quote not found or does not belong to user' 
+      });
+    }
+
+    // Check if quote is already converted to order
+    const existingOrder = await Order.findOne({
+      where: { quoteId: quote.id },
+      transaction
+    });
+
+    if (existingOrder) {
+      await transaction.rollback();
+      return res.status(400).json({ 
+        error: 'Quote has already been converted to an order',
+        orderId: existingOrder.id,
+        orderNumber: existingOrder.orderNumber
+      });
+    }
+
+    // Find supplier profile for the supplier user
+    const supplierProfile = await Supplier.findOne({
+      where: { userId: quote.supplierId },
+      transaction
+    });
+
+    // Create the order from the quote
+    const subtotal = parseFloat(quote.unitPrice) * quote.quantity;
+    const order = await Order.create({
+      orderNumber: generateOrderNumber(),
+      userId: quote.buyerId,
+      supplierId: supplierProfile ? supplierProfile.id : null,
+      quoteId: quote.id,
+      status: 'pending',
+      subtotal: subtotal,
+      totalAmount: subtotal,
+      notes: `Order created from quote ${quote.quoteNumber}`,
+      shippingAddress: quote.shippingAddress || null
+    }, { transaction });
+
+    // Create order item from quote details
+    await OrderItem.create({
+      orderId: order.id,
+      productId: quote.productId,
+      quantity: quote.quantity,
+      price: quote.unitPrice,
+      subtotal: subtotal
+    }, { transaction });
+
+    // Update quote status to completed
+    await quote.update({ 
+      status: 'completed' 
+    }, { transaction });
+
+    await transaction.commit();
+
+    // Return the created order with full details
+    const fullOrder = await Order.findByPk(order.id, {
+      include: [
+        {
+          model: OrderItem,
+          include: [
+            {
+              model: Product,
+              attributes: ['id', 'name', 'description', 'unit', 'image']
+            }
+          ]
+        },
+        {
+          model: User,
+          attributes: ['id', 'name', 'email', 'companyName']
+        },
+        {
+          model: Quote,
+          as: 'quote',
+          attributes: ['id', 'quoteNumber', 'unitPrice', 'totalAmount']
+        }
+      ]
+    });
+
+    res.status(201).json({
+      message: 'Quote successfully converted to order',
+      order: fullOrder
+    });
+
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Error converting quote to order:', error);
+    res.status(500).json({ 
+      error: 'Internal server error while converting quote to order' 
+    });
+  }
+};
+
 export {
   requestQuote,
   getSupplierQuotes,
@@ -379,7 +465,8 @@ export {
   getBuyerQuotes,
   acceptQuote,
   rejectQuote,
-  getQuote
+  getQuote,
+  convertQuoteToOrder
 };
 
 export default {

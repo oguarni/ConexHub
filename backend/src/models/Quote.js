@@ -72,6 +72,10 @@ export default (sequelize, DataTypes) => {
     Quote.belongsTo(models.Product, { 
       foreignKey: 'productId'
     });
+    Quote.hasOne(models.Order, {
+      foreignKey: 'quoteId',
+      as: 'order'
+    });
   };
 
   return Quote;

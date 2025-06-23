@@ -13,6 +13,15 @@ router.post('/', [
   authMiddleware,
   requirePermission('orders:write')
 ], asyncHandler(async (req, res) => {
+  // ADD THIS LOGGING BLOCK
+  console.log('📦 [API] Order creation request received:', {
+    userId: req.user.id,
+    userRole: req.user.role,
+    itemsCount: req.body.items?.length || 0,
+    paymentMethod: req.body.paymentMethod,
+    timestamp: new Date().toISOString()
+  });
+
   const t = await sequelize.transaction();
   
   try {
@@ -71,7 +80,8 @@ router.post('/', [
       status: 'pending',
       shippingAddress: shippingAddress || req.user.address,
       paymentMethod: paymentMethod || 'invoice',
-      supplierId
+      supplierId,
+      quoteId: req.body.quoteId || null
     }, { transaction: t });
 
     for (const item of orderItems) {
@@ -112,7 +122,7 @@ router.get('/user', [
     order: [['createdAt', 'DESC']]
   });
 
-  res.json(orders);
+  res.json({ orders });
 }));
 
 // Get supplier orders

@@ -1,20 +1,17 @@
 import React, { useState } from 'react';
 import { X, CreditCard, MapPin, User, Mail, Phone } from 'lucide-react';
-import { useQuotation } from '../../contexts/QuotationContext';
+import { useCart } from '../../contexts/CartContext';
+import { useCreateOrderMutation } from '../../hooks/queries/useOrdersQuery';
 import useAuthStore from '../../stores/authStore';
 import useUIStore from '../../stores/uiStore';
 
 const CheckoutModal = () => {
-  const { 
-    quotationItems, 
-    shippingCost,
-    calculateSubtotal, 
-    calculateTotal,
-    clearQuotation,
-    isCheckoutOpen,
-    setIsCheckoutOpen
-  } = useQuotation();
+  const { isModalOpen, hideModal } = useUIStore();
+  const isOpen = isModalOpen('showCheckout');
+  const onClose = () => hideModal('showCheckout');
   
+  const { items: cartItems, clearCart, getSubtotal, getTotal, shipping } = useCart();
+  const createOrderMutation = useCreateOrderMutation();
   const { user } = useAuthStore();
   const { addNotification } = useUIStore();
   const [step, setStep] = useState(1);
@@ -49,7 +46,7 @@ const CheckoutModal = () => {
     notes: ''
   });
 
-  if (!isCheckoutOpen) return null;
+  if (!isOpen || cartItems.length === 0) return null;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -121,33 +118,47 @@ const CheckoutModal = () => {
     setLoading(true);
 
     try {
-      // Simular processamento do pedido
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 1. Transform cart items and form data into the required API payload
+      const orderData = {
+        items: cartItems.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        shippingAddress: {
+          street: formData.street,
+          number: formData.number,
+          complement: formData.complement,
+          neighborhood: formData.neighborhood,
+          city: formData.city,
+          state: formData.state,
+          cep: formData.cep
+        },
+        paymentMethod: formData.paymentMethod,
+        notes: formData.notes
+      };
 
-      // Gerar ID fake do pedido
-      const orderId = 'COT-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      // 2. Execute the mutation to make the real API call
+      const order = await createOrderMutation.mutateAsync(orderData);
 
-      // Limpar cotação
-      clearQuotation();
+      // 3. On success, clear the cart and close the modal
+      clearCart();
+      onClose();
 
-      // Fechar modal
-      setIsCheckoutOpen(false);
-
-      // Mostrar sucesso
       addNotification({
         type: 'success',
-        message: `Cotação ${orderId} finalizada com sucesso! Você receberá um email com os detalhes.`,
-        duration: 8000
+        message: `Pedido ${order.orderNumber || order.id} criado com sucesso!`
       });
 
     } catch (error) {
+      console.error('Order creation error:', error);
       addNotification({
         type: 'error',
-        message: 'Erro ao processar pedido. Tente novamente.'
+        message: error.message || 'Erro ao criar pedido. Tente novamente.'
       });
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const formatPrice = (price) => {
@@ -496,9 +507,9 @@ const CheckoutModal = () => {
 
             {/* Resumo dos itens */}
             <div className="border rounded-lg p-4">
-              <h4 className="font-medium mb-3">Itens da Cotação</h4>
+              <h4 className="font-medium mb-3">Itens do Pedido</h4>
               <div className="space-y-2">
-                {quotationItems.map((item) => (
+                {cartItems.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span>{item.name} x {item.quantity}</span>
                     <span>{formatPrice(item.price * item.quantity)}</span>
@@ -513,15 +524,15 @@ const CheckoutModal = () => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>{formatPrice(calculateSubtotal())}</span>
+                  <span>{formatPrice(getSubtotal())}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Frete:</span>
-                  <span>{shippingCost === 0 ? 'Grátis' : formatPrice(shippingCost)}</span>
+                  <span>{shipping.cost === 0 ? 'Grátis' : formatPrice(shipping.cost)}</span>
                 </div>
                 <div className="flex justify-between font-medium text-lg border-t pt-2">
                   <span>Total:</span>
-                  <span>{formatPrice(calculateTotal())}</span>
+                  <span>{formatPrice(getTotal())}</span>
                 </div>
               </div>
             </div>
@@ -566,10 +577,10 @@ const CheckoutModal = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b bg-blue-50">
           <h2 className="text-xl font-semibold text-gray-900">
-            Finalizar Cotação - Passo {step} de 4
+            Finalizar Compra - Passo {step} de 4
           </h2>
           <button
-            onClick={() => setIsCheckoutOpen(false)}
+            onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
             <X size={24} />
@@ -635,7 +646,7 @@ const CheckoutModal = () => {
                 disabled={loading}
                 className="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
               >
-                {loading ? 'Processando...' : 'Finalizar Cotação'}
+                {loading ? 'Processando...' : 'Finalizar Compra'}
               </button>
             )}
           </div>

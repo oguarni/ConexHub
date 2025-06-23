@@ -210,8 +210,16 @@ const OrdersModal = ({ show, onClose, user }) => {
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-800 p-4 rounded-lg mb-4">
-              {error.message || 'Erro ao carregar pedidos'}
+            <div className="text-center p-8">
+              <p className="text-red-500 font-semibold mb-4">
+                Ocorreu um erro ao carregar os pedidos: {error.message}
+              </p>
+              <button
+                onClick={() => refetchOrders()}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg transition-colors"
+              >
+                Tentar Novamente
+              </button>
             </div>
           )}
 

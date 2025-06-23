@@ -5,6 +5,7 @@ import { AppProvider } from './contexts/AppProvider';
 import AuthModal from './components/auth/AuthModal';
 import QuotationModal from './components/quotation/QuotationModal';
 import CheckoutModal from './components/checkout/CheckoutModal';
+import CartModal from './components/cart/CartModal';
 import OrdersModal from './components/orders/OrdersModal';
 import QuotesSidebar from './components/quotes/QuotesSidebar';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
@@ -78,6 +79,7 @@ const AppContent = () => {
         addNotification={addNotification}
       />
       <QuotationModal />
+      <CartModal />
       <CheckoutModal />
       <NotificationContainer />
     </div>

@@ -8,7 +8,8 @@ import {
   getBuyerQuotes,
   acceptQuote,
   rejectQuote,
-  getQuote
+  getQuote,
+  convertQuoteToOrder
 } from '../controllers/quoteController.js';
 
 const router = express.Router();
@@ -33,6 +34,9 @@ router.post('/:quoteId/accept', requirePermission('quotes:accept'), acceptQuote)
 
 // POST: Reject a specific quote
 router.post('/:quoteId/reject', requirePermission('quotes:reject'), rejectQuote);
+
+// POST: Convert accepted quote to order
+router.post('/:quoteId/create-order', requirePermission('orders:write'), convertQuoteToOrder);
 
 // --- Supplier-Specific Routes ---
 // Role-based authorization is handled for each endpoint

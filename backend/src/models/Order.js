@@ -65,6 +65,14 @@ export default (sequelize, DataTypes) => {
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    quoteId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'Quotes',
+        key: 'id',
+      },
     }
   }, {
     timestamps: true,
@@ -75,8 +83,13 @@ export default (sequelize, DataTypes) => {
     Order.belongsTo(models.User, { foreignKey: 'userId' });
     Order.belongsTo(models.Supplier, { foreignKey: 'supplierId' });
     Order.hasMany(models.OrderItem, { foreignKey: 'orderId' });
-    Order.hasMany(models.Quote, { foreignKey: 'orderId' });
     Order.hasMany(models.Review, { foreignKey: 'orderId' });
+    Order.belongsTo(models.Quote, {
+      foreignKey: 'quoteId',
+      as: 'quote',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE'
+    });
   };
 
   return Order;
