@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Lock, Building } from 'lucide-react';
-import useAuthStore from '../../stores/authStore';
+import { useAuth } from '../../stores/authStore';
 import useUIStore from '../../stores/uiStore';
 
 const AuthModal = () => {
-  const { login, register, loading, error } = useAuthStore();
+  const { login, register, loading, error } = useAuth();
   const { modals, hideModal, addNotification } = useUIStore();
   
   // Debug logging

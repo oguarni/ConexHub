@@ -9,7 +9,7 @@ import CartModal from './components/cart/CartModal';
 import OrdersModal from './components/orders/OrdersModal';
 import QuotesSidebar from './components/quotes/QuotesSidebar';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
-import useAuthStore from './stores/authStore';
+import { useAuth } from './stores/authStore';
 import useUIStore from './stores/uiStore';
 import { useQuotesModalQuery } from './hooks/queries/useQuotesQuery';
 import './App.css';
@@ -52,7 +52,7 @@ const NotificationContainer = () => {
 
 // This component centralizes the content that depends on the providers
 const AppContent = () => {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const { modals, showModal, hideModal, addNotification } = useUIStore();
   
   // Fetch quotes data for the sidebar

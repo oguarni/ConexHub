@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, CreditCard, MapPin, User, Mail, Phone } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { useCreateOrderMutation } from '../../hooks/queries/useOrdersQuery';
-import useAuthStore from '../../stores/authStore';
+import { useAuth } from '../../stores/authStore';
 import useUIStore from '../../stores/uiStore';
 
 const CheckoutModal = () => {
@@ -12,7 +12,7 @@ const CheckoutModal = () => {
   
   const { items: cartItems, clearCart, getSubtotal, getTotal, shipping } = useCart();
   const createOrderMutation = useCreateOrderMutation();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const { addNotification } = useUIStore();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);

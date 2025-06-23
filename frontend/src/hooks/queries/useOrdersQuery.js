@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { queryKeys, invalidateQueries, updateQueryData, handleQueryError } from '../../lib/queryClient';
-import { useAuthStore } from '../../stores/authStore';
+import useAuthStore from '../../stores/authStore';
 
 console.log('[useOrdersQuery] Module loading started');
 

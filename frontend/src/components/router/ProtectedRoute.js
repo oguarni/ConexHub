@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import useAuthStore from '../../stores/authStore';
+import { useAuth } from '../../stores/authStore';
 
 const ProtectedRoute = ({ children, requiredRole = null, requireAuth = true }) => {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const location = useLocation();
 
   // If authentication is required but user is not logged in

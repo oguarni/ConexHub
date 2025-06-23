@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Package } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import useAuthStore from '../../stores/authStore';
+import { useAuth } from '../../stores/authStore';
 import { useNotifications } from '../../stores/uiStore';
 import { useProductsQuery } from '../../hooks/queries/useProductsQuery';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -125,7 +125,7 @@ const SearchAndFilters = ({ searchTerm, setSearchTerm, selectedCategory, setSele
 
 // Main Content Component
 const MainContent = () => {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const { addNotification } = useNotifications();
   const { data: productsResponse, isLoading: loading, error } = useProductsQuery();
   const products = productsResponse?.products || [];

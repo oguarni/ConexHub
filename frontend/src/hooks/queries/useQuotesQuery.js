@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { queryKeys, invalidateQueries, updateQueryData, handleQueryError } from '../../lib/queryClient';
 import { apiService } from '../../services/api';
-import { useAuthStore } from '../../stores/authStore';
+import useAuthStore from '../../stores/authStore';
 
 console.log('[useQuotesQuery] Module loading, apiService methods:', 
   apiService ? Object.keys(apiService) : 'apiService is undefined');
