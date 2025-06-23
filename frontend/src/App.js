@@ -10,6 +10,7 @@ import QuotesSidebar from './components/quotes/QuotesSidebar';
 import EnhancedErrorBoundary from './components/common/EnhancedErrorBoundary';
 import useAuthStore from './stores/authStore';
 import useUIStore from './stores/uiStore';
+import { useQuotesModalQuery } from './hooks/queries/useQuotesQuery';
 import './App.css';
 import './styles/components.css';
 
@@ -52,6 +53,9 @@ const NotificationContainer = () => {
 const AppContent = () => {
   const { user } = useAuthStore();
   const { modals, showModal, hideModal, addNotification } = useUIStore();
+  
+  // Fetch quotes data for the sidebar
+  const { data: quotes = [], isLoading: quotesLoading } = useQuotesModalQuery();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -61,6 +65,8 @@ const AppContent = () => {
       <QuotesSidebar
         showQuotes={modals.showQuotes}
         setShowQuotes={(show) => show ? showModal('showQuotes') : hideModal('showQuotes')}
+        quotes={quotes}
+        loading={quotesLoading}
         user={user}
         setShowQuoteComparison={(show) => show ? showModal('showQuoteComparison') : hideModal('showQuoteComparison')}
         setShowAuth={(show) => show ? showModal('showAuth') : hideModal('showAuth')}

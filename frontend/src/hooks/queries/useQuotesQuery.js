@@ -1,8 +1,39 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { queryKeys, invalidateQueries, updateQueryData, handleQueryError } from '../../lib/queryClient';
 import { apiService } from '../../services/api';
+import { useAuthStore } from '../../stores/authStore';
 
 // =================== QUOTE QUERIES ===================
+
+/**
+ * Hook for fetching quotes based on user role (for modals/UI components)
+ * This hook encapsulates all the logic for fetching quotes with role-based API calls
+ */
+export const useQuotesModalQuery = () => {
+  const user = useAuthStore(state => state.user);
+
+  return useQuery({
+    queryKey: ['quotes', 'list', { userId: user?.id, role: user?.role }],
+    queryFn: async () => {
+      if (!user?.role) return [];
+      
+      try {
+        const data = user.role === 'supplier'
+          ? await apiService.getSupplierQuotes()
+          : await apiService.getBuyerQuotes();
+        
+        // Handle both direct array and wrapped object API responses
+        return Array.isArray(data) ? data : (data?.quotes || []);
+      } catch (apiError) {
+        console.error('API Error fetching quotes:', apiError);
+        console.log('API not available, returning empty array as fallback.');
+        return [];
+      }
+    },
+    enabled: !!user?.id && !!user?.role,
+    staleTime: 30 * 1000,
+  });
+};
 
 /**
  * Hook for fetching quotes as a buyer

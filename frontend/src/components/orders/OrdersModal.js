@@ -1,20 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Package, Truck, CheckCircle, Clock, Calculator, MapPin } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../../services/api';
+import { useOrdersModalQuery } from '../../hooks/queries/useOrdersQuery';
 
 const OrdersModal = ({ show, onClose, user }) => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const queryClient = useQueryClient();
   const [shippingCalculations, setShippingCalculations] = useState({});
   const [calculatingShipping, setCalculatingShipping] = useState({});
   const [shippingCeps, setShippingCeps] = useState({});
-  const [shippingConfig, setShippingConfig] = useState(null);
+
+  // React Query for Orders using custom hook
+  const {
+    data: orders = [],
+    isLoading: loading,
+    error,
+    refetch: refetchOrders
+  } = useOrdersModalQuery();
+
+  // React Query for Shipping Config
+  const { data: shippingConfig } = useQuery({
+    queryKey: ['shippingConfig'],
+    queryFn: async () => {
+      try {
+        const config = await apiService.getShippingConfig();
+        return config;
+      } catch (error) {
+        console.error('Error loading shipping config:', error);
+        return {
+          zones: {
+            '0': { region: 'São Paulo', multiplier: 1.8, baseDays: 2 }
+          },
+          baseShipping: 25.50,
+          weightMultiplier: 2.5,
+          insuranceRate: 0.01,
+          bulkDiscount: 0.15,
+          bulkThreshold: 10
+        };
+      }
+    },
+    enabled: show && !!user,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Mutation for updating order status
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }) => {
+      try {
+        await apiService.updateOrderStatus(orderId, status);
+      } catch (apiError) {
+        console.log('API not available, updating status locally');
+        // Return a mock successful response for local update
+        return { id: orderId, status };
+      }
+    },
+    onSuccess: () => {
+      refetchOrders();
+    },
+    onError: (error) => {
+      console.error('Error updating order status:', error);
+    }
+  });
 
   useEffect(() => {
     if (show && user) {
-      loadOrders();
-      loadShippingConfig();
       // Load saved shipping calculations
       const savedShippingCalculations = localStorage.getItem('shippingCalculations');
       if (savedShippingCalculations) {
@@ -34,92 +83,12 @@ const OrdersModal = ({ show, onClose, user }) => {
     }
   }, [shippingCalculations]);
 
-  const loadOrders = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Try to load from API first
-      try {
-        const data = user.role === 'supplier' 
-          ? await apiService.getSupplierOrders()
-          : await apiService.getUserOrders();
-        setOrders(data.orders || []);
-      } catch (apiError) {
-        // If API fails, use sample data from new endpoint
-        console.log('API not available, using sample orders');
-        const sampleOrders = await loadSampleOrders(user.role);
-        setOrders(sampleOrders);
-      }
-    } catch (error) {
-      setError('Erro ao carregar pedidos');
-      console.error('Error loading orders:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // loadSampleOrders is now handled by the custom hook
 
-  const loadSampleOrders = async (userRole) => {
-    try {
-      const response = await apiService.getSampleOrders(userRole);
-      return response.orders || [];
-    } catch (error) {
-      console.error('Error loading sample orders from API:', error);
-      // Fallback to minimal local data if API fails
-      return [{
-        id: 1,
-        orderNumber: 'SAMPLE-001',
-        productName: 'Produto de Exemplo',
-        quantity: 1,
-        unit: 'un',
-        supplierName: 'Fornecedor Exemplo',
-        totalPrice: 100.00,
-        status: 'pending',
-        createdAt: new Date().toISOString()
-      }];
-    }
-  };
-
-  const loadShippingConfig = async () => {
-    try {
-      const config = await apiService.getShippingConfig();
-      setShippingConfig(config);
-    } catch (error) {
-      console.error('Error loading shipping config:', error);
-      // Set fallback config
-      setShippingConfig({
-        zones: {
-          '0': { region: 'São Paulo', multiplier: 1.8, baseDays: 2 }
-        },
-        baseShipping: 25.50,
-        weightMultiplier: 2.5,
-        insuranceRate: 0.01,
-        bulkDiscount: 0.15,
-        bulkThreshold: 10
-      });
-    }
-  };
+  // Shipping config is now handled by React Query above
 
   const updateOrderStatus = async (orderId, status) => {
-    try {
-      try {
-        await apiService.updateOrderStatus(orderId, status);
-      } catch (apiError) {
-        // If API fails, update locally
-        console.log('API not available, updating status locally');
-        setOrders(prevOrders => 
-          prevOrders.map(order => 
-            order.id === orderId 
-              ? { ...order, status } 
-              : order
-          )
-        );
-        return; // Don't reload orders if updating locally
-      }
-      await loadOrders();
-    } catch (error) {
-      setError('Erro ao atualizar status do pedido');
-    }
+    updateOrderStatusMutation.mutate({ orderId, status });
   };
 
   // Shipping calculation functions
@@ -273,7 +242,7 @@ const OrdersModal = ({ show, onClose, user }) => {
 
           {error && (
             <div className="bg-red-50 text-red-800 p-4 rounded-lg mb-4">
-              {error}
+              {error.message || 'Erro ao carregar pedidos'}
             </div>
           )}
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Package } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import useAuthStore from '../../stores/authStore';
 import { useNotifications } from '../../stores/uiStore';
 import { useProductsQuery } from '../../hooks/queries/useProductsQuery';
@@ -128,6 +129,7 @@ const MainContent = () => {
   const { addNotification } = useNotifications();
   const { data: productsResponse, isLoading: loading, error } = useProductsQuery();
   const products = productsResponse?.products || [];
+  const queryClient = useQueryClient();
   
   const { t } = useLanguage();
 
@@ -205,6 +207,9 @@ const MainContent = () => {
     setQuoteLoading(true);
     try {
       await apiService.requestQuote(selectedProduct.id, quoteForm);
+      
+      // Invalidate quotes cache to force refetch
+      queryClient.invalidateQueries({ queryKey: ['quotes'] });
       
       addNotification({
         type: 'success',

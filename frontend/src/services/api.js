@@ -179,11 +179,16 @@ class ApiService {
         // Processar erro através do handler
         const processedError = ApiErrorHandler.handle(error);
         
-        // Auto-redirect para login se necessário
+        // Dispatch custom event for auth errors instead of forcing page refresh
         if (processedError.requiresAuth && window.location.pathname !== '/login') {
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 1000);
+          // Dispatch a global event that components can listen for
+          window.dispatchEvent(new CustomEvent('auth:error', {
+            detail: {
+              error: processedError,
+              message: processedError.userMessage,
+              timestamp: processedError.timestamp
+            }
+          }));
         }
 
         // Rejeitar com erro processado
@@ -356,7 +361,14 @@ class ApiService {
    */
   async requestQuote(productId, quoteData) {
     return this.withRetry(async () => {
-      const response = await this.api.post('/quotes/request', { productId, ...quoteData });
+      // Transform the frontend form data into the backend's expected structure
+      const payload = {
+        productId,
+        quantity: quoteData.quantity,
+        // Combine multiple fields into the 'notes' field for the backend
+        notes: `Urgency: ${quoteData.urgency}\nAddress: ${quoteData.deliveryAddress || 'N/A'}\n\nMessage: ${quoteData.message || ''}`.trim()
+      };
+      const response = await this.api.post('/quotes/request', payload);
       return response.data;
     });
   }

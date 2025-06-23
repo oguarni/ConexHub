@@ -22,12 +22,11 @@ router.use(authMiddleware);
 // POST: Request a new quote from suppliers
 router.post('/request', requirePermission('quotes:write'), requestQuote);
 
-// 🚨 CRITICAL: The specific :quoteId route must come BEFORE general text routes like '/buyer'.
-// GET: Retrieve a single quote by its ID
-router.get('/:quoteId', requirePermission('quotes:read_own'), getQuote);
-
 // GET: Retrieve all quotes for the authenticated buyer
 router.get('/buyer', requirePermission('quotes:read_own'), getBuyerQuotes);
+
+// GET: Retrieve a single quote by its ID (MUST come AFTER specific text routes)
+router.get('/:quoteId', requirePermission('quotes:read_own'), getQuote);
 
 // POST: Accept a specific quote
 router.post('/:quoteId/accept', requirePermission('quotes:accept'), acceptQuote);
