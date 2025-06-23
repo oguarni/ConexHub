@@ -1,0 +1,47 @@
+import express from 'express';
+import authMiddleware from '../middleware/auth.js';
+import { requirePermission } from '../middleware/rbac.js';
+import {
+  requestQuote,
+  getSupplierQuotes,
+  submitQuote,
+  getBuyerQuotes,
+  acceptQuote,
+  rejectQuote,
+  getQuote
+} from '../controllers/quoteController.js';
+
+const router = express.Router();
+
+// Apply authentication middleware to all quote routes
+router.use(authMiddleware);
+
+// --- Buyer-Specific Routes ---
+// Role-based authorization is handled for each endpoint
+
+// POST: Request a new quote from suppliers
+router.post('/request', requirePermission('quotes:write'), requestQuote);
+
+// 🚨 CRITICAL: The specific :quoteId route must come BEFORE general text routes like '/buyer'.
+// GET: Retrieve a single quote by its ID
+router.get('/:quoteId', requirePermission('quotes:read_own'), getQuote);
+
+// GET: Retrieve all quotes for the authenticated buyer
+router.get('/buyer', requirePermission('quotes:read_own'), getBuyerQuotes);
+
+// POST: Accept a specific quote
+router.post('/:quoteId/accept', requirePermission('quotes:accept'), acceptQuote);
+
+// POST: Reject a specific quote
+router.post('/:quoteId/reject', requirePermission('quotes:reject'), rejectQuote);
+
+// --- Supplier-Specific Routes ---
+// Role-based authorization is handled for each endpoint
+
+// GET: Retrieve all quote requests for the authenticated supplier
+router.get('/supplier', requirePermission('quotes:read_own'), getSupplierQuotes);
+
+// POST: Submit a price and details for a specific quote request
+router.post('/:quoteId/submit', requirePermission('quotes:respond'), submitQuote);
+
+export default router;

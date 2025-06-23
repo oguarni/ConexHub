@@ -339,13 +339,47 @@ const rejectQuote = async (req, res) => {
   }
 };
 
+/**
+ * Get a single quote by its ID.
+ * Ensures the requesting user is either the buyer or the supplier.
+ */
+const getQuote = async (req, res) => {
+  try {
+    const { quoteId } = req.params;
+    const { id: userId } = req.user;
+
+    const quote = await Quote.findByPk(quoteId, {
+      include: [
+        { model: User, as: 'Buyer', attributes: ['id', 'name', 'email', 'companyName'] },
+        { model: User, as: 'Supplier', attributes: ['id', 'name', 'email', 'companyName'] },
+        { model: Product, attributes: ['id', 'name', 'description', 'price', 'unit', 'image'] }
+      ]
+    });
+
+    if (!quote) {
+      return res.status(404).json({ error: 'Quote not found' });
+    }
+
+    // Security check: Only the buyer or the assigned supplier can view the quote.
+    if (quote.buyerId !== userId && quote.supplierId !== userId) {
+      return res.status(403).json({ error: 'Forbidden: You do not have permission to view this quote' });
+    }
+
+    res.status(200).json(quote);
+  } catch (error) {
+    console.error('Error fetching quote:', error);
+    res.status(500).json({ error: 'Error fetching quote' });
+  }
+};
+
 export {
   requestQuote,
   getSupplierQuotes,
   submitQuote,
   getBuyerQuotes,
   acceptQuote,
-  rejectQuote
+  rejectQuote,
+  getQuote
 };
 
 export default {

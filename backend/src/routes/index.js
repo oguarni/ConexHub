@@ -12,6 +12,7 @@ import adminRoutes from './admin.js';
 import recommendationRoutes from './recommendations.js';
 import notificationRoutes from './notifications.js';
 import errorRoutes from './errors.js';
+import quoteRoutes from './quotes.js';
 import swaggerSpec from '../docs/swagger.js';
 
 const router = express.Router();
@@ -24,6 +25,7 @@ router.get('/health', (req, res) => {
 // Existing routes
 router.use('/auth', authRoutes);
 router.use('/products', productRoutes);
+router.use('/quotes', quoteRoutes);
 router.use('/orders', orderRoutes);
 router.use('/pix', pixRoutes);
 router.use('/constants', constantsRoutes);

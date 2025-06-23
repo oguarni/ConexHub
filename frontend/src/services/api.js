@@ -348,50 +348,88 @@ class ApiService {
     }
   }
 
-  // Quote methods
+  // --- Quote Management ---
+
+  /**
+   * Requests a new quote for a specific product.
+   * Corresponds to: POST /api/quotes/request
+   */
   async requestQuote(productId, quoteData) {
-    try {
-      const response = await this.api.post('/quotes/request', {
-        productId,
-        quantity: quoteData.quantity,
-        notes: `${quoteData.message || ''}\n\nUrgência: ${quoteData.urgency}\nEndereço: ${quoteData.deliveryAddress || ''}\nEspecificações: ${quoteData.specifications || ''}`.trim()
-      });
+    return this.withRetry(async () => {
+      const response = await this.api.post('/quotes/request', { productId, ...quoteData });
       return response.data;
-    } catch (error) {
-      throw error;
-    }
+    });
   }
 
-  async createQuote(quoteData) {
-    try {
-      const response = await this.api.post('/quotes', quoteData);
+  /**
+   * Fetches all quotes for the authenticated buyer, with optional filters.
+   * Corresponds to: GET /api/quotes/buyer
+   */
+  async getBuyerQuotes(filters = {}) {
+    return this.withRetry(async () => {
+      const response = await this.api.get('/quotes/buyer', { params: filters });
       return response.data;
-    } catch (error) {
-      throw error;
-    }
+    });
   }
 
+  /**
+   * Fetches all quote requests for the authenticated supplier.
+   * Corresponds to: GET /api/quotes/supplier
+   */
+  async getSupplierQuotes(filters = {}) {
+    return this.withRetry(async () => {
+        const response = await this.api.get('/quotes/supplier', { params: filters });
+        return response.data;
+    });
+  }
+
+  /**
+   * Fetches a single quote by its ID.
+   * Corresponds to: GET /api/quotes/:quoteId
+   */
+  async getQuote(quoteId) {
+    return this.withRetry(async () => {
+      const response = await this.api.get(`/quotes/${quoteId}`);
+      return response.data;
+    });
+  }
+
+  /**
+   * Submits a response (e.g., price) to a quote request (for suppliers).
+   * Corresponds to: POST /api/quotes/:quoteId/submit
+   */
+  async respondToQuote(quoteId, responseData) {
+    return this.withRetry(async () => {
+      const response = await this.api.post(`/quotes/${quoteId}/submit`, responseData);
+      return response.data;
+    });
+  }
+
+  /**
+   * Accepts a quote (for buyers).
+   * Corresponds to: POST /api/quotes/:quoteId/accept
+   */
+  async acceptQuote(quoteId, data = {}) {
+    return this.withRetry(async () => {
+      const response = await this.api.post(`/quotes/${quoteId}/accept`, data);
+      return response.data;
+    });
+  }
+
+  /**
+   * Rejects a quote (for buyers).
+   * Corresponds to: POST /api/quotes/:quoteId/reject
+   */
+  async rejectQuote(quoteId, reason = '') {
+    return this.withRetry(async () => {
+      const response = await this.api.post(`/quotes/${quoteId}/reject`, { reason });
+      return response.data;
+    });
+  }
+
+  // Legacy method for backward compatibility
   async getUserQuotes() {
-    return this.withRetry(async () => {
-      const response = await this.api.get('/quotes/user');
-      return response.data;
-    });
-  }
-
-  async getSupplierQuotes() {
-    return this.withRetry(async () => {
-      const response = await this.api.get('/quotes/supplier');
-      return response.data;
-    });
-  }
-
-  async respondQuote(quoteId, response) {
-    try {
-      const res = await this.api.put(`/quotes/${quoteId}/respond`, response);
-      return res.data;
-    } catch (error) {
-      throw error;
-    }
+    return this.getBuyerQuotes();
   }
 
   // Seed method
