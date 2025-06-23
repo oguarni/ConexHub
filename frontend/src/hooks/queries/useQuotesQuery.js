@@ -3,6 +3,9 @@ import { queryKeys, invalidateQueries, updateQueryData, handleQueryError } from 
 import { apiService } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 
+console.log('[useQuotesQuery] Module loading, apiService methods:', 
+  apiService ? Object.keys(apiService) : 'apiService is undefined');
+
 // =================== QUOTE QUERIES ===================
 
 /**
@@ -18,9 +21,12 @@ export const useQuotesModalQuery = () => {
       if (!user?.role) return [];
       
       try {
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
+        
         const data = user.role === 'supplier'
-          ? await apiService.getSupplierQuotes()
-          : await apiService.getBuyerQuotes();
+          ? await dynamicApiService.getSupplierQuotes()
+          : await dynamicApiService.getBuyerQuotes();
         
         // Handle both direct array and wrapped object API responses
         return Array.isArray(data) ? data : (data?.quotes || []);
@@ -43,13 +49,16 @@ export const useBuyerQuotesQuery = (filters = {}, options = {}) => {
     queryKey: queryKeys.quotes.buyer(),
     queryFn: async () => {
       try {
-        // Defensive check to see what methods are available on the apiService object at runtime
-        if (typeof apiService.getBuyerQuotes !== 'function') {
-          console.error('CRITICAL: getBuyerQuotes is NOT a function on apiService!', apiService);
-          console.log('Available keys:', Object.keys(apiService));
-          throw new Error('API service is not initialized correctly.');
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
+        
+        if (typeof dynamicApiService.getBuyerQuotes !== 'function') {
+          console.error('CRITICAL: getBuyerQuotes is NOT a function on apiService!', dynamicApiService);
+          console.log('Available keys:', Object.keys(dynamicApiService));
+          throw new Error('getBuyerQuotes not available');
         }
-        const response = await apiService.getBuyerQuotes(filters);
+        
+        const response = await dynamicApiService.getBuyerQuotes(filters);
         return response;
       } catch (error) {
         throw handleQueryError(error, 'useBuyerQuotesQuery');
@@ -69,7 +78,9 @@ export const useSupplierQuotesQuery = (filters = {}, options = {}) => {
     queryKey: queryKeys.quotes.supplier(),
     queryFn: async () => {
       try {
-        const response = await apiService.getSupplierQuotes(filters);
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
+        const response = await dynamicApiService.getSupplierQuotes(filters);
         return response;
       } catch (error) {
         throw handleQueryError(error, 'useSupplierQuotesQuery');
@@ -89,10 +100,13 @@ export const useInfiniteQuotesQuery = (type = 'buyer', baseFilters = {}, options
     queryKey: queryKeys.quotes[type]({ ...baseFilters, infinite: true }),
     queryFn: async ({ pageParam = 1 }) => {
       try {
+        // Dynamic import to ensure module is loaded
+        const { apiService: dynamicApiService } = await import('../../services/api');
+        
         const filters = { ...baseFilters, page: pageParam, limit: 20 };
         const response = type === 'buyer' 
-          ? await apiService.getBuyerQuotes(filters)
-          : await apiService.getSupplierQuotes(filters);
+          ? await dynamicApiService.getBuyerQuotes(filters)
+          : await dynamicApiService.getSupplierQuotes(filters);
         return {
           ...response,
           nextCursor: response.pagination?.hasNextPage ? pageParam + 1 : undefined,

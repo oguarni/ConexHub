@@ -7,7 +7,7 @@ import {
   useUpdateProductMutation,
   useDeleteProductMutation
 } from '../hooks/api/useProductsQuery';
-import { queryClient } from '../config/queryClient';
+import { queryClient } from '../../lib/queryClient';
 
 // Product List Component using React Query
 const ProductList = ({ filters = {} }) => {
